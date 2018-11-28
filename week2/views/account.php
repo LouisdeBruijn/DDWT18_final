@@ -43,7 +43,7 @@
                 <div class="col-md-4">
                     <div class="card">
                         <div class="card-header">
-                            Welcome, <?= $user ?>
+                            Welcome, <?= get_username($db, get_user_id()) ?> <!-- get_user_id() kan ook $_SESSION['user_id'] zijn -->
                         </div>
                         <div class="card-body">
                             <p>You're logged in to Series Overview.</p>

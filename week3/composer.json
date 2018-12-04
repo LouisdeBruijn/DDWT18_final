@@ -1,0 +1,15 @@
+{
+  "name": "LouisdeBruijn/DDWT18_week3",
+  "description": "",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Louis de Bruijn",
+      "email": "l.e.d.de.bruijn@student.rug.nl"
+    }
+  ],
+  "require": {
+    "bramus/router": "1.3"
+  }
+}

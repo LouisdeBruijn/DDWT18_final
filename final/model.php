@@ -37,6 +37,63 @@ function connect_db($host, $db, $user, $pass){
 }
 
 /**
+ * Check if the route exist
+ * @param string $route_uri URI to be matched
+ * @param string $request_type request method
+ * @return bool
+ *
+ */
+function new_route($route_uri, $request_type){
+    $route_uri_expl = array_filter(explode('/', $route_uri));
+    $current_path_expl = array_filter(explode('/',parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)));
+    if ($route_uri_expl == $current_path_expl && $_SERVER['REQUEST_METHOD'] == strtoupper($request_type)) {
+        return True;
+    }
+}
+
+/**
+ * Creates filename to the template
+ * @param string $template filename of the template without extension
+ * @return string
+ */
+function use_template($template){
+    $template_doc = sprintf("views/%s.php", $template);
+    return $template_doc;
+}
+
+/**
+ * Creates navigation HTML code using given array
+ * @param array $navigation Array with as Key the page name and as Value the corresponding url
+ * @return string html code that represents the navigation
+ */
+function get_navigation($template, $active_id){
+    $navigation_exp = '
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand">Series Overview</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">';
+    foreach ($template as $id => $info) {
+        if ($id == $active_id) {
+            $navigation_exp .= '<li class="nav-item active">';
+            $navigation_exp .= '<a class="nav-link" href="' . $info['url'] . '">' . $info['name'] . '</a>';
+        } else {
+            $navigation_exp .= '<li class="nav-item">';
+            $navigation_exp .= '<a class="nav-link" href="' . $info['url'] . '">' . $info['name'] . '</a>';
+        }
+
+        $navigation_exp .= '</li>';
+    }
+    $navigation_exp .= '
+    </ul>
+    </div>
+    </nav>';
+    return $navigation_exp;
+}
+
+/**
  * Get current user id
  * @return bool current user id or False if not logged in
  */
@@ -62,20 +119,46 @@ function get_username($pdo, $user_id){
 }
 
 /**
+ * Changes the HTTP Header to a given location
+ * @param string $location location to be redirected to
+ */
+function redirect($location){
+    header(sprintf('Location: %s', $location));
+    die();
+}
+
+/**
+ * Function to check whether the required params is exists in the array or not.
+ * @param string $requiredFields required form fields
+ * @param string $form_data fields from form to be submitted
+ */
+function check_required_fields($required_fields, $form_data) {
+    $missing_fields = [];
+    // Loop over the required fields and check whether the value is exist or not in the request params.
+    foreach ($required_fields as $field) {
+        if (empty($form_data[$field])) {
+            array_push($missing_fields, $field);
+        }
+    }
+    $missing_fields = implode(', ', $missing_fields);
+    return $missing_fields;
+}
+
+
+/**
  * Register the user
- * @param object $pdo database object $form_data filled in user-data
+ * @param object $pdo database object
+ * @param object $form_data filled in user-data
  */
 function register_user($pdo, $form_data){
-    /* Check if all fields are set */
-    if (
-        empty($form_data['username']) or
-        empty($form_data['password']) or
-        empty($form_data['firstname']) or
-        empty($form_data['lastname'])
-    ) {
+
+    $required_fields = ['username', 'password', 'firstname', 'lastname', 'role', 'birthdate', 'biography', 'occupation', 'language', 'email', 'phone'];
+    $missing_fields = check_required_fields($required_fields, $form_data);
+
+    if ($missing_fields) {
         return [
             'type' => 'danger',
-            'message' => 'You should enter a username, password, first- and last name.'
+            'message' => 'The following fields are mandatory: ', $missing_fields
         ];
     }
 
@@ -104,8 +187,8 @@ function register_user($pdo, $form_data){
 
     /* Save user to the database */
     try {
-        $stmt = $pdo->prepare('INSERT INTO users (username, password, firstname, lastname) VALUES (?, ?, ?, ?)');
-        $stmt->execute([$form_data['username'], $password, $form_data['firstname'], $form_data['lastname']]);
+        $stmt = $pdo->prepare('INSERT INTO users (username, password, firstname, lastname, role, birthdate, biography, occupation, language, email, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $stmt->execute([$form_data['username'], $password, $form_data['firstname'], $form_data['lastname'], $form_data['role'], $form_data['birthdate'], $form_data['biography'], $form_data['occupation'], $form_data['language'], $form_data['email'], $form_data['phone']]);
         $user_id = $pdo->lastInsertId();
     } catch (PDOException $e) {
         return [
@@ -121,13 +204,14 @@ function register_user($pdo, $form_data){
         'type' => 'success',
         'message' => sprintf('%s, your account was successfully created!', get_username($pdo, $_SESSION['user_id']))
     ];
-    redirect(sprintf('/DDWT18/week2/myaccount/?error_msg=%s',
+    redirect(sprintf('/DDWT18/final/myaccount/?error_msg=%s',
         json_encode($feedback)));
 }
 
 /**
  * Log the user in
- * @param object $pdo database object $form_data filled in user-data
+ * @param object $pdo database
+ * @param object $form_data filled in user-data
  */
 function login_user($pdo, $form_data)
 {
@@ -195,17 +279,16 @@ function check_login(){
 
 /**
  * Logs the user out of their session
- * @return Array
+ * @return array
  */
 function logout_user(){
     session_start();
-    if( session_destroy()){
+    if (session_destroy()) {
         return [
             'type' => 'success',
             'message' => 'You were logged out successfully!'
         ];
-    }
-    else{
+    } else {
         return [
             'type' => 'danger',
             'message' => 'You were not logged out successfully!'
@@ -213,3 +296,4 @@ function logout_user(){
         ];
     }
 }
+

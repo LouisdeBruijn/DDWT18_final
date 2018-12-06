@@ -14,13 +14,13 @@
     <!-- Add Material CSS, replace Bootstrap CSS -->
     <link href="/DDWT18/final/css/material.min.css" rel="stylesheet">
     <!-- Own CSS -->
-    <link rel="stylesheet" href="/DDWT18/final/css/main.css">
+    <link rel="stylesheet" type="text/css" href="/DDWT18/final/css/main.css">
 </head>
 <body>
 
 <div class="container">
     <div class="row justify-content-center">
-        <form action="" method="POST" class="needs-validation" novalidate>
+        <form action="/DDWT18/final/register/" method="POST" class="needs-validation" novalidate>
             <div class="form-group">
                 <div class="floating-label">
                     <label for="inputUsername">Username</label>
@@ -60,7 +60,7 @@
             <div class="form-group">
                 <div class="floating-label">
                     <label for="inputLastName">Last name</label>
-                    <input aria-describedby="" class="form-control" id="inputLastName" placeholder="Your last name" name="inputLastName" type="text" required>
+                    <input aria-describedby="" class="form-control" id="inputLastName" placeholder="Your last name" name="lastname" type="text" required>
                     <div class="valid-feedback">
                         Looks good.
                     </div>
@@ -71,8 +71,8 @@
             </div>
             <div class="form-group">
                     <label for="inputRole">Role</label>
-                        <select class="custom-select" id="inputRole" name="inputLastName" required>
-                            <option selected>Choose...</option>
+                        <select class="custom-select" id="inputRole" name="role" required>
+                            <option disabled selected value>Choose...</option>
                             <option value="1">Owner</option>
                             <option value="2">Tenant</option>
                         </select>
@@ -80,13 +80,13 @@
             <div class="form-group">
                 <div class="floating-label">
                     <label for="inputBirthDate">Birth date</label>
-                    <input aria-describedby="" class="form-control" id="inputBirthDate" placeholder="Your birth date" name="inputBirthDate" type="date" required>
+                    <input aria-describedby="" class="form-control" id="inputBirthDate" placeholder="Your birth date" name="birthdate" type="date" required>
                 </div>
             </div>
             <div class="form-group">
                 <div class="">
                     <label for="inputBio">Biography</label>
-                    <textarea class="form-control"  aria-describedby="" id="inputBio" placeholder="Tell us about you" name="inputBio" type="textarea" required></textarea>
+                    <textarea class="form-control"  aria-describedby="" id="inputBio" placeholder="Tell us about you" name="biography" type="textarea" required></textarea>
                     <div class="valid-feedback">
                         Looks good.
                     </div>
@@ -98,7 +98,7 @@
             <div class="form-group">
                 <div class="floating-label">
                     <label for="inputOccupation">Occupation</label>
-                    <input aria-describedby="" class="form-control" id="inputOccupation" placeholder="Your studies or profession" name="inputOccupation" type="text" required>
+                    <input aria-describedby="" class="form-control" id="inputOccupation" placeholder="Your studies or profession" name="occupation" type="text" required>
                     <div class="valid-feedback">
                         Looks good.
                     </div>
@@ -109,8 +109,8 @@
             </div>
             <div class="form-group">
                     <label for="inputLanguage">Language</label>
-                    <select class="custom-select">
-                        <option selected>Choose a language...</option>
+                    <select class="custom-select" id="inputLanguage" name="language" required>
+                        <option disabled selected value>Choose a language...</option>
                         <option value="AF">Afrikanns</option>
                         <option value="SQ">Albanian</option>
                         <option value="AR">Arabic</option>
@@ -188,7 +188,7 @@
             <div class="form-group">
                 <div class="floating-label">
                     <label for="inputEmail">Email address</label>
-                    <input aria-describedby="" class="form-control" id="inputEmail" placeholder="Your email address" name="inputEmail" type="email" required>
+                    <input aria-describedby="" class="form-control" id="inputEmail" placeholder="Your email address" name="email" type="email" required>
                     <div class="valid-feedback">
                         Looks good.
                     </div>
@@ -200,7 +200,7 @@
             <div class="form-group">
                 <div class="floating-label">
                     <label for="inputPhone">Phone number</label>
-                    <input aria-describedby="" class="form-control" id="inputPhone" placeholder="Your phone number" name="inputPhone" type="tel" required>
+                    <input aria-describedby="" class="form-control" id="inputPhone" placeholder="Your phone number" name="phone" type="tel" required>
                     <div class="valid-feedback">
                         Looks good.
                     </div>
@@ -217,26 +217,7 @@
 
 
 <!-- Optional JavaScript -->
-<script>
-    // Example starter JavaScript for disabling form submissions if there are invalid fields
-    (function() {
-        'use strict';
-        window.addEventListener('load', function() {
-            // Fetch all the forms we want to apply custom Bootstrap validation styles to
-            var forms = document.getElementsByClassName('needs-validation');
-            // Loop over them and prevent submission
-            var validation = Array.prototype.filter.call(forms, function(form) {
-                form.addEventListener('submit', function(event) {
-                    if (form.checkValidity() === false) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            });
-        }, false);
-    })();
-</script>
+<script type="text/javascript" src="/DDWT18/final/js/materialize.js"></script>
 
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>

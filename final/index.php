@@ -43,16 +43,22 @@ if (new_route('/DDWT18/final/', 'get')) {
 
 /* Overview page */
 elseif (new_route('/DDWT18/final/overview/', 'get')) {
+    /* Get rooms from db */
+    $rooms = get_rooms($db);
 
     /* Page info */
     $page_title = 'Overview';
+    $page_subtitle = 'Rooms in Groningen';
 
     /* Navigation */
     $navigation = get_navigation($navigation_tpl, 2);
 
     /* Page content */
+    $page_content = 'An overview of available rooms in Groningen';
+    $left_content = get_rooms_table($rooms);
 
     /* Choose Template */
+    include use_template('main');
 }
 
 /*  Login GET route */

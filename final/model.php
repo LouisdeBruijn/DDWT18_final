@@ -297,6 +297,12 @@ function logout_user(){
     }
 }
 
+/**
+ * returns an array with all the rooms in de database
+ * @param $pdo
+ * @return array
+ */
+
 function get_rooms($pdo){
     $stmt = $pdo->prepare('SELECT * FROM rooms');
     $stmt->execute();
@@ -310,4 +316,34 @@ function get_rooms($pdo){
         }
     }
     return $rooms_exp;
+}
+
+/**
+ * returns a table of all the rooms. Their names (description) and their owner names are showed.
+ * Returns a string with the HTML code representing the table with all the series
+ * @param $series_info_exp All the information for each series
+ * @return string The series table
+ *
+ */
+function get_rooms_table($rooms){
+    $rooms_table = '
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Rooms</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>';
+    foreach ($rooms as $key => $value){
+        $rooms_table .= '
+        <tr>
+            <th scope="row">'.$value['name'].'</th>
+            <td><a href="/DDWT18/final/?room_id='.$value['id'].'" role="button" class="btn btn-primary">More info</a></td>
+        </tr>';
+    }
+    $rooms_table .= '
+        </tbody>
+    </table>';
+    return $rooms_table;
 }

@@ -339,6 +339,7 @@ function get_rooms_table($rooms){
         $rooms_table .= '
         <tr>
             <th scope="row">'.$value['name'].'</th>
+            <th scope="row">Hier moet je naam van diegene komen die de kamer aanbied</th>
             <td><a href="/DDWT18/final/?room_id='.$value['id'].'" role="button" class="btn btn-primary">More info</a></td>
         </tr>';
     }
@@ -347,3 +348,16 @@ function get_rooms_table($rooms){
     </table>';
     return $rooms_table;
 }
+
+function get_owner_name($pdo, $owner_id){
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
+    $stmt->execute([$owner_id]);
+    $owner_info = $stmt->fetch();
+    $owner_info_exp = Array();
+
+    foreach ($owner_info as $key => $value){
+        $owner_info_exp[$key] = htmlspecialchars($value);
+    }
+    return $owner_info_exp;
+}
+

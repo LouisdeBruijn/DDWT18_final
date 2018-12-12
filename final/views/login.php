@@ -20,7 +20,7 @@
 
 <div class="container">
     <div class="row justify-content-center">
-        <form action="" method="POST" class="needs-validation" novalidate>
+        <form action="/DDWT18/final/login/" method="POST" class="needs-validation" novalidate>
             <div class="form-group">
                 <div class="floating-label">
                     <label for="inputUsername">Username</label>

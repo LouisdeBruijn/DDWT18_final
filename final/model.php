@@ -69,7 +69,7 @@ function use_template($template){
 function get_navigation($template, $active_id){
     $navigation_exp = '
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand">Series Overview</a>
+    <a class="navbar-brand">Room Overview</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
     </button>
@@ -152,6 +152,8 @@ function check_required_fields($required_fields, $form_data) {
  */
 function register_user($pdo, $form_data){
 
+    /* Back-end validation of missing fields */
+
     $required_fields = ['username', 'password', 'firstname', 'lastname', 'role', 'birthdate', 'biography', 'occupation', 'language', 'email', 'phone'];
     $missing_fields = check_required_fields($required_fields, $form_data);
 
@@ -216,6 +218,7 @@ function register_user($pdo, $form_data){
 function login_user($pdo, $form_data)
 {
     /* Check if all fields are set */
+    /* We could also use the back-end validation check_required_fields here as we did in register_user instead of below */
     if (
         empty($form_data['username']) or
         empty($form_data['password'])
@@ -259,7 +262,7 @@ function login_user($pdo, $form_data)
             'message' => sprintf('%s, you were logged in successfully!',
                 get_username($pdo, $_SESSION['user_id']))
         ];
-        redirect(sprintf('/DDWT18/week2/myaccount/?error_msg=%s',
+        redirect(sprintf('/DDWT18/final/myaccount/?error_msg=%s',
             json_encode($feedback)));
     }
 }
@@ -359,5 +362,23 @@ function get_owner_name($pdo, $owner_id){
         $owner_info_exp[$key] = htmlspecialchars($value);
     }
     return $owner_info_exp;
+}
+
+
+/**
+ * Creats HTML alert code with information about the success or failure
+ * @param bool $type True if success, False if failure
+ * @param string $message Error/Success message
+ * @return string
+ */
+function get_error($feedback){
+    $feedback = json_decode($feedback, True);
+
+    /* Hier pas je aan hoe die error message eruit komt te zien */
+    $error_exp = '
+        <div class="alert alert-'.$feedback['type'].'" role="alert">
+            '.$feedback['message'].'
+        </div>';
+    return $error_exp;
 }
 

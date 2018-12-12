@@ -24,8 +24,12 @@ $navigation_tpl = Array(
         'url' => '/DDWT18/final/login/' ),
     4 => Array(
         'name' => 'Register',
-        'url' => '/DDWT18/final/register/'
+        'url' => '/DDWT18/final/register/'),
+    5 => Array(
+        'name' => 'My Account',
+        'url' => '/DDWT18/final/myaccount/'
     ));
+
 
 /* Landing page */
 if (new_route('/DDWT18/final/', 'get')) {
@@ -75,6 +79,15 @@ elseif (new_route('/DDWT18/final/login/', 'get')) {
 
 }
 
+/*  Login POST route */
+elseif (new_route('/DDWT18/final/login/', 'post')) {
+    /* Login user */
+    $error_msg = login_user($db, $_POST);
+
+    /* Redirect to homepage */
+    redirect(sprintf('/DDWT18/final/login/?error_msg=%s', json_encode($error_msg)));
+}
+
 /*  Register GET route */
 elseif (new_route('/DDWT18/final/register/', 'get')) {
 
@@ -96,6 +109,38 @@ elseif (new_route('/DDWT18/final/register/', 'post')) {
 
     /* Redirect to homepage */
     redirect(sprintf('/DDWT18/final/register/?error_msg=%s', json_encode($error_msg)));
+}
+
+/*  Logout GET route */
+elseif (new_route('/DDWT18/final/logout/', 'get')){
+    /* Logout user */
+    $feedback = logout_user();
+
+    /* Redirect to homepage */
+    redirect(sprintf('/DDWT18/final/?error_msg=%s',
+        json_encode($feedback)));
+}
+
+/* My Account page */
+elseif (new_route('/DDWT18/final/myaccount/', 'get')) {
+
+    /* Page info */
+    $page_title = 'My Account';
+    $page_subtitle = 'Edit your account here';
+
+    /* Navigation */
+    $navigation = get_navigation($navigation_tpl, 5);
+
+    /* Page content */
+    $page_content = 'An overview of your account ';
+
+    /* Get error msg from POST route */
+    if ( isset($_GET['error_msg']) ) {
+        $error_msg = get_error($_GET['error_msg']);
+    }
+
+    /* Choose Template */
+    include use_template('account');
 }
 
 

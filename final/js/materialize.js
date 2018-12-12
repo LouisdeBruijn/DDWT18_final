@@ -17,3 +17,15 @@
         });
     }, false);
 })();
+
+// Creates a focused label based on the form-values
+(function focus_label(element_id) {
+    // Get the variable
+    var input = document.getElementById('element_id');
+    // Return the statements
+    if (input.value) {
+        return 'floating-label has-value';
+    } else {
+        return 'floating-label';
+    }
+})();

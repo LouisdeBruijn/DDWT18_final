@@ -69,7 +69,7 @@ function use_template($template){
 function get_navigation($template, $active_id){
     $navigation_exp = '
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand">Room Overview</a>
+    <a class="navbar-brand">Series Overview</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
     </button>
@@ -93,30 +93,6 @@ function get_navigation($template, $active_id){
     return $navigation_exp;
 }
 
-/**
- * Get current user id
- * @return bool current user id or False if not logged in
- */
-function get_user_id(){
-    if (isset($_SESSION['user_id'])){
-        return $_SESSION['user_id'];
-    } else {
-        return False;
-    }
-}
-
-/**
- * Get the name of the user based on a specific user_id
- * @param object $pdo database object, object $user_id user_id
- * @return Array with first name and last name of user_id
- */
-function get_username($pdo, $user_id){
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-    $stmt->execute([$user_id]);
-    $user_info = $stmt->fetch();
-
-    return $user_info['firstname'].' '.$user_info['lastname'];
-}
 
 /**
  * Changes the HTTP Header to a given location
@@ -151,8 +127,6 @@ function check_required_fields($required_fields, $form_data) {
  * @param object $form_data filled in user-data
  */
 function register_user($pdo, $form_data){
-
-    /* Back-end validation of missing fields */
 
     $required_fields = ['username', 'password', 'firstname', 'lastname', 'role', 'birthdate', 'biography', 'occupation', 'language', 'email', 'phone'];
     $missing_fields = check_required_fields($required_fields, $form_data);
@@ -218,7 +192,6 @@ function register_user($pdo, $form_data){
 function login_user($pdo, $form_data)
 {
     /* Check if all fields are set */
-    /* We could also use the back-end validation check_required_fields here as we did in register_user instead of below */
     if (
         empty($form_data['username']) or
         empty($form_data['password'])
@@ -268,6 +241,32 @@ function login_user($pdo, $form_data)
 }
 
 /**
+ * Get current user id
+ * @return bool current user id or False if not logged in
+ */
+function get_user_id(){
+    session_start(); #waarom moet session_start() bij get_user_id staan???? en bij elke andere functie??
+    if (isset($_SESSION['user_id'])){ #wat is beter om te gebruiken hier: session_status() == PHP_SESSION_ACTIVE of zoals nu?
+        return $_SESSION['user_id'];
+    } else {
+        return False;
+    }
+}
+
+/**
+ * Get the name of the user based on a specific user_id
+ * @param object $pdo database object, object $user_id user_id
+ * @return Array with first name and last name of user_id
+ */
+function get_username($pdo, $user_id){
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->execute([$user_id]);
+    $user_info = $stmt->fetch();
+
+    return $user_info['firstname'].' '.$user_info['lastname'];
+}
+
+/**
  * Check whether the user is logged in
  * @return boolean
  */
@@ -279,6 +278,26 @@ function check_login(){
         return False;
     }
 }
+
+/**
+ * Generates an array with account information
+ * @param object $pdo db object
+ * @param int $user_id id of the user
+ * @return mixed
+ */
+function get_account_info($pdo, $user_id){
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
+    $stmt->execute([$user_id]);
+    $user_info = $stmt->fetch();
+    $user_info_exp = Array();
+
+    /* Create array with htmlspecialchars */
+    foreach ($user_info as $key => $value){
+        $user_info_exp[$key] = htmlspecialchars($value);
+    }
+    return $user_info_exp;
+}
+
 
 /**
  * Logs the user out of their session
@@ -299,6 +318,22 @@ function logout_user(){
         ];
     }
 }
+
+/**
+ * Creats HTML alert code with information about the success or failure
+ * @param bool $type True if success, False if failure
+ * @param string $message Error/Success message
+ * @return string
+ */
+function get_error($feedback){
+    $feedback = json_decode($feedback, True);
+    $error_exp = '
+        <div class="alert alert-'.$feedback['type'].'" role="alert">
+            '.$feedback['message'].'
+        </div>';
+    return $error_exp;
+}
+
 
 /**
  * returns an array with all the rooms in de database
@@ -362,23 +397,5 @@ function get_owner_name($pdo, $owner_id){
         $owner_info_exp[$key] = htmlspecialchars($value);
     }
     return $owner_info_exp;
-}
-
-
-/**
- * Creats HTML alert code with information about the success or failure
- * @param bool $type True if success, False if failure
- * @param string $message Error/Success message
- * @return string
- */
-function get_error($feedback){
-    $feedback = json_decode($feedback, True);
-
-    /* Hier pas je aan hoe die error message eruit komt te zien */
-    $error_exp = '
-        <div class="alert alert-'.$feedback['type'].'" role="alert">
-            '.$feedback['message'].'
-        </div>';
-    return $error_exp;
 }
 

@@ -42,7 +42,14 @@ if (new_route('/DDWT18/final/', 'get')) {
 
     /* Page content */
 
+    /* Get error msg from POST route */
+    if ( isset($_GET['error_msg']) ) {
+        $error_msg = get_error($_GET['error_msg']);
+    }
+
     /* Choose Template */
+    include use_template('main');
+
 }
 
 /* Overview page */
@@ -132,14 +139,14 @@ elseif (new_route('/DDWT18/final/register/', 'post')) {
 /*  Logout GET route */
 elseif (new_route('/DDWT18/final/logout/', 'get')){
     /* Logout user */
-    $feedback = logout_user();
+    $error_msg = logout_user();
 
     /* Redirect to homepage */
     redirect(sprintf('/DDWT18/final/?error_msg=%s',
-        json_encode($feedback)));
+        json_encode($error_msg)));
 }
 
-/* My Account page */
+/* Account GET route  */
 elseif (new_route('/DDWT18/final/myaccount/', 'get')) {
 
     /* Page info */
@@ -151,6 +158,9 @@ elseif (new_route('/DDWT18/final/myaccount/', 'get')) {
 
     /* Page content */
     $page_content = 'An overview of your account ';
+
+    /* Get account info from db */
+    $user_info = get_account_info($db, get_user_id()); #deze functie is PRECIES hetzelfde als get_serieinfo() en is dus redundant, maar nu voor nu voldoet het even. We kunnen later get_serieinfo() herschrijven zodat we die ook hier kunnen gebruiken.
 
     /* Get error msg from POST route */
     if ( isset($_GET['error_msg']) ) {

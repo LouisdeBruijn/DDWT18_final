@@ -340,7 +340,7 @@ function get_rooms_table($rooms){
         <tr>
             <th scope="row">'.$value['name'].'</th>
             <th scope="row">Hier moet je naam van diegene komen die de kamer aanbied</th>
-            <td><a href="/DDWT18/final/?room_id='.$value['id'].'" role="button" class="btn btn-primary">More info</a></td>
+            <td><a href="/DDWT18/final/room/?room_id='.$value['id'].'" role="button" class="btn btn-primary">More info</a></td>
         </tr>';
     }
     $rooms_table .= '

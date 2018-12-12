@@ -14,7 +14,8 @@
     <link href="path_to/material.min.css" rel="stylesheet">
 </head>
 <body>
-<h1>Hello, world!</h1>
+<h1><?= $room_streetname ?>
+</h1>
 
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->

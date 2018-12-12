@@ -27,7 +27,10 @@ $navigation_tpl = Array(
         'url' => '/DDWT18/final/register/'),
     5 => Array(
         'name' => 'My Account',
-        'url' => '/DDWT18/final/myaccount/'
+        'url' => '/DDWT18/final/myaccount/'),
+    6 => Array(
+        'name' => 'Add room',
+        'url' => '/DDWT18/final/add/',
     ));
 
 
@@ -169,6 +172,41 @@ elseif (new_route('/DDWT18/final/myaccount/', 'get')) {
 
     /* Choose Template */
     include use_template('account');
+}
+
+/* Add serie GET */
+elseif (new_route('/DDWT18/final/add/', 'get')) {
+
+    /* Page info */
+    $page_title = 'Add Room';
+
+    /* Navigation */
+    $navigation = get_navigation($navigation_tpl, 6);
+
+    /* Page content */
+    $page_subtitle = 'Add your favorite series';
+    $page_content = 'Fill in the details of you favorite series.';
+    $submit_btn = "Add Series";
+    $form_action = '/DDWT18/week2/add/';
+
+    /* Get error msg from POST route */
+    if ( isset($_GET['error_msg']) ) {
+        $error_msg = get_error($_GET['error_msg']);
+    }
+
+    /* Choose Template */
+    include use_template('new');
+}
+
+/* Add serie POST */
+elseif (new_route('/DDWT18/final/add/', 'post')) {
+
+    /* Add serie to database */
+    $feedback = postcode($db, $_POST);
+    echo $feedback;
+
+    /* Redirect to serie GET route */
+    redirect(sprintf('/DDWT18/final/add/?error_msg=%s', json_encode($feedback)));
 }
 
 

@@ -387,7 +387,7 @@ function get_rooms_table($rooms){
     return $rooms_table;
 }
 
-function get_owner_name($pdo, $owner_id){
+function get_owner_name($pdo, $owner_id){ #deze functie is ook hetzelfde als get_user_name en kan dus samengevoegd worden (enige verschil is de select query welke DB)?
     $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
     $stmt->execute([$owner_id]);
     $owner_info = $stmt->fetch();
@@ -399,3 +399,33 @@ function get_owner_name($pdo, $owner_id){
     return $owner_info_exp;
 }
 
+function postcode($pdo, $form_data){
+    // De headers worden altijd meegestuurd als array
+    $headers = array();
+    $headers[] = 'X-Api-Key: WmTqvoFo9P6UbjqGGVwBvqrVPsbM6b9aShiwhMji';
+    $postalcode = $form_data['postalcode'];
+    $streetnumber = $form_data['streetnumber'];
+
+    // De URL naar de API call
+    $url = 'https://api.postcodeapi.nu/v2/addresses/?postcode='.$postalcode.'&number='.$streetnumber;
+
+    $curl = curl_init($url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+    // Indien de server geen TLS ondersteunt kun je met
+    // onderstaande optie een onveilige verbinding forceren.
+    // Meestal is dit probleem te herkennen aan een lege response.
+    // curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+    // De ruwe JSON response
+    $response = curl_exec($curl);
+
+    // Gebruik json_decode() om de response naar een PHP array te converteren
+    $data = json_decode($response);
+
+    curl_close($curl);
+
+    // begrijp nog niet helemaal wat ik hier nu mee moet.
+    var_dump($data);
+}

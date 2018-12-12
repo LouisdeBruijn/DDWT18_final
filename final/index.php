@@ -77,7 +77,7 @@ elseif (new_route('/DDWT18/final/room/', 'get')) {
     $room_city = $room_info['city'];
     $room_type = $room_info['type'];
     $room_price = $room_info['price'];
-    $room_siza = $room_info['size'];
+    $room_size = $room_info['size'];
 
     /* page content */
     include use_template('room');

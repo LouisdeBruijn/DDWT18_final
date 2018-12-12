@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <!-- Required meta tags -->
@@ -11,11 +11,37 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <!-- Add Material CSS, replace Bootstrap CSS -->
-    <link href="path_to/material.min.css" rel="stylesheet">
+    <link href="/DDWT18/final/css/material.min.css" rel="stylesheet">
+    <!-- Own CSS -->
+    <link rel="stylesheet" type="text/css" href="/DDWT18/final/css/main.css">
+
+    <title><?= $page_title ?></title>
 </head>
 <body>
-<h1><?= $room_streetname ?>
-</h1>
+<table class="table table-hover">
+    <tbody>
+    <tr>
+        <th scope="row">Name</th>
+        <td><?= $room_name ?></td>
+    </tr>
+    <tr>
+        <th scope="row">Address</th>
+        <td><?= $room_streetname." ".$room_streetnumber."</br>".$room_postalcode." ".$room_city ?></td>
+    </tr>
+    <tr>
+        <th scope="row">Type</th>
+        <td colspan="2"><?= $room_type ?></td>
+    </tr>
+    <tr>
+        <th scope="row">Price</th>
+        <td>&euro; <?= $room_price ?></td>
+    </tr>
+    <tr>
+        <th scope="row">Size</th>
+        <td><?= $room_size ?> m<sup>2</sup></td>
+    </tr>
+    </tbody>
+</table>
 
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->

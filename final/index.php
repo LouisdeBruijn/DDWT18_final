@@ -65,6 +65,24 @@ elseif (new_route('/DDWT18/final/overview/', 'get')) {
     include use_template('main');
 }
 
+/* single room info */
+elseif (new_route('/DDWT18/final/room/', 'get')) {
+    /* get room info from database */
+    $room_id = $_GET['room_id'];
+    $room_info = get_room_info($db, $room_id);
+    $room_name = $room_info['name'];
+    $room_streetname = $room_info['streetname'];
+    $room_streetnumber = $room_info['streetnumber'];
+    $room_postalcode = $room_info['postalcode'];
+    $room_city = $room_info['city'];
+    $room_type = $room_info['type'];
+    $room_price = $room_info['price'];
+    $room_siza = $room_info['size'];
+
+    /* page content */
+    include use_template('room');
+}
+
 /*  Login GET route */
 elseif (new_route('/DDWT18/final/login/', 'get')) {
 
@@ -148,4 +166,5 @@ elseif (new_route('/DDWT18/final/myaccount/', 'get')) {
 else {
     http_response_code(404);
 }
+
 

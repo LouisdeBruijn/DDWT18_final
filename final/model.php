@@ -361,3 +361,21 @@ function get_owner_name($pdo, $owner_id){
     return $owner_info_exp;
 }
 
+/**
+ * Returns a string with the HTML code representing the information for that room
+ * @param PDO $pdo The database connection
+ * @return string The series table
+ *
+ */
+function get_room_info($pdo, $room_id){
+    $stmt = $pdo->prepare('SELECT * FROM rooms WHERE id = ?');
+    $stmt->execute([$room_id]);
+    $room_info = $stmt->fetch();
+
+    /* Create array with htmlspecialchars */
+    foreach ($room_info as $row => $rowcontent){
+        $room_info_exp[$row] = htmlspecialchars($rowcontent);
+    }
+    return $room_info_exp;
+}
+

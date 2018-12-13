@@ -518,4 +518,17 @@ function counter($pdo){
     return $cnt;
 }
 
+/**
+ * Count the number of rooms listed on rooms Overview
+ * @param object $pdo database object
+ * @return mixed
+ */
+function count_rooms($pdo){
+    /* Get rooms */
+    $stmt = $pdo->prepare('SELECT * FROM rooms');
+    $stmt->execute();
+    $rooms = $stmt->rowCount();
+    return $rooms;
+}
+
 

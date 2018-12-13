@@ -378,7 +378,7 @@ function get_rooms_table($rooms){
         <tr>
             <th scope="row">'.$value['name'].'</th>
             <th scope="row">Hier moet je naam van diegene komen die de kamer aanbied</th>
-            <td><a href="/DDWT18/final/?room_id='.$value['id'].'" role="button" class="btn btn-primary">More info</a></td>
+            <td><a href="/DDWT18/final/room/?room_id='.$value['id'].'" role="button" class="btn btn-primary">More info</a></td>
         </tr>';
     }
     $rooms_table .= '
@@ -386,6 +386,25 @@ function get_rooms_table($rooms){
     </table>';
     return $rooms_table;
 }
+
+/**
+ * Returns a string with the HTML code representing the information for that series
+ * @param PDO $pdo The database connection
+ * @return string The series table
+ *
+ */
+function get_room_info($pdo, $room_id){
+    $stmt = $pdo->prepare('SELECT * FROM rooms WHERE id = ?');
+    $stmt->execute([$room_id]);
+    $room_info = $stmt->fetch();
+
+    /* Create array with htmlspecialchars */
+    foreach ($room_info as $row => $rowcontent){
+        $room_info_exp[$row] = htmlspecialchars($rowcontent);
+    }
+    return $room_info_exp;
+}
+
 
 function get_owner_name($pdo, $owner_id){ #deze functie is ook hetzelfde als get_user_name en kan dus samengevoegd worden (enige verschil is de select query welke DB)?
     $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
@@ -426,7 +445,7 @@ function postcode($pdo, $form_data){
         $current_timestamp = date('Y-m-d H:i:s');
 
         // Update
-        if ($db['count'] == 0){
+        if ( $db['count'] == 0){
             // Set date
             $begin_timestamp = $current_timestamp;
 
@@ -437,7 +456,7 @@ function postcode($pdo, $form_data){
             return $begin_timestamp;
         }
 
-        if ( $cnt < 100){
+        if ( $db['count'] < 100){
             // Add to counter
             $db['count']++;
             $cnt = $db['count'];

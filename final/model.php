@@ -362,7 +362,7 @@ function get_rooms($pdo){
  * @return string The series table
  *
  */
-function get_rooms_table($rooms){
+function get_rooms_table($pdo, $rooms){
     $rooms_table = '
     <table class="table table-hover">
         <thead>
@@ -376,7 +376,7 @@ function get_rooms_table($rooms){
         $rooms_table .= '
         <tr>
             <th scope="row">'.$value['name'].'</th>
-            <th scope="row">Hier moet je naam van diegene komen die de kamer aanbied</th>
+            <th scope="row">'.get_owner_name($pdo, $value['owner']).'</th>
             <td><a href="/DDWT18/final/room/?room_id='.$value['id'].'" role="button" class="btn btn-primary">More info</a></td>
         </tr>';
     }
@@ -406,7 +406,7 @@ function get_room_info($pdo, $room_id){
 
 
 function get_owner_name($pdo, $owner_id){ #deze functie is ook hetzelfde als get_user_name en kan dus samengevoegd worden (enige verschil is de select query welke DB)?
-    $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT firstname,lastname FROM users WHERE id = ?');
     $stmt->execute([$owner_id]);
     $owner_info = $stmt->fetch();
     $owner_info_exp = Array();
@@ -414,7 +414,7 @@ function get_owner_name($pdo, $owner_id){ #deze functie is ook hetzelfde als get
     foreach ($owner_info as $key => $value){
         $owner_info_exp[$key] = htmlspecialchars($value);
     }
-    return $owner_info_exp;
+    return $owner_info['firstname'].' '.$owner_info['lastname'];
 }
 
 
@@ -515,6 +515,19 @@ function counter($pdo){
     $cnt = $counter['count'];
 
     return $cnt;
+}
+
+/**
+ * Count the number of rooms listed on rooms Overview
+ * @param object $pdo database object
+ * @return mixed
+ */
+function count_rooms($pdo){
+    /* Get rooms */
+    $stmt = $pdo->prepare('SELECT * FROM rooms');
+    $stmt->execute();
+    $rooms = $stmt->rowCount();
+    return $rooms;
 }
 
 

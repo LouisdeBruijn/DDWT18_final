@@ -245,8 +245,7 @@ function login_user($pdo, $form_data)
  * @return bool current user id or False if not logged in
  */
 function get_user_id(){
-    session_start(); #waarom moet session_start() bij get_user_id staan???? en bij elke andere functie??
-    if (isset($_SESSION['user_id'])){ #wat is beter om te gebruiken hier: session_status() == PHP_SESSION_ACTIVE of zoals nu?
+    if (isset($_SESSION['user_id'])){
         return $_SESSION['user_id'];
     } else {
         return False;
@@ -490,9 +489,9 @@ function postcode($pdo, $form_data){
             $street = $data['_embedded']['addresses'][0]['street'];
 
             // Associative Array
-            # return array('postalcode' => $postalcode, 'streetnumber' => $streetnumber, 'city' => $city, 'street' => $street);
+            return array('postalcode' => $postalcode, 'streetnumber' => $streetnumber, 'city' => $city, 'street' => $street);
             // Normal Array
-            return array($postalcode, $streetnumber, $city, $street);
+            #return array($postalcode, $streetnumber, $city, $street);
 
         } else {
             return [

@@ -151,6 +151,12 @@ elseif (new_route('/DDWT18/final/logout/', 'get')){
 
 /* Account GET route  */
 elseif (new_route('/DDWT18/final/myaccount/', 'get')) {
+    /* Check login */
+    check_login();
+
+    /* User first name and last name */
+    $name = get_username($db, get_user_id());
+    # Hier nog met een if statement kijken of er get_username() uitkomt en anders user_name uit de db tonen
 
     /* Page info */
     $page_title = 'My Account';
@@ -198,19 +204,54 @@ elseif (new_route('/DDWT18/final/add/', 'get')) {
     }
 
     /* Choose Template */
-    include use_template('new');
+    include use_template('new-step1');
 }
 
 /* Add serie POST */
 elseif (new_route('/DDWT18/final/add/', 'post')) {
 
-    /* Add serie to database */
-    $feedback = postcode($db, $_POST);
+    if(isset($output['postalcode']) and isset($output['streetnumber'])
+        and isset($output['street']) and isset($output['city'])){
+        // Process step 2
+        echo 'waarom doet ie het niet';
+    }
+    else if(isset($output['postalcode']) and isset($output['streetnumber'])){
+        $output = postcode($db, $_POST);
+        if(isset($output['postalcode']) and isset($output['streetnumber'])){
+            /* Get counter for usage of Postcode API */
+            $count = counter($db);
 
-    /* Redirect to serie GET route */
-    redirect(sprintf('/DDWT18/final/add/?error_msg=%s', json_encode($feedback)));
+            /* Page info */
+            $page_title = 'Add Room';
+
+            /* Navigation */
+            $navigation = get_navigation($navigation_tpl, 6);
+
+            /* Page content */
+            $page_subtitle = 'Add your favorite series';
+            $page_content = 'Fill in the details of you favorite series.';
+            $submit_btn = "Add Series";
+            $form_action = '/DDWT18/week2/add/';
+
+            $postalcode = $_POST['postalcode'];
+            $streetnumber = $_POST['streetnumber'];
+            $city = $_POST['city'];
+            $street = $_POST['street'];
+
+            include use_template('new-step2');
+        }
+        else {
+            /* Redirect to serie GET route with error_msg */
+            redirect(sprintf('/DDWT18/final/add/?error_msg=%s', json_encode($output)));
+        }
+    }
+    else {
+        /* Redirect to serie GET route with error_msg */
+        $error_msg = []; #hier moet nog wat gebeuren
+        redirect(sprintf('/DDWT18/final/add/?error_msg=%s', json_encode($error_msg)));
+    }
+
 }
-
 
 else {
     http_response_code(404);

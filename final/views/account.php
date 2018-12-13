@@ -46,7 +46,7 @@
                     <div class="card text-center">
                         <div class="card-body">
                             <img class="img-fluid" id="avatar" src="../images/profile.jpg" alt="profile image"/>
-                            <h5 class="card-title"><?= get_username($db, get_user_id()); ?></h5>
+                            <h5 class="card-title"><?= $name ?></h5>
                             <a href="#" class="btn btn-primary">Edit profile</a>
                         </div>
                     </div>

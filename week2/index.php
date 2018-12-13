@@ -165,6 +165,7 @@ elseif (new_route('/DDWT18/week2/add/', 'post')) {
         redirect('/DDWT18/week2/login/');
     }
 
+
     /* Add serie to database */
     $feedback = add_serie($db, $_POST, get_user_id());
 

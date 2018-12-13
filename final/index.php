@@ -69,7 +69,7 @@ elseif (new_route('/DDWT18/final/overview/', 'get')) {
 
     /* Page content */
     $page_content = 'An overview of available rooms in Groningen';
-    $left_content = get_rooms_table($rooms);
+    $left_content = get_rooms_table($db, $rooms);
 
     /* Choose Template */
     include use_template('main');

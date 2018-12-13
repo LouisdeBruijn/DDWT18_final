@@ -42,7 +42,7 @@
                 <div class="form-group">
                     <div class="<script>focus_label(inputPostalcode)</script>">
                         <label for="inputPostalcode">Postal code</label>
-                        <input aria-describedby="" class="form-control" id="inputPostalcode" placeholder="1234AB" value="5038EA" name="postalcode" type="text" required>
+                        <input aria-describedby="" class="form-control" id="inputPostalcode" placeholder="1234AB" value="5038EA" name="postalcode" type="text">
                         <div class="valid-feedback">
                             Looks good.
                         </div>
@@ -66,11 +66,67 @@
                 <button type="submit" class="btn btn-primary">Continue</button>
             </form>
 
+            <form action="/DDWT18/final/" method="POST" class="needs-validation" novalidate>
+                <div class="form-group">
+                    <div class="<script>focus_label(inputPostalcode)</script>">
+                        <label for="inputPostalcode">Postal code</label>
+                        <input aria-describedby="" class="form-control" id="inputPostalcode" placeholder="1234AB" value="<?php if (isset($postalcode)){echo $postalcode;} ?>" name="postalcode" type="text">
+                        <div class="valid-feedback">
+                            Looks good.
+                        </div>
+                        <div class="invalid-feedback">
+                            Please enter the postal code.
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="<script>focus_label(InputStreetnumber)</script>">
+                        <label for="InputStreetnumber">Street number</label>
+                        <input aria-describedby="" class="form-control" id="InputStreetnumber" placeholder="27" value="" name="streetnumber" type="number" required>
+                        <div class="valid-feedback">
+                            Looks good.
+                        </div>
+                        <div class="invalid-feedback">
+                            Please enter the street number.
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="<script>focus_label(InputCity)</script>">
+                        <label for="InputCity">Street number</label>
+                        <input aria-describedby="" class="form-control" id="InputCity" placeholder="City" value="" name="city" type="text" required>
+                        <div class="valid-feedback">
+                            Looks good.
+                        </div>
+                        <div class="invalid-feedback">
+                            Please enter the street number.
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="<script>focus_label(InputStreet)</script>">
+                        <label for="InputStreet">Street</label>
+                        <input aria-describedby="" class="form-control" id="InputStreet" placeholder="Street" value="" name="street" type="text" required>
+                        <div class="valid-feedback">
+                            Looks good.
+                        </div>
+                        <div class="invalid-feedback">
+                            Please enter the street number.
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
         </div>
 
         <!-- Right column -->
         <div class="col-md-4">
-
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">The number of calls to the Postcode API</h5>
+                    <h1 class="text-right" ><?= $count ?></h1>
+                </div>
+            </div>
         </div>
 
     </div>

@@ -399,33 +399,104 @@ function get_owner_name($pdo, $owner_id){ #deze functie is ook hetzelfde als get
     return $owner_info_exp;
 }
 
+
+/**
+ * Makes use of the Postcode API to fill in the city and street address
+ */
 function postcode($pdo, $form_data){
-    // De headers worden altijd meegestuurd als array
-    $headers = array();
-    $headers[] = 'X-Api-Key: WmTqvoFo9P6UbjqGGVwBvqrVPsbM6b9aShiwhMji';
-    $postalcode = $form_data['postalcode'];
-    $streetnumber = $form_data['streetnumber'];
+    // Validate form submission
+    if (
+        empty($form_data['postalcode']) or
+        empty($form_data['streetnumber'])
+    ) {
+        return [
+            'type' => 'danger',
+            'message' => 'You should enter a postal code and a streetnumber.'
+        ];
+    }
 
-    // De URL naar de API call
-    $url = 'https://api.postcodeapi.nu/v2/addresses/?postcode='.$postalcode.'&number='.$streetnumber;
+    // Create a counter
+        // Fetch DB information from counters
+        $stmt = $pdo->prepare('SELECT * FROM counters WHERE name = ?');
+        $stmt->execute(['postalcode']);
+        $db = $stmt->fetch();
 
-    $curl = curl_init($url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        // Set date
+        date_default_timezone_set('Europe/Paris');
+        $current_timestamp = date('Y-m-d H:i:s');
 
-    // Indien de server geen TLS ondersteunt kun je met
-    // onderstaande optie een onveilige verbinding forceren.
-    // Meestal is dit probleem te herkennen aan een lege response.
-    // curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        // Update
+        if ($db['count'] == 0){
+            // Set date
+            $begin_timestamp = $current_timestamp;
 
-    // De ruwe JSON response
-    $response = curl_exec($curl);
+            // Update counter to DB
+            $stmt = $pdo->prepare("UPDATE counters SET begin_date = ? WHERE name = ? ");
+            $stmt->execute([$begin_timestamp,'postalcode']);
 
-    // Gebruik json_decode() om de response naar een PHP array te converteren
-    $data = json_decode($response);
+            return $begin_timestamp;
+        }
 
-    curl_close($curl);
+        if ( $cnt < 100){
+            // Add to counter
+            $db['count']++;
+            $cnt = $db['count'];
 
-    // begrijp nog niet helemaal wat ik hier nu mee moet.
-    var_dump($data);
+            // Update counter to DB
+            $stmt = $pdo->prepare("UPDATE counters SET count = ?, end_date = ? WHERE name = ? ");
+            $stmt->execute([$cnt, $current_timestamp,'postalcode']);
+
+            // De headers worden altijd meegestuurd als array
+            $headers = array();
+            $headers[] = 'X-Api-Key: WmTqvoFo9P6UbjqGGVwBvqrVPsbM6b9aShiwhMji';
+            $postalcode = $form_data['postalcode'];
+            $streetnumber = $form_data['streetnumber'];
+
+            // De URL naar de API call
+            $url = 'https://api.postcodeapi.nu/v2/addresses/?postcode='.$postalcode.'&number='.$streetnumber;
+
+            $curl = curl_init($url);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+            // De ruwe JSON response
+            $response = curl_exec($curl);
+
+            // Gebruik json_decode() om de response naar een PHP array te converteren
+            $data = json_decode($response, true);
+
+            curl_close($curl);
+
+            $city = $data['_embedded']['addresses'][0]['city']['label']; #kan dit ook nog anders opgeschreven worden?
+            $street = $data['_embedded']['addresses'][0]['street'];
+
+            // Associative Array
+            # return array('postalcode' => $postalcode, 'streetnumber' => $streetnumber, 'city' => $city, 'street' => $street);
+            // Normal Array
+            return array($postalcode, $streetnumber, $city, $street);
+
+        } else {
+            return [
+                'type' => 'danger',
+                'message' => 'You have reached the maximum number of API calls.'
+            ];
+        }
+
 }
+
+
+/**
+ * Returns counter from DB
+ */
+function counter($pdo){
+    // Fetch counter from DB
+    $stmt = $pdo->prepare("SELECT count FROM counters WHERE name = ?");
+    $stmt->execute(['postalcode']);
+    $counter = $stmt->fetch();
+
+    $cnt = $counter['count'];
+
+    return $cnt;
+}
+
+

@@ -24,9 +24,6 @@
 
         <!-- Content -->
         <div class="container">
-            <!-- Breadcrumbs -->
-            <div class="pd-15">&nbsp</div>
-            <?= $breadcrumbs ?>
 
             <div class="row">
 
@@ -213,7 +210,10 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Edit</button>
+                                <input type="hidden" value="<?= $user_id ?>" name="user_id">
+                                <div class="col-sm-2">
+                                    <a href="/DDWT18/final/edit/?user_id=<?= get_user_id() ?>" role="button" class="btn btn-primary">Edit</a>                        </div>
+                                <div class="col-sm-2">
                             </form>
                         </div>
                     </div>
@@ -250,6 +250,7 @@
 
             </div>
         </div>
+
 
 
         <!-- Optional JavaScript -->

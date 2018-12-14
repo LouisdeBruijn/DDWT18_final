@@ -278,6 +278,12 @@ elseif (new_route('/DDWT18/final/edit/', 'get')) {
     include use_template('account');
 }
 
+/* post edit route */
+elseif (new_route('/DDWT18/final/edit/', 'post')) {
+    #we moeten deze nog doen!!!!!!!
+}
+
+
 else {
     http_response_code(404);
 }

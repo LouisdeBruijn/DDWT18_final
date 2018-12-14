@@ -1,11 +1,11 @@
 <?php
 
 /**
-* Model
-* User: louis_de_bruijn
-* Date: 05-12-18
-* Time: 17:45
-*/
+ * Model
+ * User: louis_de_bruijn
+ * Date: 05-12-18
+ * Time: 17:45
+ */
 
 /* Enable error reporting */
 ini_set('display_errors', 1);
@@ -434,71 +434,71 @@ function postcode($pdo, $form_data){
     }
 
     // Create a counter
-        // Fetch DB information from counters
-        $stmt = $pdo->prepare('SELECT * FROM counters WHERE name = ?');
-        $stmt->execute(['postalcode']);
-        $db = $stmt->fetch();
+    // Fetch DB information from counters
+    $stmt = $pdo->prepare('SELECT * FROM counters WHERE name = ?');
+    $stmt->execute(['postalcode']);
+    $db = $stmt->fetch();
 
+    // Set date
+    date_default_timezone_set('Europe/Paris');
+    $current_timestamp = date('Y-m-d H:i:s');
+
+    // Update
+    if ( $db['count'] == 0){
         // Set date
-        date_default_timezone_set('Europe/Paris');
-        $current_timestamp = date('Y-m-d H:i:s');
+        $begin_timestamp = $current_timestamp;
 
-        // Update
-        if ( $db['count'] == 0){
-            // Set date
-            $begin_timestamp = $current_timestamp;
+        // Update counter to DB
+        $stmt = $pdo->prepare("UPDATE counters SET begin_date = ? WHERE name = ? ");
+        $stmt->execute([$begin_timestamp,'postalcode']);
 
-            // Update counter to DB
-            $stmt = $pdo->prepare("UPDATE counters SET begin_date = ? WHERE name = ? ");
-            $stmt->execute([$begin_timestamp,'postalcode']);
+        return $begin_timestamp;
+    }
 
-            return $begin_timestamp;
-        }
+    if ( $db['count'] < 100){
+        // Add to counter
+        $db['count']++;
+        $cnt = $db['count'];
 
-        if ( $db['count'] < 100){
-            // Add to counter
-            $db['count']++;
-            $cnt = $db['count'];
+        // Update counter to DB
+        $stmt = $pdo->prepare("UPDATE counters SET count = ?, end_date = ? WHERE name = ? ");
+        $stmt->execute([$cnt, $current_timestamp,'postalcode']);
 
-            // Update counter to DB
-            $stmt = $pdo->prepare("UPDATE counters SET count = ?, end_date = ? WHERE name = ? ");
-            $stmt->execute([$cnt, $current_timestamp,'postalcode']);
+        // De headers worden altijd meegestuurd als array
+        $headers = array();
+        $headers[] = 'X-Api-Key: WmTqvoFo9P6UbjqGGVwBvqrVPsbM6b9aShiwhMji';
+        $postalcode = $form_data['postalcode'];
+        $streetnumber = $form_data['streetnumber'];
 
-            // De headers worden altijd meegestuurd als array
-            $headers = array();
-            $headers[] = 'X-Api-Key: WmTqvoFo9P6UbjqGGVwBvqrVPsbM6b9aShiwhMji';
-            $postalcode = $form_data['postalcode'];
-            $streetnumber = $form_data['streetnumber'];
+        // De URL naar de API call
+        $url = 'https://api.postcodeapi.nu/v2/addresses/?postcode='.$postalcode.'&number='.$streetnumber;
 
-            // De URL naar de API call
-            $url = 'https://api.postcodeapi.nu/v2/addresses/?postcode='.$postalcode.'&number='.$streetnumber;
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
-            $curl = curl_init($url);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        // De ruwe JSON response
+        $response = curl_exec($curl);
 
-            // De ruwe JSON response
-            $response = curl_exec($curl);
+        // Gebruik json_decode() om de response naar een PHP array te converteren
+        $data = json_decode($response, true);
 
-            // Gebruik json_decode() om de response naar een PHP array te converteren
-            $data = json_decode($response, true);
+        curl_close($curl);
 
-            curl_close($curl);
+        $city = $data['_embedded']['addresses'][0]['city']['label'];
+        $street = $data['_embedded']['addresses'][0]['street'];
 
-            $city = $data['_embedded']['addresses'][0]['city']['label']; #kan dit ook nog anders opgeschreven worden?
-            $street = $data['_embedded']['addresses'][0]['street'];
+        // Associative Array
+        return array('postalcode' => $postalcode, 'streetnumber' => $streetnumber, 'city' => $city, 'street' => $street);
+        // Normal Array
+        #return array($postalcode, $streetnumber, $city, $street);
 
-            // Associative Array
-            return array('postalcode' => $postalcode, 'streetnumber' => $streetnumber, 'city' => $city, 'street' => $street);
-            // Normal Array
-            #return array($postalcode, $streetnumber, $city, $street);
-
-        } else {
-            return [
-                'type' => 'danger',
-                'message' => 'You have reached the maximum number of API calls.'
-            ];
-        }
+    } else {
+        return [
+            'type' => 'danger',
+            'message' => 'You have reached the maximum number of API calls.'
+        ];
+    }
 
 }
 
@@ -529,5 +529,72 @@ function count_rooms($pdo){
     $rooms = $stmt->rowCount();
     return $rooms;
 }
+
+/**
+ * @param $pdo
+ * @param $user_info
+ * @param $user_id
+ * @return array
+ */
+function update_user($pdo, $user_info, $user_id){
+    /* Check if all fields are set */
+    if (
+        empty($user_info['firstname']) or
+        empty($user_info['lastname']) or
+        empty($user_info['birthdate']) or
+        empty($user_info['biography']) or
+        empty($user_info['occupation']) or
+        empty($user_info['language']) or
+        empty($user_info['email']) or
+        empty($user_info['phone'])
+    ){
+        return [
+            'type' => 'danger',
+            'message' => 'There was an error. Not all fields were filled in.'
+        ];
+    }
+    /* Get current email */
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
+    $stmt->execute([$user_id]);
+    $user = $stmt->fetch();
+    $current_email = $user['email'];
+    /* Check if email already exists */
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
+    $stmt->execute([$user_info['email']]);
+    $user = $stmt->fetch();
+    if ($user_info['email'] == $user['email'] and $user['email'] != $current_email) {
+        return [
+            'type' => 'danger',
+            'message' => 'This email is already used for an account.'
+        ];
+    }
+    /* Update user */
+    $stmt = $pdo->prepare('UPDATE users SET firstname = ?, lastname  = ?, birthdate = ?, biography = ?, occupation = ?, language = ?, email = ?, phone = ?');
+    $stmt->execute([
+        $user_info['firstname'],
+        $user_info['lastname'],
+        $user_info['birthdate'],
+        $user_info['biography'],
+        $user_info['occupation'],
+        $user_info['language'],
+        $user_info['email'],
+        $user_info['phone'],
+        $user_id
+    ]);
+    $updated = $stmt->rowCount();
+    if ($updated == 1) {
+        return [
+            'type' => 'success',
+            'message' => 'Your useraccount was updated.'
+        ];
+    }
+    else {
+        return [
+            'type' => 'warning',
+            'message' => 'Your useraccount was not updated, no changes were detected.'
+        ];
+    }
+}
+
 
 

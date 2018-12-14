@@ -18,30 +18,33 @@
     <title><?= $page_title ?></title>
 </head>
 <body>
-<table class="table table-hover">
-    <tbody>
-    <tr>
-        <th scope="row">Name</th>
-        <td><?= $room_name ?></td>
-    </tr>
-    <tr>
-        <th scope="row">Address</th>
-        <td><?= $room_streetname." ".$room_streetnumber."</br>".$room_postalcode." ".$room_city ?></td>
-    </tr>
-    <tr>
-        <th scope="row">Type</th>
-        <td colspan="2"><?= $room_type ?></td>
-    </tr>
-    <tr>
-        <th scope="row">Price</th>
-        <td>&euro; <?= $room_price ?></td>
-    </tr>
-    <tr>
-        <th scope="row">Size</th>
-        <td><?= $room_size ?> m<sup>2</sup></td>
-    </tr>
-    </tbody>
-</table>
+<!-- Content -->
+<div class="container">
+    <table class="table table-hover">
+        <tbody>
+        <tr>
+            <th scope="row">Name</th>
+            <td><?= $room_name ?></td>
+        </tr>
+        <tr>
+            <th scope="row">Address</th>
+            <td><?= $room_streetname." ".$room_streetnumber."</br>".$room_postalcode." ".$room_city ?></td>
+        </tr>
+        <tr>
+            <th scope="row">Type</th>
+            <td colspan="2"><?= $room_type ?></td>
+        </tr>
+        <tr>
+            <th scope="row">Price</th>
+            <td>&euro; <?= $room_price ?></td>
+        </tr>
+        <tr>
+            <th scope="row">Size</th>
+            <td><?= $room_size ?> m<sup>2</sup></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->

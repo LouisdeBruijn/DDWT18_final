@@ -6,11 +6,19 @@
  * Time: 17:45
  */
 
+/* Require composer autoloader */
+require __DIR__ . '/vendor/autoload.php';
+
+/* Include model.php */
 include 'model.php';
 
 /* Connect to DB */
 $db = connect_db('localhost', 'ddwt18_final', 'ddwt18','ddwt18');
 
+/* Create Router instance */
+$router = new \Bramus\Router\Router();
+
+// Global variables for all routes
 /* Navigation */
 $navigation_tpl = Array(
     1 => Array(
@@ -33,9 +41,8 @@ $navigation_tpl = Array(
         'url' => '/DDWT18/final/add/',
     ));
 
-
-/* Landing page */
-if (new_route('/DDWT18/final/', 'get')) {
+/* Home GET */
+$router->get('/home', function() use($db, $navigation_tpl) {
 
     /* Page info */
     $page_title = 'Home';
@@ -53,10 +60,11 @@ if (new_route('/DDWT18/final/', 'get')) {
     /* Choose Template */
     include use_template('main');
 
-}
 
-/* Overview page */
-elseif (new_route('/DDWT18/final/overview/', 'get')) {
+});
+
+/* Overview GET */
+$router->get('/overview', function() use ($db) {
     /* Get rooms from db */
     $rooms = get_rooms($db);
 
@@ -74,10 +82,11 @@ elseif (new_route('/DDWT18/final/overview/', 'get')) {
 
     /* Choose Template */
     include use_template('main');
-}
 
-/* single room info */
-elseif (new_route('/DDWT18/final/room/', 'get')) {
+});
+
+/* Single room GET */
+$router->get('/room', function() use ($db) {
     /* get room info from database */
     $room_id = $_GET['room_id'];
     $room_info = get_room_info($db, $room_id);
@@ -92,11 +101,11 @@ elseif (new_route('/DDWT18/final/room/', 'get')) {
 
     /* page content */
     include use_template('room');
-}
 
-/*  Login GET route */
-elseif (new_route('/DDWT18/final/login/', 'get')) {
+});
 
+/* Login GET */
+$router->get('/login', function() use ($db) {
     /* Page info */
     $page_title = 'Login';
 
@@ -106,20 +115,32 @@ elseif (new_route('/DDWT18/final/login/', 'get')) {
     /* Choose Template */
     include use_template('login');
 
-}
 
-/*  Login POST route */
-elseif (new_route('/DDWT18/final/login/', 'post')) {
+});
+
+/* Login POST */
+$router->post('/login', function() use ($db) {
     /* Login user */
     $error_msg = login_user($db, $_POST);
 
     /* Redirect to homepage */
     redirect(sprintf('/DDWT18/final/login/?error_msg=%s', json_encode($error_msg)));
-}
 
-/*  Register GET route */
-elseif (new_route('/DDWT18/final/register/', 'get')) {
+});
 
+/* Logout GET */
+$router->get('/logout', function() use ($db) {
+    /* Logout user */
+    $error_msg = logout_user();
+
+    /* Redirect to homepage */
+    redirect(sprintf('/DDWT18/final/?error_msg=%s',
+        json_encode($error_msg)));
+
+});
+
+/* Register GET */
+$router->get('/register', function() use ($db) {
     /* Page info */
     $page_title = 'Register';
 
@@ -129,29 +150,21 @@ elseif (new_route('/DDWT18/final/register/', 'get')) {
     /* Choose Template */
     include use_template('register');
 
-}
 
-/*  Register POST route */
-elseif (new_route('/DDWT18/final/register/', 'post')) {
+});
+
+/* Register POST */
+$router->post('/register', function() use ($db) {
     /* Register user */
     $error_msg = register_user($db, $_POST);
 
     /* Redirect to homepage */
     redirect(sprintf('/DDWT18/final/register/?error_msg=%s', json_encode($error_msg)));
-}
 
-/*  Logout GET route */
-elseif (new_route('/DDWT18/final/logout/', 'get')){
-    /* Logout user */
-    $error_msg = logout_user();
+});
 
-    /* Redirect to homepage */
-    redirect(sprintf('/DDWT18/final/?error_msg=%s',
-        json_encode($error_msg)));
-}
-
-/* Account GET route  */
-elseif (new_route('/DDWT18/final/myaccount/', 'get')) {
+/* Account GET */
+$router->get('/myaccount', function() use ($db) {
     /* Check login */
     check_login();
 
@@ -179,10 +192,16 @@ elseif (new_route('/DDWT18/final/myaccount/', 'get')) {
 
     /* Choose Template */
     include use_template('account');
-}
+
+});
+
+/* Account POST */
+$router->post('/myaccount', function() use ($db) {
+
+});
 
 /* Add serie GET */
-elseif (new_route('/DDWT18/final/add/', 'get')) {
+$router->get('/add', function() use ($db) {
     /* Get counter for usage of Postcode API */
     $count = counter($db);
 
@@ -206,19 +225,20 @@ elseif (new_route('/DDWT18/final/add/', 'get')) {
 
     /* Choose Template */
     include use_template('new-step1');
-}
+
+});
 
 /* Add serie POST */
-elseif (new_route('/DDWT18/final/add/', 'post')) {
+$router->post('/add', function() use ($db) {
 
-    if(isset($output['postalcode']) and isset($output['streetnumber'])
-        and isset($output['street']) and isset($output['city'])){
+    if(isset($_POST['postalcode']) and isset($_POST['streetnumber'])
+        and isset($_POST['street']) and isset($_POST['city'])){
         // Process step 2
         echo 'waarom doet ie het niet';
     }
-    else if(isset($output['postalcode']) and isset($output['streetnumber'])){
-        $output = postcode($db, $_POST);
-        if(isset($output['postalcode']) and isset($output['streetnumber'])){
+    else if(isset($_POST['postalcode']) and isset($_POST['streetnumber'])){
+        $postcode_data = postcode($db, $_POST);
+        if(isset($postcode_data['postalcode']) and isset($postcode_data['streetnumber'])){
             /* Get counter for usage of Postcode API */
             $count = counter($db);
 
@@ -243,7 +263,7 @@ elseif (new_route('/DDWT18/final/add/', 'post')) {
         }
         else {
             /* Redirect to serie GET route with error_msg */
-            redirect(sprintf('/DDWT18/final/add/?error_msg=%s', json_encode($output)));
+            redirect(sprintf('/DDWT18/final/add/?error_msg=%s', json_encode($postcode_data)));
         }
     }
     else {
@@ -252,10 +272,52 @@ elseif (new_route('/DDWT18/final/add/', 'post')) {
         redirect(sprintf('/DDWT18/final/add/?error_msg=%s', json_encode($error_msg)));
     }
 
-}
+});
 
-else {
+/* Edit user account GET */
+$router->get('/edit', function() use ($db) {
+    /* Get user account information from db */
+    check_login();
+    $navigation = get_navigation($navigation_tpl, 5);
+    $name = get_username($db, get_user_id());
+    $page_title = 'edit account';
+    $page_subtitle = 'edit here your personal account';
+    $page_content = '';
+    $user_id = $_GET['user_id'];
+    $user_info = get_account_info($db, $user_id);
+    $user_firstname = $user_info['firstname'];
+    $user_lastname = $user_info['lastname'];
+    $user_birthdate = $user_info['birthdate']; #je kan niet veranderen van tenant of owner dus die hebben we er niet in
+    $user_biography = $user_info['biography'];
+    $user_occupation = $user_info['occupation'];
+    $user_language = $user_info['language'];
+    $user_email = $user_info['email'];
+    $user_phone = $user_info['phone'];
+    include use_template('account');
+
+});
+
+/* Edit user account GET */
+$router->post('/edit', function() use ($db) {
+    #we moeten deze nog doen!!!!!!!
+
+});
+
+
+    /* Add routes here */
+$router->mount('add', function() use ($router, $db) {
+
+
+
+});
+
+$router->set404(function() {
+    // will result in an error message on page 404
+    header('HTTP/1.1 404 Not Found');
     http_response_code(404);
-}
+    echo 'Error: HTTP/1.1 404 Not Found';
+});
 
+/* Run the router */
+$router->run();
 

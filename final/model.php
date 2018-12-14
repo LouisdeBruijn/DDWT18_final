@@ -530,4 +530,74 @@ function count_rooms($pdo){
     return $rooms;
 }
 
+/**
+ * @param $pdo
+ * @param $user_info
+ * @param $user_id
+ * @return array
+ */
+function update_user($pdo, $user_info, $user_id){
+    /* Check if all fields are set */
+    if (
+        empty($user_info['firstname']) or
+        empty($user_info['lastname']) or
+        empty($user_info['birthdate']) or
+        empty($user_info['biography']) or
+        empty($user_info['occupation']) or
+        empty($user_info['language']) or
+        empty($user_info['email']) or
+        empty($user_info['phone'])
+    ){
+        return [
+            'type' => 'danger',
+            'message' => 'There was an error. Not all fields were filled in.'
+        ];
+    }
+
+    /* Get current email */
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
+    $stmt->execute([$user_id]);
+    $user = $stmt->fetch();
+    $current_email = $user['email'];
+
+    /* Check if email already exists */
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
+    $stmt->execute([$user_info['email']]);
+    $user = $stmt->fetch();
+    if ($user_info['email'] == $user['email'] and $user['email'] != $current_email) {
+        return [
+            'type' => 'danger',
+            'message' => 'This email is already used for an account.'
+        ];
+    }
+
+    /* Update user */
+    $stmt = $pdo->prepare('UPDATE users SET firstname = ?, lastname  = ?, birthdate = ?, biography = ?, occupation = ?, language = ?, email = ?, phone = ?');
+    $stmt->execute([
+        $user_info['firstname'],
+        $user_info['lastname'],
+        $user_info['birthdate'],
+        $user_info['biography'],
+        $user_info['occupation'],
+        $user_info['language'],
+        $user_info['email'],
+        $user_info['phone'],
+        $user_id
+    ]);
+
+    $updated = $stmt->rowCount();
+    if ($updated == 1) {
+        return [
+            'type' => 'success',
+            'message' => 'Your useraccount was updated.'
+        ];
+    }
+    else {
+        return [
+            'type' => 'warning',
+            'message' => 'Your useraccount was not updated, no changes were detected.'
+        ];
+    }
+}
+
 

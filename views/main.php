@@ -11,9 +11,9 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <!-- Add Material CSS, replace Bootstrap CSS -->
-    <link href="/DDWT18/final/css/material.min.css" rel="stylesheet">
+    <link href="<?= $root ?>css/material.min.css" rel="stylesheet">
     <!-- Own CSS -->
-    <link rel="stylesheet" type="text/css" href="/DDWT18/final/css/main.css">
+    <link rel="stylesheet" type="text/css" href="<?= $root ?>css/main.css">
 
     <title><?= $page_title ?></title>
 </head>
@@ -43,12 +43,14 @@
 
 
 <!-- Optional JavaScript -->
+<script type="text/javascript" src="<?= $root ?>js/materialize.js"></script>
+
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 
 <!-- Then Material JavaScript on top of Bootstrap JavaScript -->
-<script src="/DDWT18/final/css/material.min.js"></script>
+<script src="<?= $root ?>css/material.min.js"></script>
 </body>
 </html>

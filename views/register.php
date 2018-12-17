@@ -6,22 +6,24 @@
     <meta charset="utf-8">
     <meta content="initial-scale=1, shrink-to-fit=no, width=device-width" name="viewport">
 
-    <link rel="stylesheet" type="text/css" href="/DDWT18/final/css/main.css">
+    <link rel="stylesheet" type="text/css" href="<?= $root ?>final/css/main.css">
     <!-- CSS -->
     <!-- Add Material font (Roboto) and Material icon as needed -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i|Roboto+Mono:300,400,700|Roboto+Slab:300,400,700" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <!-- Add Material CSS, replace Bootstrap CSS -->
-    <link href="/DDWT18/final/css/material.min.css" rel="stylesheet">
+    <link href="<?= $root ?>css/material.min.css" rel="stylesheet">
     <!-- Own CSS -->
-    <link rel="stylesheet" type="text/css" href="/DDWT18/final/css/main.css">
+    <link rel="stylesheet" type="text/css" href="<?= $root ?>css/main.css">
 </head>
 <body>
+<!-- Menu -->
+<?= $navigation ?>
 
 <div class="container">
     <div class="row justify-content-center">
-        <form action="/DDWT18/final/register/" method="POST" class="needs-validation" novalidate>
+        <form action="<?= $root ?>register/" method="POST" class="needs-validation" novalidate>
             <div class="form-group">
                 <div class="floating-label">
                     <label for="inputUsername">Username</label>
@@ -218,7 +220,7 @@
 
 
 <!-- Optional JavaScript -->
-<script type="text/javascript" src="/DDWT18/final/js/materialize.js"></script>
+<script type="text/javascript" src="<?= $root ?>js/materialize.js"></script>
 
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
@@ -226,7 +228,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 
 <!-- Then Material JavaScript on top of Bootstrap JavaScript -->
-<script src="/DDWT18/final/css/material.min.js"></script>
+<script src="<?= $root ?>css/material.min.js"></script>
 </body>
 </html>
 

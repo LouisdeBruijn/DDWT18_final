@@ -19,30 +19,32 @@ $db = connect_db('localhost', 'ddwt18_final', 'ddwt18','ddwt18');
 $router = new \Bramus\Router\Router();
 
 // Global variables for all routes
-/* Navigation */
-$navigation_tpl = Array(
-    1 => Array(
-        'name' => 'Home',
-        'url' => '/DDWT18/final/' ),
-    2 => Array(
-        'name' => 'Overview',
-        'url' => '/DDWT18/final/overview/' ),
-    3 => Array(
-        'name' => 'Login',
-        'url' => '/DDWT18/final/login/' ),
-    4 => Array(
-        'name' => 'Register',
-        'url' => '/DDWT18/final/register/'),
-    5 => Array(
-        'name' => 'My Account',
-        'url' => '/DDWT18/final/myaccount/'),
-    6 => Array(
-        'name' => 'Add room',
-        'url' => '/DDWT18/final/add/',
-    ));
+    /* Navigation */
+    $navigation_tpl = Array(
+        1 => Array(
+            'name' => 'Home',
+            'url' => '/DDWT18/' ),
+        2 => Array(
+            'name' => 'Overview',
+            'url' => '/DDWT18/overview/' ),
+        3 => Array(
+            'name' => 'Login',
+            'url' => '/DDWT18/login/' ),
+        4 => Array(
+            'name' => 'Register',
+            'url' => '/DDWT18/register/'),
+        5 => Array(
+            'name' => 'My Account',
+            'url' => '/DDWT18/myaccount/'),
+        6 => Array(
+            'name' => 'Add room',
+            'url' => '/DDWT18/add/',
+        ));
+    /* Root folder */
+    $root = '/DDWT18/';
 
 /* Home GET */
-$router->get('/home', function() use($db, $navigation_tpl) {
+$router->get('/', function() use($db, $navigation_tpl, $root) {
 
     /* Page info */
     $page_title = 'Home';
@@ -64,7 +66,7 @@ $router->get('/home', function() use($db, $navigation_tpl) {
 });
 
 /* Overview GET */
-$router->get('/overview', function() use ($db) {
+$router->get('/overview', function() use ($db, $navigation_tpl, $root) {
     /* Get rooms from db */
     $rooms = get_rooms($db);
 
@@ -80,13 +82,18 @@ $router->get('/overview', function() use ($db) {
     $left_content = get_rooms_table($db, $rooms);
     $nbr_rooms = count_rooms($db);
 
+    /* Get error msg from POST route */
+    if ( isset($_GET['error_msg']) ) {
+        $error_msg = get_error($_GET['error_msg']);
+    }
+
     /* Choose Template */
     include use_template('main');
 
 });
 
 /* Single room GET */
-$router->get('/room', function() use ($db) {
+$router->get('/room', function() use ($db, $navigation_tpl, $root) {
     /* get room info from database */
     $room_id = $_GET['room_id'];
     $room_info = get_room_info($db, $room_id);
@@ -105,7 +112,11 @@ $router->get('/room', function() use ($db) {
 });
 
 /* Login GET */
-$router->get('/login', function() use ($db) {
+$router->get('/login', function() use ($db, $navigation_tpl, $root) {
+    /* Check if logged in */
+    if ( check_login() ) {
+        redirect('/DDWT18/myaccount/');
+    }
     /* Page info */
     $page_title = 'Login';
 
@@ -119,12 +130,12 @@ $router->get('/login', function() use ($db) {
 });
 
 /* Login POST */
-$router->post('/login', function() use ($db) {
+$router->post('/login', function() use ($db, $navigation_tpl, $root) {
     /* Login user */
     $error_msg = login_user($db, $_POST);
 
     /* Redirect to homepage */
-    redirect(sprintf('/DDWT18/final/login/?error_msg=%s', json_encode($error_msg)));
+    redirect(sprintf('/DDWT18/login/?error_msg=%s', json_encode($error_msg)));
 
 });
 
@@ -134,13 +145,13 @@ $router->get('/logout', function() use ($db) {
     $error_msg = logout_user();
 
     /* Redirect to homepage */
-    redirect(sprintf('/DDWT18/final/?error_msg=%s',
+    redirect(sprintf('/DDWT18/?error_msg=%s',
         json_encode($error_msg)));
 
 });
 
 /* Register GET */
-$router->get('/register', function() use ($db) {
+$router->get('/register', function() use ($db, $navigation_tpl, $root) {
     /* Page info */
     $page_title = 'Register';
 
@@ -154,25 +165,34 @@ $router->get('/register', function() use ($db) {
 });
 
 /* Register POST */
-$router->post('/register', function() use ($db) {
+$router->post('/register', function() use ($db, $navigation_tpl, $root) {
+
     /* Register user */
     $error_msg = register_user($db, $_POST);
 
     /* Redirect to homepage */
-    redirect(sprintf('/DDWT18/final/register/?error_msg=%s', json_encode($error_msg)));
+    redirect(sprintf('/DDWT18/register/?error_msg=%s', json_encode($error_msg)));
 
 });
 
 /* Account GET */
-$router->get('/myaccount', function() use ($db) {
-    /* Check login */
-    check_login();
+$router->get('/myaccount', function() use ($db, $navigation_tpl, $root) {
+    /* Check if logged in */
+    if ( !check_login() ) {
+        redirect('/DDWT18/login/');
+    }
+
+    /* Get rooms from db */
+    $rooms = get_rooms($db);
+    $rooms_cards = get_rooms_card($rooms, get_user_id());
+
 
     /* User first name and last name */
     $name = get_username($db, get_user_id());
     # Hier nog met een if statement kijken of er get_username() uitkomt en anders user_name uit de db tonen
 
     /* Page info */
+    $root = '/DDWT18/';
     $page_title = 'My Account';
     $page_subtitle = 'Edit your account here';
 
@@ -196,27 +216,146 @@ $router->get('/myaccount', function() use ($db) {
 });
 
 /* Account POST */
-$router->post('/myaccount', function() use ($db) {
+$router->post('/myaccount', function() use ($db, $navigation_tpl, $root) {
+    /* Check if logged in */
+    if ( !check_login() ) {
+        redirect('/DDWT18/login/');
+    }
 
 });
 
-/* Add serie GET */
-$router->get('/add', function() use ($db) {
-    /* Get counter for usage of Postcode API */
-    $count = counter($db);
+
+/* Add room mount */
+$router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) { #waarom moet ik bij elke route weer opnieuw deze variabelen aanroepen
+
+
+    /* Add room GET */
+    $router->get('/', function() use ($router, $db, $navigation_tpl, $root) {
+        /* Check if logged in */
+        if ( !check_login() ) {
+            redirect('/DDWT18/login/');
+        }
+
+        /* Get counter for usage of Postcode API */
+        $count = count_postcode($db);
+
+        /* Page info */
+        $page_title = 'Add Room';
+
+        /* Navigation */
+        $navigation = get_navigation($navigation_tpl, 6);
+
+        /* Page content */
+        $page_subtitle = 'Add your room';
+        $page_content = 'Fill in the details of your room.';
+        $submit_btn = "Continue";
+        $form_action = '/DDWT18/add/';
+
+        /* Get error msg from POST route */
+        if ( isset($_GET['error_msg']) ) {
+            $error_msg = get_error($_GET['error_msg']);
+        }
+
+        /* Choose Template */
+        include use_template('new-step1');
+
+    });
+
+    /* Add room POST-step1 */
+    $router->post('/', function() use ($router, $db, $navigation_tpl, $root) {
+        /* Check if logged in */
+        if ( !check_login() ) {
+            redirect('/DDWT18/login/');
+        }
+
+        /* Call postcode API */
+        $postcode_data = postcode($db, $_POST);
+
+        /* Get counter for usage of Postcode API */
+        $count = count_postcode($db);
+
+        /* Page info */
+        $page_title = 'Add Room';
+
+        /* Get error msg from POST route */
+        if ( isset($_GET['error_msg']) ) {
+            $error_msg = get_error($_GET['error_msg']);
+        }
+
+        /* Navigation */
+        $navigation = get_navigation($navigation_tpl, 6);
+
+        /* Page content */
+        $page_subtitle = 'Add your room';
+        $page_content = 'Fill in the details of your room.';
+        $submit_btn = "Add room";
+        $form_action = '/DDWT18/add/next';
+
+        $postalcode = $_POST['postalcode'];
+        $streetnumber = $_POST['streetnumber'];
+        $city = $postcode_data['city'];
+        $street = $postcode_data['street'];
+
+        include use_template('new-step2');
+
+    });
+
+    /* Add room POST-step2 */
+    $router->post('/next', function() use ($router, $db, $navigation_tpl, $root) {
+        /* Check if logged in */
+        if ( !check_login() ) {
+            redirect('/DDWT18/login/');
+        }
+
+        var_dump($_POST);
+
+        /* Get counter for usage of Postcode API */
+        $count = count_postcode($db);
+
+        /* Page info */
+        $page_title = 'Add Room';
+
+        /* Navigation */
+        $navigation = get_navigation($navigation_tpl, 6);
+
+        /* Page content */
+        $page_subtitle = 'Add your room';
+        $page_content = 'Fill in the details of your room.';
+
+        /* Add serie to database */
+        $feedback = add_room($db, $_POST, get_user_id());;
+
+        /* Redirect to serie GET route */
+        redirect(sprintf('/DDWT18/overview/?error_msg=%s', json_encode($feedback)));
+
+    });
+});
+
+
+/* Edit user account GET */
+$router->get('/edit', function() use ($db, $navigation_tpl, $root) {
+    /* Check if logged in */
+    if ( !check_login() ) {
+        redirect('/DDWT18/login/');
+    }
+
+    /* User first name and last name */
+    $name = get_username($db, get_user_id());
+    # Hier nog met een if statement kijken of er get_username() uitkomt en anders user_name uit de db tonen
 
     /* Page info */
-    $page_title = 'Add Room';
+    $root = '/DDWT18/';
+    $page_title = 'My Account';
+    $page_subtitle = 'Edit your account here';
 
     /* Navigation */
-    $navigation = get_navigation($navigation_tpl, 6);
+    $navigation = get_navigation($navigation_tpl, 5);
 
     /* Page content */
-    $page_subtitle = 'Add your favorite series';
-    $page_content = 'Fill in the details of you favorite series.';
-    $submit_btn = "Add Series";
-    $form_action = '/DDWT18/week2/add/';
+    $page_content = 'An overview of your account';
 
+    /* Get account info from db */
+    $user_info = get_account_info($db, get_user_id()); #deze functie is PRECIES hetzelfde als get_serieinfo() en is dus redundant, maar nu voor nu voldoet het even. We kunnen later get_serieinfo() herschrijven zodat we die ook hier kunnen gebruiken.
 
     /* Get error msg from POST route */
     if ( isset($_GET['error_msg']) ) {
@@ -224,60 +363,20 @@ $router->get('/add', function() use ($db) {
     }
 
     /* Choose Template */
-    include use_template('new-step1');
+    include use_template('user_edit');
+
+
 
 });
 
-/* Add serie POST */
-$router->post('/add', function() use ($db) {
-
-    if(isset($_POST['postalcode']) and isset($_POST['streetnumber'])
-        and isset($_POST['street']) and isset($_POST['city'])){
-        // Process step 2
-        echo 'waarom doet ie het niet';
-    }
-    else if(isset($_POST['postalcode']) and isset($_POST['streetnumber'])){
-        $postcode_data = postcode($db, $_POST);
-        if(isset($postcode_data['postalcode']) and isset($postcode_data['streetnumber'])){
-            /* Get counter for usage of Postcode API */
-            $count = counter($db);
-
-            /* Page info */
-            $page_title = 'Add Room';
-
-            /* Navigation */
-            $navigation = get_navigation($navigation_tpl, 6);
-
-            /* Page content */
-            $page_subtitle = 'Add your favorite series';
-            $page_content = 'Fill in the details of you favorite series.';
-            $submit_btn = "Add Series";
-            $form_action = '/DDWT18/week2/add/';
-
-            $postalcode = $_POST['postalcode'];
-            $streetnumber = $_POST['streetnumber'];
-            $city = $_POST['city'];
-            $street = $_POST['street'];
-
-            include use_template('new-step2');
-        }
-        else {
-            /* Redirect to serie GET route with error_msg */
-            redirect(sprintf('/DDWT18/final/add/?error_msg=%s', json_encode($postcode_data)));
-        }
-    }
-    else {
-        /* Redirect to serie GET route with error_msg */
-        $error_msg = []; #hier moet nog wat gebeuren
-        redirect(sprintf('/DDWT18/final/add/?error_msg=%s', json_encode($error_msg)));
+/* Edit user account POST */
+$router->post('/edit', function() use ($db, $navigation_tpl, $root) {
+    /* Check if logged in */
+    if ( !check_login() ) {
+        redirect('/DDWT18/login/');
     }
 
-});
-
-/* Edit user account GET */
-$router->get('/edit', function() use ($db) {
     /* Get user account information from db */
-    check_login();
     $navigation = get_navigation($navigation_tpl, 5);
     $name = get_username($db, get_user_id());
     $page_title = 'edit account';
@@ -293,23 +392,12 @@ $router->get('/edit', function() use ($db) {
     $user_language = $user_info['language'];
     $user_email = $user_info['email'];
     $user_phone = $user_info['phone'];
-    include use_template('account');
 
-});
 
-/* Edit user account GET */
-$router->post('/edit', function() use ($db) {
     #we moeten deze nog doen!!!!!!!
 
 });
 
-
-    /* Add routes here */
-$router->mount('add', function() use ($router, $db) {
-
-
-
-});
 
 $router->set404(function() {
     // will result in an error message on page 404

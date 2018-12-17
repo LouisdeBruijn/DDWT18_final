@@ -6,16 +6,16 @@
     <meta charset="utf-8">
     <meta content="initial-scale=1, shrink-to-fit=no, width=device-width" name="viewport">
 
-    <link rel="stylesheet" type="text/css" href="/DDWT18/final/css/main.css">
+    <link href="<?= $root ?>css/material.min.css" rel="stylesheet">
     <!-- CSS -->
     <!-- Add Material font (Roboto) and Material icon as needed -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i|Roboto+Mono:300,400,700|Roboto+Slab:300,400,700" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <!-- Add Material CSS, replace Bootstrap CSS -->
-    <link href="/DDWT18/final/css/material.min.css" rel="stylesheet">
+    <link href="<?= $root ?>final/css/material.min.css" rel="stylesheet">
     <!-- Own CSS -->
-    <link rel="stylesheet" type="text/css" href="/DDWT18/final/css/main.css">
+    <link rel="stylesheet" type="text/css" href="<?= $root ?>css/main.css">
 </head>
 <body>
 <!-- Menu -->
@@ -38,11 +38,11 @@
             <h5><?= $page_subtitle ?></h5>
             <p><?= $page_content ?></p>
 
-            <form action="/DDWT18/final/add" method="POST" class="needs-validation" novalidate>
+            <form action="<?= $form_action ?>" method="POST" class="needs-validation" novalidate>
                 <div class="form-group">
                     <div class="<script>focus_label(inputPostalcode)</script>">
                         <label for="inputPostalcode">Postal code</label>
-                        <input aria-describedby="" class="form-control" id="inputPostalcode" placeholder="1234AB" value="5038EA" name="postalcode" type="text">
+                        <input aria-describedby="" class="form-control" id="inputPostalcode" placeholder="1234AB" value="" name="postalcode" type="text" maxlength="6" autocapitalize="characters" required>
                         <div class="valid-feedback">
                             Looks good.
                         </div>
@@ -54,7 +54,7 @@
                 <div class="form-group">
                     <div class="<script>focus_label(InputStreetnumber)</script>">
                         <label for="InputStreetnumber">Street number</label>
-                        <input aria-describedby="" class="form-control" id="InputStreetnumber" placeholder="27" value="27" name="streetnumber" type="number" required>
+                        <input aria-describedby="" class="form-control" id="InputStreetnumber" placeholder="27" value="" name="streetnumber" type="number" required>
                         <div class="valid-feedback">
                             Looks good.
                         </div>
@@ -63,7 +63,7 @@
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Continue</button>
+                <button type="submit" class="btn btn-primary"><?= $submit_btn ?></button>
             </form>
         </div>
 
@@ -82,7 +82,7 @@
 
 
 <!-- Optional JavaScript -->
-<script type="text/javascript" src="/DDWT18/final/js/materialize.js"></script>
+<script type="text/javascript" src="<?= $root ?>js/materialize.js"></script>
 
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
@@ -90,6 +90,6 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 
 <!-- Then Material JavaScript on top of Bootstrap JavaScript -->
-<script src="/DDWT18/final/css/material.min.js"></script>
+<script src="<?= $root ?>css/material.min.js"></script>
 </body>
 </html>

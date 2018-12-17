@@ -69,7 +69,7 @@ function use_template($template){
 function get_navigation($template, $active_id){
     $navigation_exp = '
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand">Series Overview</a>
+    <a class="navbar-brand">Rooms Overview</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
     </button>
@@ -85,9 +85,11 @@ function get_navigation($template, $active_id){
         }
 
         $navigation_exp .= '</li>';
+
     }
     $navigation_exp .= '
     </ul>
+    <a href="/DDWT18/logout/" class="btn btn-primary">Logout</a>
     </div>
     </nav>';
     return $navigation_exp;
@@ -128,6 +130,7 @@ function check_required_fields($required_fields, $form_data) {
  */
 function register_user($pdo, $form_data){
 
+    /* Form validation */
     $required_fields = ['username', 'password', 'firstname', 'lastname', 'role', 'birthdate', 'biography', 'occupation', 'language', 'email', 'phone'];
     $missing_fields = check_required_fields($required_fields, $form_data);
 
@@ -180,7 +183,7 @@ function register_user($pdo, $form_data){
         'type' => 'success',
         'message' => sprintf('%s, your account was successfully created!', get_username($pdo, $_SESSION['user_id']))
     ];
-    redirect(sprintf('/DDWT18/final/myaccount/?error_msg=%s',
+    redirect(sprintf('/DDWT18/myaccount/?error_msg=%s',
         json_encode($feedback)));
 }
 
@@ -235,7 +238,7 @@ function login_user($pdo, $form_data)
             'message' => sprintf('%s, you were logged in successfully!',
                 get_username($pdo, $_SESSION['user_id']))
         ];
-        redirect(sprintf('/DDWT18/final/myaccount/?error_msg=%s',
+        redirect(sprintf('/DDWT18/myaccount/?error_msg=%s',
             json_encode($feedback)));
     }
 }
@@ -377,13 +380,32 @@ function get_rooms_table($pdo, $rooms){
         <tr>
             <th scope="row">'.$value['name'].'</th>
             <th scope="row">'.get_owner_name($pdo, $value['owner']).'</th>
-            <td><a href="/DDWT18/final/room/?room_id='.$value['id'].'" role="button" class="btn btn-primary">More info</a></td>
+            <td><a href="/DDWT18/room/?room_id='.$value['id'].'" role="button" class="btn btn-primary">More info</a></td>
         </tr>';
     }
     $rooms_table .= '
         </tbody>
     </table>';
     return $rooms_table;
+}
+
+function get_rooms_card($rooms, $user_id) {
+
+        var_dump($rooms);
+    if ($user_id == $rooms[0]['owner'] ) {
+        foreach ($rooms as $key => $value) {
+            $rooms_card = '
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">' . $value['name'] . '</h5>
+                        <p class="card-text">' . $value['description'] . '</p>
+                        <a href="/DDWT18/room/?room_id=' . $value['id'] . '" role="button" class="btn btn-primary">More info</a>
+                    </div>
+                </div>';
+
+            return $rooms_card;
+        }
+    }
 }
 
 /**
@@ -433,42 +455,21 @@ function postcode($pdo, $form_data){
         ];
     }
 
-    // Create a counter
-    // Fetch DB information from counters
-    $stmt = $pdo->prepare('SELECT * FROM counters WHERE name = ?');
-    $stmt->execute(['postalcode']);
-    $db = $stmt->fetch();
+    // Fetch count from postcode db
+    $count = count_postcode($pdo);
 
-    // Set date
-    date_default_timezone_set('Europe/Paris');
-    $current_timestamp = date('Y-m-d H:i:s');
 
-    // Update
-    if ( $db['count'] == 0){
-        // Set date
-        $begin_timestamp = $current_timestamp;
+    if ( $count < 100 ){
 
-        // Update counter to DB
-        $stmt = $pdo->prepare("UPDATE counters SET begin_date = ? WHERE name = ? ");
-        $stmt->execute([$begin_timestamp,'postalcode']);
-
-        return $begin_timestamp;
-    }
-
-    if ( $db['count'] < 100){
-        // Add to counter
-        $db['count']++;
-        $cnt = $db['count'];
-
-        // Update counter to DB
-        $stmt = $pdo->prepare("UPDATE counters SET count = ?, end_date = ? WHERE name = ? ");
-        $stmt->execute([$cnt, $current_timestamp,'postalcode']);
+        // Form variables and date
+        $postalcode = $form_data['postalcode'];
+        $streetnumber = $form_data['streetnumber'];
+        date_default_timezone_set("Europe/Amsterdam");
+        $date = date("Y-m-d");
 
         // De headers worden altijd meegestuurd als array
         $headers = array();
         $headers[] = 'X-Api-Key: WmTqvoFo9P6UbjqGGVwBvqrVPsbM6b9aShiwhMji';
-        $postalcode = $form_data['postalcode'];
-        $streetnumber = $form_data['streetnumber'];
 
         // De URL naar de API call
         $url = 'https://api.postcodeapi.nu/v2/addresses/?postcode='.$postalcode.'&number='.$streetnumber;
@@ -482,16 +483,29 @@ function postcode($pdo, $form_data){
 
         // Gebruik json_decode() om de response naar een PHP array te converteren
         $data = json_decode($response, true);
-
         curl_close($curl);
 
-        $city = $data['_embedded']['addresses'][0]['city']['label'];
-        $street = $data['_embedded']['addresses'][0]['street'];
+        var_dump($data); #hoe roep je deze key aan en zorg je dat ie dan stopt.
 
-        // Associative Array
-        return array('postalcode' => $postalcode, 'streetnumber' => $streetnumber, 'city' => $city, 'street' => $street);
-        // Normal Array
-        #return array($postalcode, $streetnumber, $city, $street);
+        if (array_key_exists("error", $data)) {
+            return [
+                'type' => 'danger',
+                'message' => 'There was an error.'
+            ];
+        } else {
+            // Fetch city and street from API data
+            $city = $data['_embedded']['addresses'][0]['city']['label'];
+            $street = $data['_embedded']['addresses'][0]['street'];
+
+            // Associative Array
+            $arr = array('postalcode' => $postalcode, 'streetnumber' => $streetnumber, 'city' => $city, 'street' => $street);
+            return $arr;
+        }
+
+
+        // Add Postcode API record to DB
+        $stmt = $pdo->prepare('INSERT INTO postcode (postalcode, streetnumber, city, street, date) VALUES (?, ?, ?, ?, ?)');
+        $stmt->execute([$postalcode, $streetnumber, $city, $street, $date]);
 
     } else {
         return [
@@ -499,23 +513,91 @@ function postcode($pdo, $form_data){
             'message' => 'You have reached the maximum number of API calls.'
         ];
     }
-
 }
-
 
 /**
- * Returns counter from DB
+ * Add serie to the database
+ * @param object $pdo db object
+ * @param array $serie_info post array
+ * @return array with message feedback
  */
-function counter($pdo){
-    // Fetch counter from DB
-    $stmt = $pdo->prepare("SELECT count FROM counters WHERE name = ?");
-    $stmt->execute(['postalcode']);
-    $counter = $stmt->fetch();
+function add_room($pdo, $room_info, $user_id){
+    /* Check if all fields are set */
+    $required_fields = ['postalcode', 'streetnumber', 'city', 'street', 'name', 'type', 'price', 'size', 'description'];
+    $missing_fields = check_required_fields($required_fields, $room_info);
 
-    $cnt = $counter['count'];
+    if ($missing_fields) {
+        return [
+            'type' => 'danger',
+            'message' => 'The following fields are mandatory: ', $missing_fields
+        ];
+    }
 
-    return $cnt;
+    /* Check data type */
+    if (!is_numeric($room_info['streetnumber'])) {
+        return [
+            'type' => 'danger',
+            'message' => 'There was an error. You should enter a number as streetnumber.'
+        ];
+    }
+
+    /* Check if room already exists */
+    $stmt = $pdo->prepare('SELECT * FROM rooms WHERE postalcode = ? AND streetnumber = ? AND city = ? AND street = ?');
+    $stmt->execute([$room_info['postalcode'], $room_info['streetnumber'], $room_info['city'], $room_info['street']]);
+    $room = $stmt->rowCount();
+    if ($room){
+        return [
+            'type' => 'danger',
+            'message' => 'This room was already added.'
+        ];
+    }
+
+    /* Add room */
+    $stmt = $pdo->prepare("INSERT INTO rooms (owner, name, description, street, streetnumber, postalcode, city, type, price, size) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([
+        $user_id,
+        $room_info['name'],
+        $room_info['description'],
+        $room_info['street'],
+        $room_info['streetnumber'],
+        $room_info['postalcode'],
+        $room_info['city'],
+        $room_info['type'],
+        $room_info['price'],
+        $room_info['size'],
+    ]);
+
+    var_dump($room_info);
+    $inserted = $stmt->rowCount();
+    if ($inserted ==  1) {
+        return [
+            'type' => 'success',
+            'message' => sprintf("Room '%s' added to Rooms Overview.", $room_info['name'])
+        ];
+    }
+    else {
+        return [
+            'type' => 'danger',
+            'message' => 'There was an error. The room was not added. Try it again.'
+        ];
+    }
 }
+
+/**
+ * Count the number of Postcode API calls per day
+ * @param object $pdo database object
+ * @return mixed
+ */
+function count_postcode($pdo){
+    /* Count the number of Postcode API calls per day*/
+    date_default_timezone_set("Europe/Amsterdam");
+    $date = date("Y-m-d");
+    $stmt = $pdo->prepare('SELECT * FROM postcode WHERE date = ?');
+    $stmt->execute([$date]);
+    $count = $stmt->rowCount();
+    return $count;
+}
+
 
 /**
  * Count the number of rooms listed on rooms Overview

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Dec 12, 2018 at 10:59 AM
+-- Generation Time: Dec 17, 2018 at 01:38 AM
 -- Server version: 5.7.23
 -- PHP Version: 7.2.8
 
@@ -19,6 +19,40 @@ SET time_zone = "+00:00";
 --
 -- Database: `ddwt18_final`
 --
+CREATE DATABASE IF NOT EXISTS `ddwt18_final` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `ddwt18_final`;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `postcode`
+--
+
+CREATE TABLE `postcode` (
+  `id` int(11) NOT NULL,
+  `postalcode` varchar(255) NOT NULL,
+  `streetnumber` varchar(255) NOT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `street` varchar(255) DEFAULT NULL,
+  `date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `postcode`
+--
+
+INSERT INTO `postcode` (`id`, `postalcode`, `streetnumber`, `city`, `street`, `date`) VALUES
+(7, '9712ta', '1', 'Groningen', 'Havenstraat', '2018-12-17'),
+(8, '9712ta', '1', 'Groningen', 'Havenstraat', '2018-12-17'),
+(9, '9712ta', '1', 'Groningen', 'Havenstraat', '2018-12-17'),
+(10, '7y78', '1', '', '', '2018-12-17'),
+(11, 'joij', '2', '', '', '2018-12-17'),
+(12, 'w', '5', 'Groningen', 'Havenstraat', '2018-12-17'),
+(13, '23r43', '3', NULL, NULL, '2018-12-17'),
+(14, 'hiuh', '3', NULL, NULL, '2018-12-17'),
+(15, 'hiuh', '3', NULL, NULL, '2018-12-17'),
+(16, 'hiuh', '3', NULL, NULL, '2018-12-17'),
+(17, 'hiuhui', '23', NULL, NULL, '2018-12-17');
 
 -- --------------------------------------------------------
 
@@ -30,7 +64,8 @@ CREATE TABLE `rooms` (
   `id` int(11) NOT NULL,
   `owner` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `streetname` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `street` varchar(255) NOT NULL,
   `streetnumber` int(11) NOT NULL,
   `postalcode` varchar(6) NOT NULL,
   `city` varchar(255) NOT NULL,
@@ -38,6 +73,14 @@ CREATE TABLE `rooms` (
   `price` decimal(5,2) NOT NULL,
   `size` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `rooms`
+--
+
+INSERT INTO `rooms` (`id`, `owner`, `name`, `description`, `street`, `streetnumber`, `postalcode`, `city`, `type`, `price`, `size`) VALUES
+(3, 5, 'Chille slaapplek voor internationals', '', 'Havenstraat', 1, '9712TA', 'Groningen', 1, '410.00', 11),
+(4, 5, 'Hallo', 'hoiu', 'Havenstraat', 2, '9712TA', 'Groningen', 2, '34.00', 10);
 
 -- --------------------------------------------------------
 
@@ -65,12 +108,19 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `firstname`, `lastname`, `role`, `birthdate`, `biography`, `occupation`, `language`, `email`, `phone`) VALUES
-(1, '', '$2y$10$I7S4GIS6PCGyK2M/RmF9auR2ylv5EZTJh.pQT1Lefym4ml/IR5LSW', 'd', 'd', 1, '1994-04-23', 'df', 'dfg', 'AF', 'd@gmail.com', '061544'),
-(2, '', '$2y$10$wAI6z/y7aFSePJ0DDzxvs.WxM7Yq0.Z2SFht0caJm/IF47.jW1pvK', 'jioj', 'jioj', 2, '9119-03-14', 'joij', 'ijoj', 'AF', 'jioj@gmail.com', 'ioj');
+(1, 'lol', '$2y$10$KPfsh8m4oivOXjP/QOy0MeAA2th6znSmC9ZDYx32NQvo4VsMg8P7m', 'Louis ', 'de Bruijn', 1, '1994-03-14', 'username: lol\r\nwachtwoord: lol', 'Information Science', 'NL', 'louis@email.com', '06123456789'),
+(4, 'bob', '$2y$10$3qeHEemakDoLRYM9oQdKHOoJtvDizqSuPP/H6edNVc3XxFEo/p.lO', 'Bob', 'de Bruijn', 2, '1994-03-13', 'Bob\r\nBob', 'Informatica', 'NE', 'bob@gmail.com', '0612345678'),
+(5, 'mom', '$2y$10$bSN2nXp2UpjnnKRIIClE/eQQOdyFlMeLEGlugXI/MqeaHW7dojzvK', 'mom', 'mom', 1, '1994-03-14', 'mom', 'mom', 'AF', 'mom@gmail.com', 'mom');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `postcode`
+--
+ALTER TABLE `postcode`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `rooms`
@@ -90,16 +140,22 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `postcode`
+--
+ALTER TABLE `postcode`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
 -- AUTO_INCREMENT for table `rooms`
 --
 ALTER TABLE `rooms`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables

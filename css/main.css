@@ -7,6 +7,12 @@
 #inputBio {
     border: none;
 }
+#inputDescription {
+    border: none;
+}
+#inputPostalcode {
+    text-transform: uppercase;
+}
 
 /* Avatar */
 

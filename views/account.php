@@ -11,9 +11,9 @@
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
         <!-- Add Material CSS, replace Bootstrap CSS -->
-        <link href="<?= $root ?>css/material.min.css" rel="stylesheet">
+        <link href="<?= $root ?>/css/material.min.css" rel="stylesheet">
         <!-- Own CSS -->
-        <link rel="stylesheet" type="text/css" href="<?= $root ?>css/main.css">
+        <link rel="stylesheet" type="text/css" href="<?= $root ?>/css/main.css">
 
 
         <title><?= $page_title ?></title>
@@ -42,14 +42,13 @@
                 <div class="col-sm-4">
                     <div class="card text-center">
                         <div class="card-body">
-                            <img class="img-fluid" id="avatar" src="../images/profile.jpg" alt="profile image"/>
+                            <img class="img-fluid" id="avatar" src="<?php if(isset($avatar)){echo $avatar;} else {echo "$root/images/avatar.jpg";} ?>" alt="profile image"/>
                             <h5 class="card-title"><?= $name ?></h5>
                             <a href="/DDWT18/edit" class="btn btn-primary">Edit profile</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-sm-8">
-                    <h5>Your rooms in Groningen.</h5>
                     <?php if(isset($rooms_cards)){echo $rooms_cards;} ?>
                 </div>
             </div>
@@ -59,7 +58,7 @@
 
 
         <!-- Optional JavaScript -->
-        <script type="text/javascript" src="<?= $root ?>js/materialize.js"></script>
+        <script type="text/javascript" src="<?= $root ?>/js/materialize.js"></script>
 
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
@@ -67,6 +66,6 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 
         <!-- Then Material JavaScript on top of Bootstrap JavaScript -->
-        <script src="<?= $root ?>css/material.min.js"></script>
+        <script src="<?= $root ?>/css/material.min.js"></script>
     </body>
 </html>

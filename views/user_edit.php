@@ -11,9 +11,9 @@
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
         <!-- Add Material CSS, replace Bootstrap CSS -->
-        <link href="<?= $root ?>css/material.min.css" rel="stylesheet">
+        <link href="<?= $root ?>/css/material.min.css" rel="stylesheet">
         <!-- Own CSS -->
-        <link rel="stylesheet" type="text/css" href="<?= $root ?>css/main.css">
+        <link rel="stylesheet" type="text/css" href="<?= $root ?>/css/main.css">
 
 
         <title><?= $page_title ?></title>
@@ -24,9 +24,7 @@
 
         <!-- Content -->
         <div class="container">
-
             <div class="row">
-
                 <div class="col-md-12">
                     <!-- Error message: hier pas je aan waar die error message komt -->
                     <?php if (isset($error_msg)){echo $error_msg;} ?>
@@ -35,16 +33,28 @@
                     <h5><?= $page_subtitle ?></h5>
                     <p><?= $page_content ?></p>
                 </div>
-
             </div>
-
             <div class="row">
                 <div class="col-sm-4">
                     <div class="card text-center">
                         <div class="card-body">
-                            <img class="img-fluid" id="avatar" src="../images/profile.jpg" alt="profile image"/>
+                            <img class="img-fluid" id="avatar" src="<?php if(isset($avatar)){echo $avatar;} else {echo "$root/images/avatar.jpg";} ?>" alt="profile image"/>
                             <h5 class="card-title"><?= $name ?></h5>
-                            <a href="#" class="btn btn-primary">Edit profile</a>
+                            <form action="<?= $form_action ?>" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                                <div class="input-group mb-3">
+                                    <input aria-describedby="" class="form-control-file" id="inputFile" name="fileToUpload" type="file" required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-secondary" type="submit"><?= $submit_btn ?></button>
+                                    </div>
+                                    <div class="valid-feedback">
+                                        Looks good.
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Please enter a file.
+                                    </div>
+                                </div>
+                            </form>
+
                         </div>
                     </div>
                 </div>
@@ -225,7 +235,7 @@
 
 
         <!-- Optional JavaScript -->
-        <script type="text/javascript" src="<?= $root ?>js/materialize.js"></script>
+        <script type="text/javascript" src="<?= $root ?>/js/materialize.js"></script>
 
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
@@ -233,6 +243,6 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 
         <!-- Then Material JavaScript on top of Bootstrap JavaScript -->
-        <script src="<?= $root ?>css/material.min.js"></script>
+        <script src="<?= $root ?>/css/material.min.js"></script>
     </body>
 </html>

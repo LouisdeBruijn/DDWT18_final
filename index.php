@@ -41,7 +41,7 @@ $router = new \Bramus\Router\Router();
             'url' => '/DDWT18/add/',
         ));
     /* Root folder */
-    $root = '/DDWT18/';
+    $root = '/DDWT18';
 
 /* Home GET */
 $router->get('/', function() use($db, $navigation_tpl, $root) {
@@ -92,24 +92,127 @@ $router->get('/overview', function() use ($db, $navigation_tpl, $root) {
 
 });
 
-/* Single room GET */
-$router->get('/room', function() use ($db, $navigation_tpl, $root) {
-    /* get room info from database */
-    $room_id = $_GET['room_id'];
-    $room_info = get_room_info($db, $room_id);
-    $room_name = $room_info['name'];
-    $room_streetname = $room_info['streetname'];
-    $room_streetnumber = $room_info['streetnumber'];
-    $room_postalcode = $room_info['postalcode'];
-    $room_city = $room_info['city'];
-    $room_type = $room_info['type'];
-    $room_price = $room_info['price'];
-    $room_size = $room_info['size'];
+/* Single room mount */
+$router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) { #waarom moet ik bij elke route weer opnieuw deze variabelen aanroepen
 
-    /* page content */
-    include use_template('room');
+
+    /* Single room GET */
+    $router->get('/', function() use ($router, $db, $navigation_tpl, $root) {
+        /* Check if user is logged in */
+        check_login();
+
+        /* Get room_id from $_GET variables */
+        $room_id = $_GET['room_id'];
+
+        /* Check whether $_GET variables are set */
+        if (check_url_var($room_id)){
+            redirect('/DDWT18/overview/');
+        }
+
+        /* Display buttons */
+        $display_buttons = display_buttons($db, get_user_id(), $room_id);
+
+        /* get room info from database */
+        $room_id = $_GET['room_id'];
+        $room_info = get_room_info($db, $room_id);
+        $room_name = $room_info['name'];
+        $room_streetname = $room_info['streetname'];
+        $room_streetnumber = $room_info['streetnumber'];
+        $room_postalcode = $room_info['postalcode'];
+        $room_city = $room_info['city'];
+        $room_type = $room_info['type'];
+        $room_price = $room_info['price'];
+        $room_size = $room_info['size'];
+
+        /* page content */
+        include use_template('room');
+
+    });
+
+    /* Single room REMOVE */
+    $router->post('/remove', function() use ($router, $db, $navigation_tpl, $root) { #kan dit ook op een delete route??
+        /* Check if logged in */
+        if ( !check_login() ) {
+            redirect('/DDWT18/login/');
+        }
+
+        var_dump($_POST);
+        /* Remove room from database */
+        $feedback = remove_room($db, get_user_id(), $_POST);
+
+        /* Redirect to room GET route */
+        #redirect(sprintf('/DDWT18/overview/?error_msg=%s', json_encode($feedback)));
+        $error_msg = get_error($feedback);
+
+    });
+
+        /* Edit single room GET */
+    $router->get('/edit', function() use ($router, $db, $navigation_tpl, $root) {
+        /* Check if logged in */
+        if ( !check_login() ) {
+            redirect('/DDWT18/login/');
+        }
+
+        /* Get room_id from $_GET variables */
+        $room_id = $_GET['room_id'];
+
+        /* Check whether url variables are set */
+        if (check_url_var($room_id)){
+            redirect('/DDWT18/overview/');
+        }
+
+        /* Get current room details */
+        $room_info = get_room_info($db, $room_id);
+
+        /* Check user route authorization */
+        if (check_route(get_user_id(), $room_info['owner'])) {
+            redirect('/DDWT18/overview/');
+        }
+
+        /* Get counter for usage of Postcode API */
+        $count = count_postcode($db);
+
+        /* Page info */
+        $page_title = 'Edit Room';
+        $page_subtitle = 'Edit your room';
+
+        /* Page content */
+        $page_content = 'Fill in the details of your room.';
+        $submit_btn = "Edit room";
+
+        /* Get error msg from POST route */
+        if ( isset($_GET['error_msg']) ) {
+            $error_msg = get_error($_GET['error_msg']);
+        }
+
+        /* Navigation */
+        $navigation = get_navigation($navigation_tpl, 6);
+
+        $form_action = '/DDWT18/room/edit';
+
+        include use_template('new-step2');
+
+    });
+
+    /* Edit single room POST */
+    $router->post('/edit', function() use ($router, $db, $navigation_tpl, $root) {
+        /* Check if logged in */
+        if ( !check_login() ) {
+            redirect('/DDWT18/login/');
+        }
+
+        #moet je op de post route ook checken of room_id wel gezet is in de GET variabelen met check_url_var?? Kunnen mensen bij een post route komen?
+
+        /* Edit serie to database */
+        $feedback = update_room($db, $_POST, get_user_id());
+
+        /* Redirect to serie GET route */
+        redirect(sprintf('/DDWT18/room/?error_msg=%s', json_encode($feedback)));
+
+    });
 
 });
+
 
 /* Login GET */
 $router->get('/login', function() use ($db, $navigation_tpl, $root) {
@@ -161,7 +264,6 @@ $router->get('/register', function() use ($db, $navigation_tpl, $root) {
     /* Choose Template */
     include use_template('register');
 
-
 });
 
 /* Register POST */
@@ -186,10 +288,11 @@ $router->get('/myaccount', function() use ($db, $navigation_tpl, $root) {
     $rooms = get_rooms($db);
     $rooms_cards = get_rooms_card($rooms, get_user_id());
 
+    /* Avatar image */
+    $avatar = check_avatar(get_user_id());
 
     /* User first name and last name */
     $name = get_username($db, get_user_id());
-    # Hier nog met een if statement kijken of er get_username() uitkomt en anders user_name uit de db tonen
 
     /* Page info */
     $root = '/DDWT18/';
@@ -227,7 +330,6 @@ $router->post('/myaccount', function() use ($db, $navigation_tpl, $root) {
 
 /* Add room mount */
 $router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) { #waarom moet ik bij elke route weer opnieuw deze variabelen aanroepen
-
 
     /* Add room GET */
     $router->get('/', function() use ($router, $db, $navigation_tpl, $root) {
@@ -307,8 +409,6 @@ $router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) { #
             redirect('/DDWT18/login/');
         }
 
-        var_dump($_POST);
-
         /* Get counter for usage of Postcode API */
         $count = count_postcode($db);
 
@@ -325,6 +425,8 @@ $router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) { #
         /* Add serie to database */
         $feedback = add_room($db, $_POST, get_user_id());;
 
+        # hoe maak je nou dat de $feedback doormoet naar de overview pagina maar de #error message naar dezelfde add/room pagina. ????
+
         /* Redirect to serie GET route */
         redirect(sprintf('/DDWT18/overview/?error_msg=%s', json_encode($feedback)));
 
@@ -339,9 +441,11 @@ $router->get('/edit', function() use ($db, $navigation_tpl, $root) {
         redirect('/DDWT18/login/');
     }
 
+    /* Avatar image */
+    $avatar = check_avatar(get_user_id());
+
     /* User first name and last name */
     $name = get_username($db, get_user_id());
-    # Hier nog met een if statement kijken of er get_username() uitkomt en anders user_name uit de db tonen
 
     /* Page info */
     $root = '/DDWT18/';
@@ -354,6 +458,10 @@ $router->get('/edit', function() use ($db, $navigation_tpl, $root) {
     /* Page content */
     $page_content = 'An overview of your account';
 
+    /* Change avatar */
+    $form_action = '/DDWT18/edit/';
+    $submit_btn = 'Upload';
+
     /* Get account info from db */
     $user_info = get_account_info($db, get_user_id()); #deze functie is PRECIES hetzelfde als get_serieinfo() en is dus redundant, maar nu voor nu voldoet het even. We kunnen later get_serieinfo() herschrijven zodat we die ook hier kunnen gebruiken.
 
@@ -365,6 +473,9 @@ $router->get('/edit', function() use ($db, $navigation_tpl, $root) {
     /* Choose Template */
     include use_template('user_edit');
 
+    /* Redirect to homepage */
+    redirect(sprintf('/DDWT18/myaccount?error_msg=%s',
+        json_encode($error_msg)));
 
 
 });
@@ -375,6 +486,18 @@ $router->post('/edit', function() use ($db, $navigation_tpl, $root) {
     if ( !check_login() ) {
         redirect('/DDWT18/login/');
     }
+
+    /* Get error msg from POST route */
+    if ( isset($_GET['error_msg']) ) {
+        $error_msg = get_error($_GET['error_msg']);
+    }
+
+    $directory_name = "images/users/uploads";
+    $target_dir = create_directory($directory_name, get_user_id(), 'avatar');
+
+    $feedback = upload_file(get_user_id(), $target_dir);
+
+    var_dump($feedback);
 
     /* Get user account information from db */
     $navigation = get_navigation($navigation_tpl, 5);
@@ -393,6 +516,9 @@ $router->post('/edit', function() use ($db, $navigation_tpl, $root) {
     $user_email = $user_info['email'];
     $user_phone = $user_info['phone'];
 
+
+    /* Choose Template */
+    include use_template('account');
 
     #we moeten deze nog doen!!!!!!!
 

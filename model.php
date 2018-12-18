@@ -87,13 +87,12 @@ function get_navigation($template, $active_id){
         $navigation_exp .= '</li>';
 
     }
-    $navigation_exp .= '
-    </ul>
-    <a href="/DDWT18/logout/" class="btn btn-primary">Logout</a>
-    </div>
-    </nav>';
+    $navigation_exp .= '</ul>';
+    if (get_user_id()) {$navigation_exp .= '<a href="/DDWT18/logout/" class="btn btn-primary">Logout</a>';};
+    $navigation_exp .= '</div></nav>';
     return $navigation_exp;
 }
+
 
 
 /**
@@ -137,7 +136,7 @@ function register_user($pdo, $form_data){
     if ($missing_fields) {
         return [
             'type' => 'danger',
-            'message' => 'The following fields are mandatory: ', $missing_fields
+            'message' => 'The following fields are mandatory: '.$missing_fields.'.'
         ];
     }
 
@@ -389,23 +388,26 @@ function get_rooms_table($pdo, $rooms){
     return $rooms_table;
 }
 
-function get_rooms_card($rooms, $user_id) {
+function get_rooms_card($rooms_exp, $user_id) {
 
-        var_dump($rooms);
-    if ($user_id == $rooms[0]['owner'] ) {
-        foreach ($rooms as $key => $value) {
-            $rooms_card = '
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">' . $value['name'] . '</h5>
-                        <p class="card-text">' . $value['description'] . '</p>
-                        <a href="/DDWT18/room/?room_id=' . $value['id'] . '" role="button" class="btn btn-primary">More info</a>
-                    </div>
-                </div>';
+        var_dump($rooms_exp);
+        var_dump($user_id);
 
-            return $rooms_card;
-        }
-    }
+    foreach ($rooms_exp as $key => $value){
+            if ($user_id == $rooms_exp[$key]['owner']) {
+                    $rooms_card = '
+                        <h5>Your rooms in Groningen.</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">' . $value['name'] . '</h5>
+                                    <p class="card-text">' . $value['description'] . '</p>
+                                    <a href="/DDWT18/room/?room_id=' . $value['id'] . '" role="button" class="btn btn-primary">More info</a>
+                                </div>
+                            </div>';
+
+                    return $rooms_card;
+                }
+            }
 }
 
 /**
@@ -418,10 +420,11 @@ function get_room_info($pdo, $room_id){
     $stmt = $pdo->prepare('SELECT * FROM rooms WHERE id = ?');
     $stmt->execute([$room_id]);
     $room_info = $stmt->fetch();
+    $room_info_exp = Array();
 
     /* Create array with htmlspecialchars */
-    foreach ($room_info as $row => $rowcontent){
-        $room_info_exp[$row] = htmlspecialchars($rowcontent);
+    foreach ($room_info as $key => $value){
+        $room_info_exp[$key] = htmlspecialchars($value);
     }
     return $room_info_exp;
 }
@@ -455,9 +458,19 @@ function postcode($pdo, $form_data){
         ];
     }
 
-    // Fetch count from postcode db
-    $count = count_postcode($pdo);
+    /* Check if room already exists */
+    $stmt = $pdo->prepare('SELECT * FROM rooms WHERE postalcode = ? AND streetnumber = ?');
+    $stmt->execute([$form_data['postalcode'], $form_data['streetnumber']]);
+    $room = $stmt->rowCount();
+    if ($room){
+        return [
+            'type' => 'danger',
+            'message' => 'This room was already added.'
+        ];
+    }
 
+    // Fetch count from postcode DB
+    $count = count_postcode($pdo);
 
     if ( $count < 100 ){
 
@@ -485,27 +498,26 @@ function postcode($pdo, $form_data){
         $data = json_decode($response, true);
         curl_close($curl);
 
-        var_dump($data); #hoe roep je deze key aan en zorg je dat ie dan stopt.
+        // Fetch city and street from API data
+        $city = $data['_embedded']['addresses'][0]['city']['label'];
+        $street = $data['_embedded']['addresses'][0]['street'];
 
-        if (array_key_exists("error", $data)) {
+        // Add Postcode API record to DB
+        $stmt = $pdo->prepare('INSERT INTO postcode (postalcode, streetnumber, city, street, date) VALUES (?, ?, ?, ?, ?)');
+        $stmt->execute([$postalcode, $streetnumber, $city, $street, $date]);
+
+        if (array_key_exists('error', $data)) {
             return [
                 'type' => 'danger',
                 'message' => 'There was an error.'
             ];
         } else {
-            // Fetch city and street from API data
-            $city = $data['_embedded']['addresses'][0]['city']['label'];
-            $street = $data['_embedded']['addresses'][0]['street'];
 
             // Associative Array
             $arr = array('postalcode' => $postalcode, 'streetnumber' => $streetnumber, 'city' => $city, 'street' => $street);
             return $arr;
         }
 
-
-        // Add Postcode API record to DB
-        $stmt = $pdo->prepare('INSERT INTO postcode (postalcode, streetnumber, city, street, date) VALUES (?, ?, ?, ?, ?)');
-        $stmt->execute([$postalcode, $streetnumber, $city, $street, $date]);
 
     } else {
         return [
@@ -518,26 +530,29 @@ function postcode($pdo, $form_data){
 /**
  * Add serie to the database
  * @param object $pdo db object
- * @param array $serie_info post array
+ * @param array $room_info post array
  * @return array with message feedback
  */
 function add_room($pdo, $room_info, $user_id){
+    /* Check if user_id is set
+    #moet dit eigenlijk ook nog?
+
     /* Check if all fields are set */
-    $required_fields = ['postalcode', 'streetnumber', 'city', 'street', 'name', 'type', 'price', 'size', 'description'];
+    $required_fields = ['name', 'description', 'postalcode', 'streetnumber', 'city', 'street', 'type', 'price', 'size'];
     $missing_fields = check_required_fields($required_fields, $room_info);
 
     if ($missing_fields) {
         return [
             'type' => 'danger',
-            'message' => 'The following fields are mandatory: ', $missing_fields
+            'message' => 'The following fields are mandatory: '.$missing_fields.'.'
         ];
     }
 
     /* Check data type */
-    if (!is_numeric($room_info['streetnumber'])) {
+    if (!is_numeric($room_info['streetnumber']) OR !is_numeric($room_info['price']) OR !is_numeric($room_info['size'])) {
         return [
             'type' => 'danger',
-            'message' => 'There was an error. You should enter a number as streetnumber.'
+            'message' => 'There was an error. You should enter numbers as streetnumbers, price and size.'
         ];
     }
 
@@ -567,7 +582,6 @@ function add_room($pdo, $room_info, $user_id){
         $room_info['size'],
     ]);
 
-    var_dump($room_info);
     $inserted = $stmt->rowCount();
     if ($inserted ==  1) {
         return [
@@ -581,7 +595,137 @@ function add_room($pdo, $room_info, $user_id){
             'message' => 'There was an error. The room was not added. Try it again.'
         ];
     }
+
 }
+
+/**
+ * Updates a serie in the database using post array
+ * @param object $pdo db object
+ * @param array $serie_info post array
+ * @return array
+ */
+function update_room($pdo, $room_info, $user_id){
+
+    /* Check if all fields are set */
+    $required_fields = ['name', 'description', 'postalcode', 'streetnumber', 'city', 'street', 'type', 'price', 'size'];
+    $missing_fields = check_required_fields($required_fields, $room_info);
+
+    if ($missing_fields) {
+        return [
+            'type' => 'danger',
+            'message' => 'The following fields are mandatory: '.$missing_fields.'.'
+        ];
+    }
+
+    /* Check data type */
+    if (!is_numeric($room_info['streetnumber']) OR !is_numeric($room_info['price']) OR !is_numeric($room_info['size'])) {
+        return [
+            'type' => 'danger',
+            'message' => 'There was an error. You should enter numbers as streetnumbers, price and size.'
+        ];
+    }
+
+    /* Check if room already exists on this address */
+    $stmt = $pdo->prepare('SELECT * FROM rooms WHERE postalcode = ? AND streetnumber = ? AND city = ? AND street = ?');
+    $stmt->execute([$room_info['postalcode'], $room_info['streetnumber'], $room_info['city'], $room_info['street']]);
+    $room_db = $stmt->fetchAll();
+
+    /* Check if still editing the same room */
+    if ($room_db[0]['id'] != $room_info['room_id']){
+        return [
+            'type' => 'danger',
+            'message' => 'This room was already added.'
+        ];
+    }
+
+    /* Check user authorization */
+    if ($room_db[0]['owner'] != $user_id) {
+        return [
+            'type' => 'danger',
+            'message' => 'You are not authorized to perform this action.'
+        ];
+    }
+
+    /* Update room */
+    $stmt = $pdo->prepare('UPDATE rooms SET name = ?, description  = ?, street = ?, streetnumber = ?, postalcode = ?, city = ?, type = ?, price = ?, size = ? WHERE id = ?');
+    $stmt->execute([
+        $room_info['name'],
+        $room_info['description'],
+        $room_info['street'],
+        $room_info['streetnumber'],
+        $room_info['postalcode'],
+        $room_info['city'],
+        $room_info['type'],
+        $room_info['price'],
+        $room_info['size'],
+        $room_info['room_id'],
+    ]);
+
+    $inserted = $stmt->rowCount();
+    if ($inserted ==  1) {
+        return [
+            'type' => 'success',
+            'message' => sprintf("Room '%s' has been updated.", $room_info['name'])
+        ];
+    }
+    else {
+        return [
+            'type' => 'danger',
+            'message' => 'There was an error. The room was not updated. Try it again.'
+        ];
+    }
+
+}
+
+/**
+ * Removes a room with a specific room-ID
+ * @param object $pdo db object
+ * @param int $room_id id of the to be deleted series
+ * @return array
+ */
+function remove_room($pdo, $user_id, $room_id){
+
+    /* Get series info */
+    #$room_info = get_room_info($pdo, $room_id); #deze functie klopt niet helemaal, daardoor is de functie hieronder redundant
+
+    var_dump($user_id, $room_id);
+    $room_info = display_buttons($pdo, $user_id, $room_id);
+
+    var_dump($room_info);
+    /* Check User Authorization */
+    if ($room_info[0]['owner'] != $user_id) {
+        return [
+            'type' => 'danger',
+            'message' => 'You are not authorized to perform this action.'
+        ];
+    }
+
+    /* Check if still removing the same room */
+    if ($room_info[0]['id'] != $room_id){
+        return [
+            'type' => 'danger',
+            'message' => 'This room was already removed.'
+        ];
+    }
+
+    /* Delete Room */
+    $stmt = $pdo->prepare("DELETE FROM rooms WHERE id = ?");
+    $stmt->execute([$room_id]);
+    $deleted = $stmt->rowCount();
+    if ($deleted ==  1) {
+        return [
+            'type' => 'success',
+            'message' => sprintf("Room '%s' was removed!", $room_info['name'])
+        ];
+    }
+    else {
+        return [
+            'type' => 'warning',
+            'message' => 'An error occurred. The room was not removed.'
+        ];
+    }
+}
+
 
 /**
  * Count the number of Postcode API calls per day
@@ -597,7 +741,6 @@ function count_postcode($pdo){
     $count = $stmt->rowCount();
     return $count;
 }
-
 
 /**
  * Count the number of rooms listed on rooms Overview
@@ -678,5 +821,146 @@ function update_user($pdo, $user_info, $user_id){
     }
 }
 
+function create_directory($directory_name, $user_id, $folder){
+    //The name of the directory that we need to create.
+    $dir_name = "$directory_name/$user_id/$folder/";
+
+    //Check if the directory already exists.
+        if(!is_dir($dir_name)){
+            //Directory does not exist, so lets create it.
+            mkdir($dir_name, 0755, true);
+        }
+     return $dir_name;
+}
+
+function is_dir_empty($dir) {
+    if (!is_readable($dir)) return NULL;
+    return (count(scandir($dir)) == 2);
+}
+
+
+function upload_file($user_id, $target_dir){
+
+    // Moet je hier nog form validation doen?? Zodat ze niet een rare naam invoeren? of een rare file?
+
+    // Rename filename
+    $path_parts = pathinfo($_FILES["fileToUpload"]['name']);
+    $extension =  strtolower($path_parts['extension']);
+    $_FILES["fileToUpload"]['name'] = 'avatar.'.$extension;
+
+    // Create target file
+    $target_file = $target_dir . basename($_FILES["fileToUpload"]['name']);
+    $uploadOk = 1;
+    $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+
+    // Check if image file is a actual image or fake image
+    if(isset($_POST["submit"])) {
+        $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
+        if($check !== false) {
+            return [
+                'type' => 'danger',
+                'message' => 'File is an image - '.$check["mime"].'.' #blijkbaar is dit 'mime' niet goed
+            ];
+
+        } else {
+            return [
+                'type' => 'danger',
+                'message' => 'File is not an image.'
+            ];
+        }
+    }
+
+    // Check file size
+    if ($_FILES["fileToUpload"]["size"] > 500000) {
+        return [
+            'type' => 'danger',
+            'message' => 'Sorry, your file is too large.'
+        ];
+    }
+    // Allow certain file formats
+    if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+    && $imageFileType != "gif" ) {
+        return [
+            'type' => 'danger',
+            'message' => 'Sorry, only JPG, JPEG, PNG & GIF files are allowed.'
+        ];
+    }
+
+    // Remove any previous avatar files from directory
+    if (!is_dir_empty($target_dir)) {
+        $matching = glob('images/users/uploads/' . $user_id . '/avatar/avatar.*');
+        $old_file = pathinfo($matching[0]);
+        $old_extension = $old_file['extension'];
+        $name = "{$target_dir}avatar.$old_extension";
+
+        if (file_exists($name)) {
+            unlink($name);
+        }
+    }
+
+    // Upload file to directory
+    if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+        return [
+            'type' => 'success',
+            'message' => 'The file '.basename( $_FILES["fileToUpload"]["name"]).' has been uploaded.'
+        ];
+
+    } else {
+        return [
+            'type' => 'danger',
+            'message' => 'Sorry, there was an error uploading your file.'
+        ];
+    }
+}
+
+function check_avatar($user_id) {
+    // Create a glob that returns an array
+    $matching = glob( 'images/users/uploads/'.$user_id.'/avatar/avatar.*');
+
+    // Create the extension accessing the glob array
+    $extension = pathinfo($matching[0],PATHINFO_EXTENSION);
+
+    // Check
+    if (file_exists('images/users/uploads/'.$user_id.'/avatar/avatar.'.$extension.'')) {
+        $avatar = "/DDWT18/images/users/uploads/$user_id/avatar/avatar.$extension";
+        return $avatar;
+    }
+}
+
+function check_url_var($variables){
+    /* Check if the GET/POST variables are set on a route */
+    if ($variables == NULL) {
+        return [
+            'type' => 'danger',
+            'message' => 'No variables are set for this route.'
+        ];
+
+    }
+}
+
+function check_route($user_id, $owner){
+    /* Check if user of the route is also owner of the to-be-edited-content */
+    if ($user_id != $owner) {
+        return [
+            'type' => 'danger',
+            'message' => 'You are not authorized to view this page.'
+        ];
+    }
+}
+
+function display_buttons($pdo, $user_id, $room_id){
+
+    /* Get DB information */
+    $stmt = $pdo->prepare('SELECT * FROM rooms WHERE id = ?');
+    $stmt->execute([$room_id]);
+    $room = $stmt->fetchAll();                          #Array to string conversion ????
+    if ( $room[0]['owner'] == $user_id){
+        return True;
+    } else {
+        return False;
+    }
+
+
+}
 
 

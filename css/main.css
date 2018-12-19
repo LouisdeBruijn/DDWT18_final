@@ -29,5 +29,10 @@
     opacity: 0.8;
 }
 
+/* Images */
+.card-img-top {
+    max-height: 100px;
+}
+
 
 

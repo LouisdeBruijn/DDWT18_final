@@ -28,9 +28,7 @@
 
         <!-- Left column -->
         <div class="col-md-8">
-            <!-- Error message -->
-            <?php if (isset($error_msg)){echo $error_msg;} ?>
-
+            1052+VH+
             <h1><?= $page_title ?></h1>
             <h5><?= $page_subtitle ?></h5>
             <p><?= $page_content ?></p>

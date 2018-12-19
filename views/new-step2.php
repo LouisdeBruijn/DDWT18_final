@@ -38,7 +38,6 @@
             <h5><?= $page_subtitle ?></h5>
             <p><?= $page_content ?></p>
 
-
             <form class="" action="<?= $form_action ?>" method="POST" class="needs-validation" novalidate>
                 <div class="form-group">
                     <div class="<script>focus_label(inputName)</script>">
@@ -178,6 +177,8 @@
                     <h1 class="text-right" ><?= $count ?></h1>
                 </div>
             </div>
+            <?php if(isset($add_pictures)){echo $add_pictures;} ?>
+
         </div>
 
     </div>

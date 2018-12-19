@@ -48,7 +48,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-8">
+                <div class="col-sm-6">
                     <?php if(isset($rooms_cards)){echo $rooms_cards;} ?>
                 </div>
             </div>

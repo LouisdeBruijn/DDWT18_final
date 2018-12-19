@@ -27,7 +27,7 @@
             <div class="form-group">
                 <div class="floating-label">
                     <label for="inputUsername">Username</label>
-                    <input aria-describedby="" class="form-control" id="inputUsername" placeholder="Enter a username" name="username" type="text" >
+                    <input aria-describedby="" class="form-control" id="inputUsername" placeholder="Enter a username" name="username" type="text" required>
                     <div class="valid-feedback">
                         Looks good.
                     </div>

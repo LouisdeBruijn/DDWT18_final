@@ -179,6 +179,21 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) { 
         /* Page content */
         $page_content = 'Fill in the details of your room.';
         $submit_btn = "Edit room";
+        $form_action = '/DDWT18/room/edit';
+
+
+        #deze code kan redundant worden door de functie uit account cards !
+        /* Show example image or room images */
+        if (is_dir_empty('../DDWT18/images/users/uploads/'.$room_info['owner'].'/rooms/'.$room_id.'/')){
+            $image_src = '/DDWT18/images/avatar.jpg';
+        } else {
+            $files = scandir ('../DDWT18/images/users/uploads/'.$room_info['owner'].'/rooms/'.$room_id.'/');
+            $image_src = '/DDWT18/images/users/uploads/'.$room_info['owner'].'/rooms/'.$room_id.'/'.$files[2]; // because [0] = "." [1] = ".."
+        }
+
+        /* Add images */
+        $img_form_action = '/DDWT18/room/image';
+        $add_pictures = image_card($img_form_action, 'Upload', $image_src, $room_id);
 
         /* Get error msg from POST route */
         if ( isset($_GET['error_msg']) ) {
@@ -188,11 +203,25 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) { 
         /* Navigation */
         $navigation = get_navigation($navigation_tpl, 6);
 
-        $form_action = '/DDWT18/room/edit';
-
         include use_template('new-step2');
 
     });
+
+    /* Upload images single room POST */
+    $router->post('/image', function() use ($router, $db, $navigation_tpl, $root) {
+        if ( !check_login() ) {
+            redirect('/DDWT18/login/');
+        }
+
+        /* Upload image */
+        $directory_name = "images/users/uploads";
+        $target_dir = create_directory($directory_name, get_user_id(), 'rooms/'.$_POST['room_id']);
+        var_dump($target_dir);
+        $feedback = upload_file(get_user_id(), $target_dir);
+
+    });
+
+
 
     /* Edit single room POST */
     $router->post('/edit', function() use ($router, $db, $navigation_tpl, $root) {
@@ -205,6 +234,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) { 
 
         /* Edit serie to database */
         $feedback = update_room($db, $_POST, get_user_id());
+
 
         /* Redirect to serie GET route */
         redirect(sprintf('/DDWT18/room/?error_msg=%s', json_encode($feedback)));

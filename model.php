@@ -388,28 +388,6 @@ function get_rooms_table($pdo, $rooms){
     return $rooms_table;
 }
 
-function get_rooms_card($rooms_exp, $user_id) {
-
-        var_dump($rooms_exp);
-        var_dump($user_id);
-
-    foreach ($rooms_exp as $key => $value){
-            if ($user_id == $rooms_exp[$key]['owner']) {
-                    $rooms_card = '
-                        <h5>Your rooms in Groningen.</h5>
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">' . $value['name'] . '</h5>
-                                    <p class="card-text">' . $value['description'] . '</p>
-                                    <a href="/DDWT18/room/?room_id=' . $value['id'] . '" role="button" class="btn btn-primary">More info</a>
-                                </div>
-                            </div>';
-
-                    return $rooms_card;
-                }
-            }
-}
-
 /**
  * Returns a string with the HTML code representing the information for that series
  * @param PDO $pdo The database connection
@@ -630,6 +608,9 @@ function update_room($pdo, $room_info, $user_id){
     $stmt->execute([$room_info['postalcode'], $room_info['streetnumber'], $room_info['city'], $room_info['street']]);
     $room_db = $stmt->fetchAll();
 
+    var_dump($room_db);
+    var_dump('room_db', $room_db[0]['id'], 'room_info', $room_info['room_id']); #4 en 6
+
     /* Check if still editing the same room */
     if ($room_db[0]['id'] != $room_info['room_id']){
         return [
@@ -843,10 +824,12 @@ function upload_file($user_id, $target_dir){
 
     // Moet je hier nog form validation doen?? Zodat ze niet een rare naam invoeren? of een rare file?
 
-    // Rename filename
-    $path_parts = pathinfo($_FILES["fileToUpload"]['name']);
-    $extension =  strtolower($path_parts['extension']);
-    $_FILES["fileToUpload"]['name'] = 'avatar.'.$extension;
+    // Rename filename for avatar only
+    if ($target_dir == 'images/users/uploads/'.$user_id.'/avatar/') {
+        $path_parts = pathinfo($_FILES["fileToUpload"]['name']);
+        $extension = strtolower($path_parts['extension']);
+        $_FILES["fileToUpload"]['name'] = 'avatar.' . $extension;
+    }
 
     // Create target file
     $target_file = $target_dir . basename($_FILES["fileToUpload"]['name']);
@@ -959,8 +942,75 @@ function display_buttons($pdo, $user_id, $room_id){
     } else {
         return False;
     }
+}
+
+function get_rooms_card($rooms_exp, $user_id) {
+
+    #problems with gettign multiple rooms shown if there are multiple. Do not understand in the foreach loops of associative arrays...
+    #var_dump($rooms_exp);
+    #var_dump($user_id);
 
 
+    /* Show example image or room images */
+    if (is_dir_empty('../DDWT18/images/users/uploads/'.$room_exp['owner'].'/rooms/'.$room_exp['id'].'/')){
+        $image_src = '/DDWT18/images/avatar.jpg';
+    } else {
+        $files = scandir ('../DDWT18/images/users/uploads/'.$room_exp['owner'].'/rooms/'.$room_exp['id'].'/');
+        $image_src = '/DDWT18/images/users/uploads/'.$room_exp['owner'].'/rooms/'.$room_exp['id'].'/'.$files[2]; // because [0] = "." [1] = ".."
+    }
+
+        foreach ($rooms_exp as $key => $room) { #iterate through room Array, these are the rooms
+            # echo $room['id']; #dit is hoe je een item aanroept
+            if ($user_id == $room['owner']){
+                # echo $room['owner']; #dit werkt ook
+                $rooms_card = '
+                        <h5>Your rooms in Groningen.</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">' . $room['name'] . '</h5>
+                                    <p class="card-text">' . $room['description'] . '</p>
+                                    <a href="/DDWT18/room/?room_id=' . $room['id'] . '" role="button" class="btn btn-primary">More info</a>
+                                </div>
+                            </div>';
+                return $rooms_card; #er gaat alleen nog iets mis met die return statement. misschien moet je het als array returnen?
+                #per ongeluk heb ik ook die carousel verwijdert oepsie, dus die moet er weer even bij..
+            }
+        }
+
+}
+
+
+function image_card($form_action, $submit_btn, $image_src, $room_id){
+
+    $image = '
+    <div class="card">
+        <img class="card-img-top" id="image" src="'.$image_src.'" alt ="image" id="image_preview"/>
+        <div class="card text-center">
+        <div class="card-body">
+                <h5 class="card-title">title</h5>
+                <form action ="'.$form_action.'" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                   <div class="input-group mb-3">
+                        <input aria-describedby="" class="form-control-file" id="inputFile" name="fileToUpload" type="file" required>
+                        <div class="input-group-append">
+                        <button class="btn btn-secondary" type="submit">'.$submit_btn.'</button>
+                        </div>
+                        <div class="valid-feedback">
+                            Looks good.
+                        </div>
+                        <div class="invalid-feedback">
+                            Please enter a file.
+                        </div>
+                    </div>';
+    if(isset($room_id)){
+        $image .= '<input type="hidden" name="room_id" value="'.$room_id.'">';}
+    $image .= '
+                </form>
+            </div>
+        </div>
+    </div>
+    ';
+
+    return $image;
 }
 
 

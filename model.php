@@ -739,10 +739,9 @@ function count_rooms($pdo){
 /**
  * @param $pdo
  * @param $user_info
- * @param $user_id
  * @return array
  */
-function update_user($pdo, $user_info, $user_id){
+function update_user($pdo, $user_info){
     /* Check if all fields are set */
     if (
         empty($user_info['firstname']) or
@@ -759,11 +758,13 @@ function update_user($pdo, $user_info, $user_id){
             'message' => 'There was an error. Not all fields were filled in.'
         ];
     }
+
     /* Get current email */
     $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
-    $stmt->execute([$user_id]);
+    $stmt->execute([$user_info['user_id']]);
     $user = $stmt->fetch();
     $current_email = $user['email'];
+
     /* Check if email already exists */
     $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
     $stmt->execute([$user_info['email']]);
@@ -774,8 +775,9 @@ function update_user($pdo, $user_info, $user_id){
             'message' => 'This email is already used for an account.'
         ];
     }
+
     /* Update user */
-    $stmt = $pdo->prepare('UPDATE users SET firstname = ?, lastname  = ?, birthdate = ?, biography = ?, occupation = ?, language = ?, email = ?, phone = ?');
+    $stmt = $pdo->prepare('UPDATE users SET firstname = ?, lastname  = ?, birthdate = ?, biography = ?, occupation = ?, language = ?, email = ?, phone = ? WHERE id = ?');
     $stmt->execute([
         $user_info['firstname'],
         $user_info['lastname'],
@@ -785,19 +787,19 @@ function update_user($pdo, $user_info, $user_id){
         $user_info['language'],
         $user_info['email'],
         $user_info['phone'],
-        $user_id
+        $user_info['user_id']
     ]);
     $updated = $stmt->rowCount();
     if ($updated == 1) {
         return [
             'type' => 'success',
-            'message' => 'Your useraccount was updated.'
+            'message' => 'Your user account was updated.'
         ];
     }
     else {
         return [
             'type' => 'warning',
-            'message' => 'Your useraccount was not updated, no changes were detected.'
+            'message' => 'Your user account was not updated, no changes were detected.'
         ];
     }
 }

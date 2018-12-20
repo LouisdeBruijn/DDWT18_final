@@ -182,7 +182,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) { 
         $form_action = '/DDWT18/room/edit';
 
 
-        #deze code kan redundant worden door de functie uit account cards !
+        #deze code kan redundant worden door de functie get_room_cards !
         /* Show example image or room images */
         if (is_dir_empty('../DDWT18/images/users/uploads/'.$room_info['owner'].'/rooms/'.$room_id.'/')){
             $image_src = '/DDWT18/images/avatar.jpg';

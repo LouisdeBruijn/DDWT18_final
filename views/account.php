@@ -40,16 +40,16 @@
 
             <div class="row">
                 <div class="col-sm-4">
-                    <div class="card text-center">
+                    <div class="card text-center mb-3">
                         <div class="card-body">
                             <img class="img-fluid" id="avatar" src="<?php if(isset($avatar)){echo $avatar;} else {echo "$root/images/avatar.jpg";} ?>" alt="profile image"/>
                             <h5 class="card-title"><?= $name ?></h5>
-                            <a href="/DDWT18/edit" class="btn btn-primary">Edit profile</a>
+                            <a href="/DDWT18/edit" class="btn btn-secondary">Edit profile</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-sm-6">
-                    <?php if(isset($rooms_cards)){echo $rooms_cards;} ?>
+                    <?php if(isset($rooms_cards)){foreach($rooms_cards as $key => $room){echo $room;}} ?>
                 </div>
             </div>
             <br>

@@ -88,7 +88,7 @@ function get_navigation($template, $active_id){
 
     }
     $navigation_exp .= '</ul>';
-    if (get_user_id()) {$navigation_exp .= '<a href="/DDWT18/logout/" class="btn btn-primary">Logout</a>';};
+    if (get_user_id()) {$navigation_exp .= '<a href="/DDWT18/logout/" class="btn btn-secondary">Logout</a>';};
     $navigation_exp .= '</div></nav>';
     return $navigation_exp;
 }
@@ -379,7 +379,7 @@ function get_rooms_table($pdo, $rooms){
         <tr>
             <th scope="row">'.$value['name'].'</th>
             <th scope="row">'.get_owner_name($pdo, $value['owner']).'</th>
-            <td><a href="/DDWT18/room/?room_id='.$value['id'].'" role="button" class="btn btn-primary">More info</a></td>
+            <td><a href="/DDWT18/room/?room_id='.$value['id'].'" role="button" class="btn btn-secondary">More info</a></td>
         </tr>';
     }
     $rooms_table .= '
@@ -946,36 +946,93 @@ function display_buttons($pdo, $user_id, $room_id){
 
 function get_rooms_card($rooms_exp, $user_id) {
 
-    #problems with gettign multiple rooms shown if there are multiple. Do not understand in the foreach loops of associative arrays...
-    #var_dump($rooms_exp);
-    #var_dump($user_id);
 
+    $rooms_cards = array(); #return values have to be in empty array.
+    $carousel = array();
+    $first = True;
+    foreach ($rooms_exp as $key => $room) { #iterate through room Array, these are the rooms
+        # echo $room['id']; #dit is hoe je een item aanroept
+        if ($user_id == $room['owner']){
+            # echo $room['owner']; #dit werkt ook
 
-    /* Show example image or room images */
-    if (is_dir_empty('../DDWT18/images/users/uploads/'.$room_exp['owner'].'/rooms/'.$room_exp['id'].'/')){
-        $image_src = '/DDWT18/images/avatar.jpg';
-    } else {
-        $files = scandir ('../DDWT18/images/users/uploads/'.$room_exp['owner'].'/rooms/'.$room_exp['id'].'/');
-        $image_src = '/DDWT18/images/users/uploads/'.$room_exp['owner'].'/rooms/'.$room_exp['id'].'/'.$files[2]; // because [0] = "." [1] = ".."
-    }
+            /* Show example image or room images */
+            if (!file_exists('../DDWT18/images/users/uploads/'.$room['owner'].'/rooms/'.$room['owner'].'/')){
+                $image_src = '/DDWT18/images/avatar.jpg';
+                $image = '
+                        <div class="carousel-item active">
+                            <img class="d-block w-100" src="' . $image_src . '" alt="carousel slide">
+                        </div>
+                        ';
 
-        foreach ($rooms_exp as $key => $room) { #iterate through room Array, these are the rooms
-            # echo $room['id']; #dit is hoe je een item aanroept
-            if ($user_id == $room['owner']){
-                # echo $room['owner']; #dit werkt ook
-                $rooms_card = '
-                        <h5>Your rooms in Groningen.</h5>
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">' . $room['name'] . '</h5>
-                                    <p class="card-text">' . $room['description'] . '</p>
-                                    <a href="/DDWT18/room/?room_id=' . $room['id'] . '" role="button" class="btn btn-primary">More info</a>
-                                </div>
-                            </div>';
-                return $rooms_card; #er gaat alleen nog iets mis met die return statement. misschien moet je het als array returnen?
-                #per ongeluk heb ik ook die carousel verwijdert oepsie, dus die moet er weer even bij..
+            } else {
+                $files = scandir('../DDWT18/images/users/uploads/'.$room['owner'].'/rooms/'.$room['id'].'/'); # moet nog in een loop: if (!file_exists('../DDWT18/images/users/uploads/'.$room['owner'].'/rooms/'.$room['owner'].'/')) {}
+                foreach ($files as $key => $image) {
+                    if ($first){ #first carousel-item = active
+                        $image_src = '/DDWT18/images/users/uploads/' . $room['owner'] . '/rooms/' . $room['id'] . '/' . $files[2]; // because [0] = "." [1] = ".."
+                        $image = '
+                        <div class="carousel-item active">
+                            <img class="d-block w-100" src="' . $image_src . '" alt="carousel slide">
+                        </div>
+                        ';
+                        $first = False;
+                        array_push($carousel, $image);
+                    } else {
+                        $image_src = '/DDWT18/images/users/uploads/' . $room['owner'] . '/rooms/' . $room['id'] . '/' . $files[2]; // because [0] = "." [1] = ".."
+                        $image = '
+                        <div class="carousel-item">
+                            <img class="d-block w-100" src="' . $image_src . '" alt="carousel slide">
+                        </div>
+                        ';
+                        array_push($carousel, $image);
+                    }
+                }
             }
+
+            #moet nog even checken waarom hij nu niet die avatar.jpg pakt maar wel IMG_
+
+            $room_card = '
+            <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+              <ol class="carousel-indicators">
+                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+              </ol>
+              <div class="carousel-inner">';
+                foreach ($carousel as $key => $image){
+                    $room_card .= $image;
+                }
+                $room_card .= '
+              </div>
+              <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+              </a>
+              <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+              </a>
+            </div>
+
+                        <div class="card border-ligth mb-3">
+                          <div class="card-header">
+                            <h5 class="card-title">
+                                ' . $room['name'] . '
+                            </h5>
+                          </div>
+                          <div class="card-body">
+                            <p class="card-text">' . $room['description'] . '</p>
+                          </div>
+                          <div class="card-footer bg-transparent text-right">
+                            <a href="/DDWT18/room/?room_id=' . $room['id'] . '" role="button" class="btn btn-secondary">More info</a>
+                          </div>
+                        </div>';
+             #er gaat alleen nog iets mis met die return statement. misschien moet je het als array returnen?
+            #per ongeluk heb ik ook die carousel verwijdert oepsie, dus die moet er weer even bij..
+            array_push($rooms_cards, $room_card);
         }
+    }
+    return $rooms_cards;
+
 
 }
 

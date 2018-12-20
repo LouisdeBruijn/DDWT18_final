@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -15,6 +16,7 @@
     <!-- Own CSS -->
     <link rel="stylesheet" type="text/css" href="<?= $root ?>/css/main.css">
 
+
     <title><?= $page_title ?></title>
 </head>
 <body>
@@ -23,21 +25,23 @@
 
 <!-- Content -->
 <div class="container">
-
     <div class="row">
+        <div class="col-md-12">
+            <!-- Error message: hier pas je aan waar die error message komt -->
+            <?php if (isset($error_msg)){echo $error_msg;} ?>
 
-        <!-- Left column -->
-        <div class="col-md-8">
-            1052+VH+
             <h1><?= $page_title ?></h1>
             <h5><?= $page_subtitle ?></h5>
             <p><?= $page_content ?></p>
             <p>There are currently <?= $nbr_rooms ?> rooms available in Groningen</p>
             <?php if(isset($left_content)){echo $left_content;} ?>
         </div>
+    </div>
+        </div>
 
     </div>
 </div>
+
 
 
 <!-- Optional JavaScript -->

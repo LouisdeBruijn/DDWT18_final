@@ -18,6 +18,14 @@
     <title><?= $page_title ?></title>
 </head>
 <body>
+<!-- Menu -->
+<?= $navigation ?>
+
+
+<h1><?= $page_title ?></h1>
+<h5><?= $page_subtitle ?></h5>
+<p><?= $page_content ?></p>
+
 <!-- Content -->
 <div class="container">
     <table class="table table-hover">

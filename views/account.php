@@ -44,7 +44,7 @@
                         <div class="card-body">
                             <img class="img-fluid" id="avatar" src="<?php if(isset($avatar)){echo $avatar;} else {echo "$root/images/avatar.jpg";} ?>" alt="profile image"/>
                             <h5 class="card-title"><?= $name ?></h5>
-                            <a href="/DDWT18/edit" class="btn btn-secondary">Edit profile</a>
+                            <a href="/DDWT18/myaccount/edit" class="btn btn-secondary">Edit profile</a>
                         </div>
                     </div>
                 </div>

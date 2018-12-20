@@ -83,7 +83,13 @@
             <div class="form-group">
                 <div class="floating-label">
                     <label for="inputBirthDate">Birth date</label>
-                    <input aria-describedby="" class="form-control" id="inputBirthDate" placeholder="Your birth date" name="birthdate" type="date" required>
+                    <input aria-describedby="" class="form-control" id="inputBirthDate" placeholder="Your birth date" name="birthdate" type="date" pattern="\d{4}(\/|\-)\d{2}(\/|\-)\d{2}" required>
+                    <div class="valid-feedback">
+                        Looks good.
+                    </div>
+                    <div class="invalid-feedback">
+                        Please insert a valid date format: 1999/01/01
+                    </div>
                 </div>
             </div>
             <div class="form-group">
@@ -203,12 +209,12 @@
             <div class="form-group">
                 <div class="floating-label">
                     <label for="inputPhone">Phone number</label>
-                    <input aria-describedby="" class="form-control" id="inputPhone" placeholder="Your phone number" name="phone" type="tel" required>
+                    <input aria-describedby="" class="form-control" id="inputPhone" placeholder="Your phone number" name="phone" type="tel" pattern="^(\+|\d)(\d){5,15}" required>
                     <div class="valid-feedback">
                         Looks good.
                     </div>
                     <div class="invalid-feedback">
-                        Please enter your phone number.
+                        Please enter your phone number a a valid format: +31612345678
                     </div>
                 </div>
             </div>

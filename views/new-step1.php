@@ -42,12 +42,12 @@
                 <div class="form-group">
                     <div class="<script>focus_label(inputPostalcode)</script>">
                         <label for="inputPostalcode">Postal code</label>
-                        <input aria-describedby="" class="form-control" id="inputPostalcode" placeholder="1234AB" value="" name="postalcode" type="text" maxlength="6" autocapitalize="characters" required>
+                        <input aria-describedby="" class="form-control" id="inputPostalcode" placeholder="1234AB" value="" name="postalcode" type="text" pattern="\d{4}[a-zA-Z]{2}" maxlength="6" autocapitalize="characters" required>
                         <div class="valid-feedback">
                             Looks good.
                         </div>
                         <div class="invalid-feedback">
-                            Please enter the postal code.
+                            Please enter the postal code in format: 1234AB.
                         </div>
                     </div>
                 </div>

@@ -40,11 +40,11 @@
                         <div class="card-body">
                             <img class="img-fluid" id="avatar" src="<?php if(isset($avatar)){echo $avatar;} else {echo "$root/images/avatar.jpg";} ?>" alt="profile image"/>
                             <h5 class="card-title"><?= $name ?></h5>
-                            <form action="<?= $form_action ?>" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                            <form action="<?= $form_action_avatar ?>" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                                 <div class="input-group mb-3">
                                     <input aria-describedby="" class="form-control-file" id="inputFile" name="fileToUpload" type="file" required>
                                     <div class="input-group-append">
-                                        <button class="btn btn-secondary" type="submit"><?= $submit_btn ?></button>
+                                        <button class="btn btn-secondary" type="submit"><?= $submit_btn_avatar ?></button>
                                     </div>
                                     <div class="valid-feedback">
                                         Looks good.
@@ -63,7 +63,7 @@
                         <div class="card-body">
                             <h5 class="card-title">Edit your Account</h5>
                             <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                            <form action="/DDWT18/final/" method="POST" class="needs-validation" novalidate>
+                            <form action="<?= $form_action ?>" method="POST" class="needs-validation" novalidate>
                                 <div class="form-group">
                                     <div class="<script>focus_label(inputFirstName)</script>">
                                         <label for="inputFirstName">First name</label>
@@ -222,7 +222,7 @@
                                 </div>
                                 <input type="hidden" value="<?= $user_id ?>" name="user_id">
                                 <div class="col-sm-2">
-                                    <a href="/DDWT18/edit" role="button" class="btn btn-primary">Edit</a>
+                                    <button class="btn btn-secondary" type="submit"><?= $submit_btn ?></button>
                                 </div>
                             </form>
                         </div>

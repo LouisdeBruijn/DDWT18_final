@@ -284,10 +284,17 @@ function check_login(){
  * Generates an array with account information
  * @param object $pdo db object
  * @param int $user_id id of the user
+ * @param string $table_short
  * @return mixed
  */
-function get_account_info($pdo, $user_id){
-    $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
+function get_account_info($pdo, $user_id, $table_short = 'u'){ #aanpassen in mijn index.php en samenvoegen met get_rooms_info
+    if($table_short == 'u'){
+        $table = 'users';
+    }
+    elseif($table_short == 'r'){
+        $table = 'rooms';
+    }
+    $stmt = $pdo->prepare('SELECT * FROM '. $table .' WHERE id = ?');
     $stmt->execute([$user_id]);
     $user_info = $stmt->fetch();
     $user_info_exp = Array();
@@ -672,7 +679,6 @@ function remove_room($pdo, $user_id, $room_id){
     var_dump($user_id, $room_id);
     $room_info = display_buttons($pdo, $user_id, $room_id);
 
-    var_dump($room_info);
     /* Check User Authorization */
     if ($room_info[0]['owner'] != $user_id) {
         return [
@@ -933,10 +939,10 @@ function check_route($user_id, $owner){
     }
 }
 
-function display_buttons($pdo, $user_id, $room_id){
+function display_buttons($pdo, $user_id, $room_id){ #hier doe ik dus alleen owner omdat ik alleen owner nodig heb #hier nog naar kijken!
 
     /* Get DB information */
-    $stmt = $pdo->prepare('SELECT * FROM rooms WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT owner FROM rooms WHERE id = ?');
     $stmt->execute([$room_id]);
     $room = $stmt->fetchAll();                          #Array to string conversion ????
     if ( $room[0]['owner'] == $user_id){

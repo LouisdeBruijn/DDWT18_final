@@ -533,10 +533,6 @@ $router->post('/edit', function() use ($db, $navigation_tpl, $root) {
     $feedback = update_user($db, $_POST);
     $error_msg = get_error($feedback);
 
-    /* Get serie info from db */
-    $user_id = $_POST['user_id'];
-    $user_info = get_account_info($db, $user_id);
-
     /* Get user account information from db */
     $navigation = get_navigation($navigation_tpl, 5);
     $name = get_username($db, get_user_id());

@@ -523,7 +523,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         $user_id = $_POST['user_id'];
         $user_info = get_account_info($db, $user_id);
 
-        /* Get user account information from db */
+        /* Get user account information from db
         #redundant: deze variabelen omschrijven is niet nodig.
         $navigation = get_navigation($navigation_tpl, 5);
         $name = get_username($db, get_user_id());
@@ -541,7 +541,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         $user_email = $user_info['email'];
         $user_phone = $user_info['phone'];
 
-        #we moeten deze nog doen!!!!!!!
+        #we moeten deze nog doen!!!!!!! */
 
     });
 

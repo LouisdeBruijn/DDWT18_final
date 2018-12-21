@@ -771,6 +771,11 @@ function update_user($pdo, $user_info){
     $user = $stmt->fetch();
     $current_email = $user['email'];
 
+    echo "Hello world!";
+    print_r($user_info['user_id']);
+    print_r($current_email);
+    echo "<br>";
+
     /* Check if email already exists */
     $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
     $stmt->execute([$user_info['email']]);

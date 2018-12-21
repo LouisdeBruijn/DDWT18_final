@@ -493,6 +493,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
 
         /* Get account info from db */
         $user_info = get_account_info($db, get_user_id()); #deze functie is PRECIES hetzelfde als get_serieinfo() en is dus redundant, maar nu voor nu voldoet het even. We kunnen later get_serieinfo() herschrijven zodat we die ook hier kunnen gebruiken.
+        $user_id = get_user_id();
 
         /* Page info */
         $root = '/DDWT18/';

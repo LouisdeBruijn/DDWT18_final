@@ -1206,7 +1206,11 @@ function display_opt_button($pdo, $user_id) {
     }
 };
 
-
-
+function optinout_button($pdo, $room_id, $user_id) {
+    $stmt= $pdo->prepare('SELECT room FROM optin where tenant =?');
+    $stmt->execute([$user_id]);
+    $valid = $stmt->fetchAll();
+        // DEZE FUNCTIE MOET NO VERDER AFGEMAAKT WORDEN
+}
 
 

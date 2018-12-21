@@ -232,13 +232,13 @@ function login_user($pdo, $form_data)
     } else {
         session_start();
         $_SESSION['user_id'] = $user_info['id'];
-        $feedback = [
+        $succes = [
             'type' => 'success',
             'message' => sprintf('%s, you were logged in successfully!',
                 get_username($pdo, $_SESSION['user_id']))
         ];
-        redirect(sprintf('/DDWT18/myaccount/?error_msg=%s',
-            json_encode($feedback)));
+        redirect(sprintf('/DDWT18/myaccount/?msg=%s',
+            json_encode($succes)));
     }
 }
 
@@ -828,7 +828,7 @@ function is_dir_empty($dir) {
 }
 
 
-function upload_file($user_id, $target_dir){
+function upload_file($pdo, $user_id, $target_dir, $room_id){
 
     // Moet je hier nog form validation doen?? Zodat ze niet een rare naam invoeren? of een rare file?
 
@@ -841,7 +841,6 @@ function upload_file($user_id, $target_dir){
 
     // Create target file
     $target_file = $target_dir . basename($_FILES["fileToUpload"]['name']);
-    $uploadOk = 1;
     $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
     // Check if image file is a actual image or fake image
@@ -877,17 +876,29 @@ function upload_file($user_id, $target_dir){
         ];
     }
 
-    // Remove any previous avatar files from directory
+    // Remove any previous avatar files from directory (that might not have the same extension)
+    #fout: deze functie kan waarschijnlijk ook gewoon met file_exist() geschreven worden
     if (!is_dir_empty($target_dir)) {
         $matching = glob('images/users/uploads/' . $user_id . '/avatar/avatar.*');
         $old_file = pathinfo($matching[0]);
         $old_extension = $old_file['extension'];
         $name = "{$target_dir}avatar.$old_extension";
-
         if (file_exists($name)) {
             unlink($name);
         }
     }
+
+    // If a file exist with the same name and extension
+    if (file_exists($target_file)) {
+        $stmt = $pdo->prepare('DELETE FROM images WHERE path = ?');
+        $stmt->execute([$target_file]);
+        unlink($target_file);
+    }
+
+    // Create DB entry
+    $stmt = $pdo->prepare('INSERT INTO images (name, path, room_id) VALUES (?, ?, ?)');
+    $stmt->execute([basename($_FILES["fileToUpload"]['name']), $target_file, $room_id]);
+
 
     // Upload file to directory
     if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
@@ -902,6 +913,8 @@ function upload_file($user_id, $target_dir){
             'message' => 'Sorry, there was an error uploading your file.'
         ];
     }
+
+
 }
 
 function check_avatar($user_id) {
@@ -952,8 +965,107 @@ function display_buttons($pdo, $user_id, $room_id){ #hier doe ik dus alleen owne
     }
 }
 
-function get_rooms_card($rooms_exp, $user_id) {
+function get_image_src($pdo, $rooms_exp, $userId) {
 
+    // Create Array with image src
+    $imagePath = array();
+    $images = array();
+    $cards = array();
+    $first = True;
+    foreach ($rooms_exp as $key => $room) {
+
+        if ($userId == $room['owner']) {
+
+            // Get DB image paths
+            $stmt = $pdo->prepare('SELECT path FROM images WHERE room_id = ?');
+            $stmt->execute([$room['id']]);
+            $roomPaths = $stmt->fetchAll();
+
+            var_dump($roomPaths);
+
+            array_push($imagePath, $roomPaths);
+
+            // Create the carousel item
+            foreach ($roomPaths as $key => $imageSrc) {
+                if ($first) {
+                    $image = '
+                        <div class="carousel-item active">
+                            <img class="d-block w-100" src="../'.$imageSrc['path'] .'" alt="carousel slide" id="carousel_slide">
+                        </div>
+                        ';
+                    $first = False;
+                    array_push($images, $image);
+                } else {
+                    $image = '
+                        <div class="carousel-item">
+                            <img class="d-block w-100" src="../' . $imageSrc['path'] . '" alt="carousel slide" id="carousel_slide">
+                        </div>
+                        ';
+                    array_push($images, $image);
+                }
+            }
+
+            // Create card
+            $card = '<div class="card border-ligth mb-3">
+                          <div class="card-header">
+                            <h5 class="card-title">
+                                ' . $room['name'] . '
+                            </h5>
+                          </div>
+                          <div class="card-body">
+                            <p class="card-text">' . $room['description'] . '</p>
+                          </div>
+                          <div class="card-footer bg-transparent text-right">
+                            <a href="/DDWT18/room/?room_id=' . $room['id'] . '" role="button" class="btn btn-secondary">More info</a>
+                          </div>
+                    </div>';
+            array_push($cards, $card);
+
+        }
+    }
+
+    $superArray = [
+        'carousel' => $images,
+        'card' => $cards,
+    ];
+
+    return $superArray;
+}
+
+
+function get_rooms_cards2($superArray){
+
+    var_dump($superArray);
+
+    $rooms_card = '
+                <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" class="carousel">
+                  <div class="carousel-inner">';
+            foreach ($superArray as $key => $item){ #carousel en #card
+                foreach($item as $key => $value) { #images
+                    $rooms_card .= $value;
+                }
+            }
+    $rooms_card .= '
+              </div>
+              <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+              </a>
+              <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+              </a>
+            </div>
+    ';
+    return $rooms_card;
+}
+
+
+
+
+
+//Deze is fout (nog)
+function get_rooms_card($rooms_exp, $user_id) {
 
     $rooms_cards = array(); #return values have to be in empty array.
     $carousel = array();

@@ -15,58 +15,78 @@
     <!-- Own CSS -->
     <link rel="stylesheet" type="text/css" href="<?= $root ?>/css/main.css">
 
+
     <title><?= $page_title ?></title>
 </head>
 <body>
 <!-- Menu -->
 <?= $navigation ?>
 
-
-<h1><?= $page_title ?></h1>
-<h5><?= $page_subtitle ?></h5>
-<p><?= $page_content ?></p>
-
 <!-- Content -->
 <div class="container">
-    <table class="table table-hover">
-        <tbody>
-        <tr>
-            <th scope="row">Name</th>
-            <td><?= $room_name ?></td>
-        </tr>
-        <tr>
-            <th scope="row">Address</th>
-            <td><?= $room_streetname." ".$room_streetnumber."</br>".$room_postalcode." ".$room_city ?></td>
-        </tr>
-        <tr>
-            <th scope="row">Type</th>
-            <td colspan="2"><?= $room_type ?></td>
-        </tr>
-        <tr>
-            <th scope="row">Price</th>
-            <td>&euro; <?= $room_price ?></td>
-        </tr>
-        <tr>
-            <th scope="row">Size</th>
-            <td><?= $room_size ?> m<sup>2</sup></td>
-        </tr>
-        </tbody>
-    </table>
-    <?php if ($display_buttons) { ?>
-    <div class="row">
-        <div class="col-sm-2">
-            <a href="<?= $root ?>/room/edit?room_id=<?= $room_id ?>" role="button" class="btn btn-warning">Edit</a>
-        </div>
-        <div class="col-sm-2">
+    <div class="pd-15">&nbsp</div>
 
-            <form action="<?= $root ?>/room/remove/" method="POST">
-                <input type="hidden" value="<?= $room_id ?>" name="room_id">
-                <button type="submit" class="btn btn-danger">Remove</button>
-            </form>
+    <!-- Full width -->
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Error message -->
+            <?php if (isset($view_msg)){echo $view_msg;} ?>
+
+            <h1><?= $page_title ?></h1>
+            <h5><?= $page_subtitle ?></h5>
+            <p><?= $page_content ?></p>
+            <?php if(isset($nbr_rooms)){echo 'There are currently '.$nbr_rooms.' rooms available in Groningen';} ?>
+            <?php if(isset($left_content)){echo $left_content;} ?>
         </div>
     </div>
-    <?php } ?>
 
+    <div class="row">
+        <!-- Left content -->
+        <div class="col-md-4">
+        </div>
+        <!-- Right content -->
+        <div class="col-md-6">
+            <table class="table table-hover">
+                <tbody>
+                <tr>
+                    <th scope="row">Name</th>
+                    <td><?= $room_name ?></td>
+                </tr>
+                <tr>
+                    <th scope="row">Address</th>
+                    <td><?= $room_streetname." ".$room_streetnumber."</br>".$room_postalcode." ".$room_city ?></td>
+                </tr>
+                <tr>
+                    <th scope="row">Type</th>
+                    <td colspan="2"><?= $room_type ?></td>
+                </tr>
+                <tr>
+                    <th scope="row">Price</th>
+                    <td>&euro; <?= $room_price ?></td>
+                </tr>
+                <tr>
+                    <th scope="row">Size</th>
+                    <td><?= $room_size ?> m<sup>2</sup></td>
+                </tr>
+                </tbody>
+            </table>
+            <?php if ($display_buttons) { ?>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <a href="<?= $root ?>/room/edit?room_id=<?= $room_id ?>" role="button" class="btn btn-warning">Edit</a>
+                    </div>
+                    <div class="col-sm-2">
+
+                        <form action="<?= $root ?>/room/remove/" method="POST">
+                            <input type="hidden" value="<?= $room_id ?>" name="room_id">
+                            <button type="submit" class="btn btn-danger">Remove</button>
+                        </form>
+                    </div>
+                </div>
+            <?php } ?>
+
+        </div>
+    </div>
 </div>
 
 <!-- Optional JavaScript -->

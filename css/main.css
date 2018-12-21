@@ -34,5 +34,15 @@
     max-height: 100px;
 }
 
+/* Carousel */
+
+.carousel {
+    max-height: 40%;
+}
+#carousel_slide {
+    height: 20em;
+    max-height: 20em;
+}
+
 
 

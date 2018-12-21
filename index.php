@@ -51,15 +51,15 @@ $router->get('/', function() use($db, $navigation_tpl, $root) {
     /* Navigation */
     $navigation = get_navigation($navigation_tpl, 1);
 
-    /* Get error msg from POST route to GET route */
-    if ( isset($_GET['error_msg']) ) {
-        $error_msg = get_error($_GET['error_msg']);
+    /* Get msg from POST route */
+    if ( isset($_GET['msg']) ) {
+        $view_msg = get_error($_GET['msg']);
     }
 
     /* Page */
     $page_title = 'Home';
-
-    /* Template */
+    $page_subtitle = 'Wat gaan we hiermee doen';
+    $page_content = 'Tot nu toe niet heel veel';
     include use_template('main');
 
 });
@@ -72,9 +72,9 @@ $router->get('/overview', function() use ($db, $navigation_tpl, $root) {
     /* Navigation */
     $navigation = get_navigation($navigation_tpl, 2);
 
-    /* Get error msg from POST route to GET route */
-    if ( isset($_GET['error_msg']) ) {
-        $error_msg = get_error($_GET['error_msg']);
+    /* Get msg from POST route */
+    if ( isset($_GET['msg']) ) {
+        $view_msg = get_error($_GET['msg']);
     }
 
     /* Get rooms from db */
@@ -86,16 +86,12 @@ $router->get('/overview', function() use ($db, $navigation_tpl, $root) {
     $page_content = 'An overview of available rooms in Groningen';
     $left_content = get_rooms_table($db, $rooms);
     $nbr_rooms = count_rooms($db);
-
-
-    /* Choose Template */
     include use_template('main');
 
 });
 
 /* Single room mount */
 $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
-
 
     /* Single room GET */
     $router->get('/', function() use ($router, $db, $navigation_tpl, $root) {
@@ -105,9 +101,9 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         /* Navigation */
         $navigation = get_navigation($navigation_tpl, 2);
 
-        /* Get error msg from POST route to GET route */
-        if ( isset($_GET['error_msg']) ) {
-            $error_msg = get_error($_GET['error_msg']);
+        /* Get msg from POST route */
+        if ( isset($_GET['msg']) ) {
+            $view_msg = get_error($_GET['msg']);
         }
 
         /* Get room_id from $_GET variables */
@@ -169,7 +165,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         /* Navigation */
         $navigation = get_navigation($navigation_tpl, 6);
 
-        /* Get error msg from POST route to GET route */
+        /* Get msg from POST route */
         if ( isset($_GET['error_msg']) ) {
             $error_msg = get_error($_GET['error_msg']);
         }
@@ -226,7 +222,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         $directory_name = "images/users/uploads";
         $target_dir = create_directory($directory_name, get_user_id(), 'rooms/'.$_POST['room_id']);
 
-        $feedback = upload_file(get_user_id(), $target_dir);
+        $feedback = upload_file($db, get_user_id(), $target_dir, $_POST['room_id']);
 
         #fout: hier moet nog een mooie redirect komen
     });
@@ -261,7 +257,7 @@ $router->get('/login', function() use ($db, $navigation_tpl, $root) {
 
     /* Get error msg from POST route to GET route */
     if ( isset($_GET['error_msg']) ) {
-        $error_msg = get_error($_GET['error_msg']);
+        $view_msg = get_error($_GET['error_msg']);
     }
 
     /* Page */
@@ -274,10 +270,10 @@ $router->get('/login', function() use ($db, $navigation_tpl, $root) {
 /* Login POST */
 $router->post('/login', function() use ($db, $navigation_tpl, $root) {
     /* Login user */
-    $error_msg = login_user($db, $_POST);
+    $feedback = login_user($db, $_POST);
 
     /* Redirect to homepage */
-    redirect(sprintf('/DDWT18/login/?error_msg=%s', json_encode($error_msg)));
+    redirect(sprintf('/DDWT18/login/?error_msg=%s', json_encode($feedback)));
 
 });
 
@@ -285,11 +281,11 @@ $router->post('/login', function() use ($db, $navigation_tpl, $root) {
 $router->get('/logout', function() use ($db) {
 
     /* Logout user */
-    $error_msg = logout_user();
+    $feedback = logout_user();
 
     /* Redirect to homepage */
-    redirect(sprintf('/DDWT18/?error_msg=%s',
-        json_encode($error_msg)));
+    redirect(sprintf('/DDWT18/?msg=%s',
+        json_encode($feedback)));
 
 });
 
@@ -336,7 +332,7 @@ $router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) { #
         /* Navigation */
         $navigation = get_navigation($navigation_tpl, 6);
 
-        /* Get error msg from POST route to GET route */
+        /* Get msg from POST route */
         if ( isset($_GET['error_msg']) ) {
             $error_msg = get_error($_GET['error_msg']);
         }
@@ -436,14 +432,14 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         /* Navigation */
         $navigation = get_navigation($navigation_tpl, 5);
 
-        /* Get error msg from POST route to GET route */
-        if ( isset($_GET['error_msg']) ) {
-            $error_msg = get_error($_GET['error_msg']);
+        /* Get msg from POST route */
+        if ( isset($_GET['msg']) ) {
+            $view_msg = get_error($_GET['msg']);
         }
 
         /* Get rooms from db */
         $rooms = get_rooms($db);
-        $rooms_cards = get_rooms_card($rooms, get_user_id());
+        $rooms_cards = get_rooms_cards2(get_image_src($db, $rooms, get_user_id()));
 
         /* Avatar image */
         $avatar = check_avatar(get_user_id());
@@ -481,7 +477,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         /* Navigation */
         $navigation = get_navigation($navigation_tpl, 5);
 
-        /* Get error msg from POST route to GET route */
+        /* Get msg from POST route */
         if ( isset($_GET['error_msg']) ) {
             $error_msg = get_error($_GET['error_msg']);
         }
@@ -561,7 +557,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         $target_dir = create_directory($directory_name, get_user_id(), 'avatar');
 
         /* Upload file */
-        $feedback = upload_file(get_user_id(), $target_dir);
+        $feedback = upload_file($db, get_user_id(), $target_dir, $_POST['room_id']);
 
     });
 

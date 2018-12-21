@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -25,24 +24,31 @@
 
 <!-- Content -->
 <div class="container">
+    <div class="pd-15">&nbsp</div>
+
+    <!-- Full width -->
     <div class="row">
         <div class="col-md-12">
-            <!-- Error message: hier pas je aan waar die error message komt -->
-            <?php if (isset($error_msg)){echo $error_msg;} ?>
+            <!-- Error message -->
+            <?php if (isset($view_msg)){echo $view_msg;} ?>
 
             <h1><?= $page_title ?></h1>
             <h5><?= $page_subtitle ?></h5>
             <p><?= $page_content ?></p>
-            <p>There are currently <?= $nbr_rooms ?> rooms available in Groningen</p>
+            <?php if(isset($nbr_rooms)){echo 'There are currently '.$nbr_rooms.' rooms available in Groningen';} ?>
             <?php if(isset($left_content)){echo $left_content;} ?>
         </div>
     </div>
-        </div>
 
+    <div class="row">
+        <!-- Left content -->
+        <div class="col-md-4">
+        </div>
+        <!-- Right content -->
+        <div class="col-md-6">
+        </div>
     </div>
 </div>
-
-
 
 <!-- Optional JavaScript -->
 <script type="text/javascript" src="<?= $root ?>/js/materialize.js"></script>

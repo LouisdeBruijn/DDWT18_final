@@ -26,7 +26,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <!-- Error message: hier pas je aan waar die error message komt -->
+                    <!-- Error message -->
                     <?php if (isset($error_msg)){echo $error_msg;} ?>
 
                     <h1><?= $page_title ?></h1>

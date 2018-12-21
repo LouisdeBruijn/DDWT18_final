@@ -1195,4 +1195,18 @@ function image_card($form_action, $submit_btn, $image_src, $room_id){
     return $image;
 }
 
+function display_opt_button($pdo, $user_id) {
+    $stmt  = $pdo->prepare('SELECT role FROM users where id = ?');
+    $stmt->execute([$user_id]);
+    $role = $stmt->fetch();
+    if ( $role['role'] == 'tenant'){
+        return True;
+    } else{
+        return False;
+    }
+};
+
+
+
+
 

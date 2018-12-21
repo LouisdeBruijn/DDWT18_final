@@ -116,6 +116,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
 
         /* Display buttons */
         $display_buttons = display_buttons($db, get_user_id(), $room_id);
+        $display_optin = display_optin_button($db, get_user_id(), $room_id);
 
         /* get room info from database */
         #redundant -> kan ook gewoon als $room_info['name'] in de view

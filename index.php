@@ -524,26 +524,6 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         $user_id = $_POST['user_id'];
         $user_info = get_account_info($db, $user_id);
 
-        /* Get user account information from db
-        #redundant: deze variabelen omschrijven is niet nodig.
-        $navigation = get_navigation($navigation_tpl, 5);
-        $name = get_username($db, get_user_id());
-        $page_title = 'edit account';
-        $page_subtitle = 'edit here your personal account';
-        $page_content = '';
-        $user_id = $_GET['user_id'];
-        $user_info = get_account_info($db, $user_id);
-        $user_firstname = $user_info['firstname'];
-        $user_lastname = $user_info['lastname'];
-        $user_birthdate = $user_info['birthdate']; #je kan niet veranderen van tenant of owner dus die hebben we er niet in
-        $user_biography = $user_info['biography'];
-        $user_occupation = $user_info['occupation'];
-        $user_language = $user_info['language'];
-        $user_email = $user_info['email'];
-        $user_phone = $user_info['phone'];
-
-        #we moeten deze nog doen!!!!!!! */
-
     });
 
     /* Edit user avatar POST */

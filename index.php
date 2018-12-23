@@ -77,14 +77,26 @@ $router->get('/overview', function() use ($db, $navigation_tpl, $root) {
         $view_msg = get_error($_GET['msg']);
     }
 
-    /* Get rooms from db */
+    /* Count rooms card */
+    $count_card = count_rooms($db);
+
+    /* Get rooms from DB */
+    $all_rooms = array();
     $rooms = get_rooms($db);
+
+    /* Only show rooms that user owns */
+    foreach ($rooms as $key => $room) {
+        if (get_user_id() == $room['owner']) {
+            $rooms_card = get_rooms_cards(get_image_src($db, $room, get_user_id()));
+            array_push($all_rooms, $rooms_card);
+        }
+    }
+
 
     /* Page */
     $page_title = 'Overview';
     $page_subtitle = 'Rooms in Groningen';
     $page_content = 'An overview of available rooms in Groningen';
-    $left_content = get_rooms_table($db, $rooms);
     $nbr_rooms = count_rooms($db);
     include use_template('main');
 
@@ -437,9 +449,17 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
             $view_msg = get_error($_GET['msg']);
         }
 
-        /* Get rooms from db */
+        /* Get rooms from DB */
+        $all_rooms = array();
         $rooms = get_rooms($db);
-        $rooms_cards = get_rooms_cards2(get_image_src($db, $rooms, get_user_id()));
+
+        /* Only show rooms that user owns */
+        foreach ($rooms as $key => $room) {
+            if (get_user_id() == $room['owner']) {
+                $rooms_card = get_rooms_cards(get_image_src($db, $room, get_user_id()));
+                array_push($all_rooms, $rooms_card);
+            }
+        }
 
         /* Avatar image */
         $avatar = check_avatar(get_user_id());

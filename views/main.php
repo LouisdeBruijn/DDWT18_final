@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype HTML>
 <html lang="en">
 <head>
     <!-- Required meta tags -->
@@ -15,37 +15,39 @@
     <!-- Own CSS -->
     <link rel="stylesheet" type="text/css" href="<?= $root ?>/css/main.css">
 
-
     <title><?= $page_title ?></title>
 </head>
 <body>
 <!-- Menu -->
 <?= $navigation ?>
-
 <!-- Content -->
 <div class="container">
     <div class="pd-15">&nbsp</div>
-
     <!-- Full width -->
     <div class="row">
         <div class="col-md-12">
             <!-- Error message -->
             <?php if (isset($view_msg)){echo $view_msg;} ?>
-
-            <h1><?= $page_title ?></h1>
-            <h5><?= $page_subtitle ?></h5>
-            <p><?= $page_content ?></p>
-            <?php if(isset($nbr_rooms)){echo 'There are currently '.$nbr_rooms.' rooms available in Groningen';} ?>
-            <?php if(isset($left_content)){echo $left_content;} ?>
         </div>
     </div>
 
     <div class="row">
         <!-- Left content -->
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <h1><?= $page_title ?></h1>
+            <h5><?= $page_subtitle ?></h5>
+            <p><?= $page_content ?></p>
+
         </div>
         <!-- Right content -->
         <div class="col-md-6">
+            <?php if(isset($all_rooms)){foreach($all_rooms as $key => $room){echo $room;}}?>
+        </div>
+
+        <!-- zit hier te kloten met die col-md-3
+        Hierna moet ik nog die if-statements op index omschrijven zodat ie alle kamers laat zien -->
+        <div class="col-md-3">
+            <?php if(isset($count_card)){echo $count_card;}?>
         </div>
     </div>
 </div>

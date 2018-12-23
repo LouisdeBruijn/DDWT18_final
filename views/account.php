@@ -50,7 +50,7 @@
             </div>
             <!-- Right content -->
             <div class="col-md-6">
-                <?php if(isset($rooms_cards)){echo $rooms_cards;} ?>
+                <?php if(isset($all_rooms)){foreach($all_rooms as $key => $room){echo $room;}}?>
             </div>
         </div>
     </div>

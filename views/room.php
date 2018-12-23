@@ -84,6 +84,13 @@
                     </div>
                 </div>
             <?php } ?>
+            <?php if ($display_optin) { ?>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <a href="<?= $root ?>/room/?room_id=<?= $room_id ?>" role="button" class="btn btn-warning">Opt in</a>
+                    </div>
+                </div>
+            <?php } ?>
 
         </div>
     </div>

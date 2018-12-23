@@ -334,7 +334,7 @@ function logout_user(){
  * @return string
  */
 function get_error($feedback){
-    $feedback = json_decode($feedback, True);
+//    $feedback = json_decode($feedback, True);
     $error_exp = '
         <div class="alert alert-'.$feedback['type'].'" role="alert">
             '.$feedback['message'].'
@@ -779,6 +779,11 @@ function update_user($pdo, $user_info){
     $user = $stmt->fetch();
     $current_email = $user['email'];
 
+    echo "Hello world!";
+    print_r($user_info['user_id']);
+    print_r($current_email);
+    echo "<br>";
+
     /* Check if email already exists */
     $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
     $stmt->execute([$user_info['email']]);
@@ -1117,6 +1122,24 @@ function image_card($form_action, $submit_btn, $image_src, $room_id){
     ';
 
     return $image;
+}
+
+function display_opt_button($pdo, $user_id) {
+    $stmt  = $pdo->prepare('SELECT role FROM users where id = ?');
+    $stmt->execute([$user_id]);
+    $role = $stmt->fetch();
+    if ( $role['role'] == 'tenant'){
+        return True;
+    } else{
+        return False;
+    }
+};
+
+function optinout_button($pdo, $room_id, $user_id) {
+    $stmt= $pdo->prepare('SELECT room FROM optin where tenant =?');
+    $stmt->execute([$user_id]);
+    $valid = $stmt->fetchAll();
+        // DEZE FUNCTIE MOET NO VERDER AFGEMAAKT WORDEN
 }
 
 

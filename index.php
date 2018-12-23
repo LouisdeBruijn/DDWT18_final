@@ -128,6 +128,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
 
         /* Display buttons */
         $display_buttons = display_buttons($db, get_user_id(), $room_id);
+        $display_optin = display_optin_button($db, get_user_id(), $room_id);
 
         /* get room info from database */
         #redundant -> kan ook gewoon als $room_info['name'] in de view
@@ -513,6 +514,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
 
         /* Get account info from db */
         $user_info = get_account_info($db, get_user_id()); #deze functie is PRECIES hetzelfde als get_serieinfo() en is dus redundant, maar nu voor nu voldoet het even. We kunnen later get_serieinfo() herschrijven zodat we die ook hier kunnen gebruiken.
+        $user_id = get_user_id();
 
         /* Page info */
         $root = '/DDWT18/';
@@ -542,26 +544,6 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         /* Get user info from db */
         $user_id = $_POST['user_id'];
         $user_info = get_account_info($db, $user_id);
-
-        /* Get user account information from db */
-        #redundant: deze variabelen omschrijven is niet nodig.
-        $navigation = get_navigation($navigation_tpl, 5);
-        $name = get_username($db, get_user_id());
-        $page_title = 'edit account';
-        $page_subtitle = 'edit here your personal account';
-        $page_content = '';
-        $user_id = $_GET['user_id'];
-        $user_info = get_account_info($db, $user_id);
-        $user_firstname = $user_info['firstname'];
-        $user_lastname = $user_info['lastname'];
-        $user_birthdate = $user_info['birthdate']; #je kan niet veranderen van tenant of owner dus die hebben we er niet in
-        $user_biography = $user_info['biography'];
-        $user_occupation = $user_info['occupation'];
-        $user_language = $user_info['language'];
-        $user_email = $user_info['email'];
-        $user_phone = $user_info['phone'];
-
-        #we moeten deze nog doen!!!!!!!
 
     });
 

@@ -6,7 +6,6 @@
     <meta charset="utf-8">
     <meta content="initial-scale=1, shrink-to-fit=no, width=device-width" name="viewport">
 
-    <link href="<?= $root ?>css/material.min.css" rel="stylesheet">
     <!-- CSS -->
     <!-- Add Material font (Roboto) and Material icon as needed -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i|Roboto+Mono:300,400,700|Roboto+Slab:300,400,700" rel="stylesheet">
@@ -16,6 +15,10 @@
     <link href="<?= $root ?>/css/material.min.css" rel="stylesheet">
     <!-- Own CSS -->
     <link rel="stylesheet" type="text/css" href="<?= $root ?>/css/main.css">
+
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
 </head>
 <body>
 <!-- Menu -->
@@ -24,7 +27,6 @@
 <!-- Content -->
 <div class="container">
     <!-- Breadcrumbs -->
-    <div class="pd-15">&nbsp</div>
     <?= $breadcrumbs ?>
 
     <div class="row">

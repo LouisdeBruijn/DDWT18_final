@@ -15,6 +15,8 @@
         <!-- Own CSS -->
         <link rel="stylesheet" type="text/css" href="<?= $root ?>/css/main.css">
 
+        <!-- Google Icons -->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
         <title><?= $page_title ?></title>
     </head>

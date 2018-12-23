@@ -15,6 +15,8 @@
     <!-- Own CSS -->
     <link rel="stylesheet" type="text/css" href="<?= $root ?>/css/main.css">
 
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <title><?= $page_title ?></title>
 </head>
@@ -23,7 +25,6 @@
     <?= $navigation ?>
     <!-- Content -->
     <div class="container">
-        <div class="pd-15">&nbsp</div>
         <!-- Full width -->
         <div class="row">
             <div class="col-md-12">
@@ -48,10 +49,15 @@
                     </div>
                 </div>
             </div>
-            <!-- Right content -->
+            <!-- Middle content -->
             <div class="col-md-6">
                 <?php if(isset($all_rooms)){foreach($all_rooms as $key => $room){echo $room;}}?>
             </div>
+
+            <!-- Right content -->
+            <div class="col-md-2">
+            </div>
+
         </div>
     </div>
 

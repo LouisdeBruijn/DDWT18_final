@@ -3,6 +3,13 @@
 
 #1a73e8 is the main colour code.
 
+/* Layout */
+
+.row {
+    margin-bottom: 2em;
+}
+
+
 /* Forms */
 #inputBio {
     border: none;
@@ -29,15 +36,28 @@
     opacity: 0.8;
 }
 
-/* Images */
+/* Card with rooms */
+
 .card-img-top {
     max-height: 100px;
 }
 
+#room_card h5 {
+}
+
+#room_card p {
+    margin-bottom: 0px !important;
+}
+
+.material-icons {
+    margin-left: 1em;
+}
+
+
 /* Carousel */
 
-.carousel {
-    max-height: 40%;
+.carousel slide {
+    max-height: 40px;
 }
 #carousel_slide {
     height: 20em;

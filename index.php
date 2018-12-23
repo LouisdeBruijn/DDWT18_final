@@ -86,17 +86,13 @@ $router->get('/overview', function() use ($db, $navigation_tpl, $root) {
 
     /* Only show rooms that user owns */
     foreach ($rooms as $key => $room) {
-        if (get_user_id() == $room['owner']) {
-            $rooms_card = get_rooms_cards(get_image_src($db, $room, get_user_id()));
+            $rooms_card = get_rooms_cards(get_image_src($db, $room, get_carousel($db, $room['id'])));
             array_push($all_rooms, $rooms_card);
         }
-    }
-
 
     /* Page */
     $page_title = 'Overview';
     $page_subtitle = 'Rooms in Groningen';
-    $page_content = 'An overview of available rooms in Groningen';
     $nbr_rooms = count_rooms($db);
     include use_template('main');
 
@@ -118,8 +114,12 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
             $view_msg = get_error($_GET['msg']);
         }
 
-        /* Get room_id from $_GET variables */
+        /* Get room info from DB */
         $room_id = $_GET['room_id'];
+        $room_info = get_room_info($db, $room_id);
+
+        /* Get images */
+        $images = show_carousel(get_carousel($db, $room_id));
 
         /* Check whether $_GET variables are set */
         if (check_url_var($room_id)){
@@ -128,25 +128,13 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
 
         /* Display buttons */
         $display_buttons = display_buttons($db, get_user_id(), $room_id);
-        $display_optin = display_optin_button($db, get_user_id(), $room_id);
+        $display_optin = display_opt_button($db, get_user_id(), $room_id);
 
-        /* get room info from database */
-        #redundant -> kan ook gewoon als $room_info['name'] in de view
-        $room_id = $_GET['room_id'];
-        $room_info = get_room_info($db, $room_id);
-        $room_name = $room_info['name'];
-        $room_streetname = $room_info['streetname'];
-        $room_streetnumber = $room_info['streetnumber'];
-        $room_postalcode = $room_info['postalcode'];
-        $room_city = $room_info['city'];
-        $room_type = $room_info['type'];
-        $room_price = $room_info['price'];
-        $room_size = $room_info['size'];
 
         /* Page */
-        $page_title = 'View Room';
-        $page_subtitle = 'View the room';
-        $page_content = 'Below you can find the details of the room.';
+        $page_title = $room_info['name'];
+        $page_subtitle = $room_info['description'];
+        $page_content = 'Room details';
         include use_template('room');
 
     });
@@ -457,7 +445,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         /* Only show rooms that user owns */
         foreach ($rooms as $key => $room) {
             if (get_user_id() == $room['owner']) {
-                $rooms_card = get_rooms_cards(get_image_src($db, $room, get_user_id()));
+                $rooms_card = get_rooms_cards(get_image_src($db, $room, get_carousel($db, $room['id'])));
                 array_push($all_rooms, $rooms_card);
             }
         }

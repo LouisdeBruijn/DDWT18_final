@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype HTML>
 <html lang="en">
 <head>
     <!-- Required meta tags -->
@@ -15,67 +15,63 @@
     <!-- Own CSS -->
     <link rel="stylesheet" type="text/css" href="<?= $root ?>/css/main.css">
 
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <title><?= $page_title ?></title>
 </head>
 <body>
 <!-- Menu -->
 <?= $navigation ?>
-
 <!-- Content -->
 <div class="container">
-    <div class="pd-15">&nbsp</div>
-
     <!-- Full width -->
     <div class="row">
         <div class="col-md-12">
             <!-- Error message -->
             <?php if (isset($view_msg)){echo $view_msg;} ?>
-
             <h1><?= $page_title ?></h1>
-            <h5><?= $page_subtitle ?></h5>
-            <p><?= $page_content ?></p>
-            <?php if(isset($nbr_rooms)){echo 'There are currently '.$nbr_rooms.' rooms available in Groningen';} ?>
-            <?php if(isset($left_content)){echo $left_content;} ?>
+
         </div>
     </div>
 
     <div class="row">
         <!-- Left content -->
         <div class="col-md-4">
+            <div class="card" >
+                <div class="card-body">
+                    <h5 class="card-title"><?= $page_content ?></h5>
+
+                    <label for="location">Location</label>
+                    <p id="location" class="card-text"><i class="material-icons">map</i>&nbsp;&nbsp;<?= $room_info['street']?> <?=$room_info['streetnumber']?> <?= $room_info['postalcode']?> <?=$room_info['city']  ?></p>
+                    <label for="type">Type</label>
+                    <p id="type" class="card-text"><i class="material-icons">kitchen</i>&nbsp;&nbsp;<?= $room_info['type'] ?></p>
+                    <label for="size">Size</label>
+                    <p id ="size" class="card-text"><i class="material-icons">aspect_ratio</i>&nbsp;&nbsp;<?= $room_info['size'] ?>m<sup>2</sup></p>
+                    <label for="price">Price per month</label>
+                    <p id="price" class="card-text"><i class="material-icons">local_atm</i>&nbsp;&nbsp;<?= $room_info['price'] ?></p>
+
+
+                </div>
+            </div>
+
+
         </div>
-        <!-- Right content -->
+        <!-- Middle content -->
         <div class="col-md-6">
-            <table class="table table-hover">
-                <tbody>
-                <tr>
-                    <th scope="row">Name</th>
-                    <td><?= $room_name ?></td>
-                </tr>
-                <tr>
-                    <th scope="row">Address</th>
-                    <td><?= $room_streetname." ".$room_streetnumber."</br>".$room_postalcode." ".$room_city ?></td>
-                </tr>
-                <tr>
-                    <th scope="row">Type</th>
-                    <td colspan="2"><?= $room_type ?></td>
-                </tr>
-                <tr>
-                    <th scope="row">Price</th>
-                    <td>&euro; <?= $room_price ?></td>
-                </tr>
-                <tr>
-                    <th scope="row">Size</th>
-                    <td><?= $room_size ?> m<sup>2</sup></td>
-                </tr>
-                </tbody>
-            </table>
+            <!-- Images -->
+            <?php if (isset($images)){echo $images;} ?>
+
+
+        </div>
+
+        <!-- Right content -->
+        <div class="col-md-2">
             <?php if ($display_buttons) { ?>
-                <div class="row">
-                    <div class="col-sm-2">
+                <div class="row text-right">
+                    <div class="col-md-12">
                         <a href="<?= $root ?>/room/edit?room_id=<?= $room_id ?>" role="button" class="btn btn-warning">Edit</a>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-md-12">
 
                         <form action="<?= $root ?>/room/remove/" method="POST">
                             <input type="hidden" value="<?= $room_id ?>" name="room_id">
@@ -83,15 +79,26 @@
                         </form>
                     </div>
                 </div>
+
             <?php } ?>
             <?php if ($display_optin) { ?>
-                <div class="row">
-                    <div class="col-sm-2">
-                        <a href="<?= $root ?>/room/?room_id=<?= $room_id ?>" role="button" class="btn btn-warning">Opt in</a>
-                    </div>
+            <div class="row">
+                <div class="col-auto">
+                    <a href="<?= $root ?>/room/?room_id=<?= $room_id ?>" role="button" class="btn btn-warning">Opt in</a>
                 </div>
-            <?php } ?>
+            </div>
+        <?php } ?>
+        </div>
+    </div>
 
+    <!-- Middle content -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5><?= $page_subtitle ?></h5>
+                </div>
+            </div>
         </div>
     </div>
 </div>

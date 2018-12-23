@@ -334,7 +334,6 @@ function logout_user(){
  * @return string
  */
 function get_error($feedback){
-//    $feedback = json_decode($feedback, True);
     $error_exp = '
         <div class="alert alert-'.$feedback['type'].'" role="alert">
             '.$feedback['message'].'
@@ -978,53 +977,125 @@ function display_buttons($pdo, $user_id, $room_id){ #hier doe ik dus alleen owne
     }
 }
 
-function get_image_src($pdo, $room, $userId) {
+function show_carousel($images) {
 
-        // Create Array with image src
-        $cards = array();
-        $first = True;
-        $images = array();
+    // Create the carousel item
 
-        // Get DB image paths
-        $stmt = $pdo->prepare('SELECT path FROM images WHERE room_id = ?');
-        $stmt->execute([$room['id']]);
-        $roomPaths = $stmt->fetchAll();
+    if (empty($images)) {
+        $carousel = '<div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <img class="d-block w-100" src="../images/room.jpg" id="carousel_slide" alt="Room">
+    </div>
+  </div>
+</div>
+';
+    } else {
+        $carousel = '
+<div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+    <div class="carousel-inner">';
+        foreach ($images as $key => $image) {
+            $carousel .= $image;
+        }
+
+        $carousel .= '
+</div>
+    <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+    </a>
+</div>';
+    }
+    return $carousel;
+
+}
+
+function get_carousel($pdo, $room_id) {
+
+    // Set variables
+    $first = True;
+    $images = array();
+
+    // Get DB image paths
+    $stmt = $pdo->prepare('SELECT path FROM images WHERE room_id = ?');
+    $stmt->execute([$room_id]);
+    $roomPaths = $stmt->fetchAll();
 
 
-        // Create the carousel item
-        foreach ($roomPaths as $key => $imageSrc) {
-            if ($first) {
-                $image = '
+
+    // Create the carousel item
+    foreach ($roomPaths as $key => $imageSrc) {
+        if ($first) {
+            $image = '
                     <div class="carousel-item active">
                         <img class="d-block w-100" src="../'.$imageSrc['path'] .'" alt="carousel slide" id="carousel_slide">
                     </div>
                     ';
-                $first = False;
-                array_push($images, $image);
-            } else {
-                $image = '
+            $first = False;
+            array_push($images, $image);
+        } else {
+            $image = '
                     <div class="carousel-item">
                         <img class="d-block w-100" src="../' . $imageSrc['path'] . '" alt="carousel slide" id="carousel_slide">
                     </div>
                     ';
-                array_push($images, $image);
-            }
+            array_push($images, $image);
         }
+    }
+    return $images;
+}
+
+function get_image_src($pdo, $room, $images) {
+
+        // Create Array with image src
+        $cards = array();
+        $first = True;
 
         // Create card
-        $card = '<div class="card border-ligth mb-3">
-                      <div class="card-header">
-                        <h5 class="card-title">
-                            ' . $room['name'] . '
-                        </h5>
-                      </div>
-                      <div class="card-body">
-                        <p class="card-text">' . $room['description'] . '</p>
-                      </div>
-                      <div class="card-footer bg-transparent text-right">
-                        <a href="/DDWT18/room/?room_id=' . $room['id'] . '" role="button" class="btn btn-secondary">More info</a>
-                      </div>
-                </div>';
+        $card = '
+<div class="card border-ligth mb-3" id="room_card">
+    <div class="card-header">
+        <h5 class="card-title">
+            ' . $room['name'] . '
+        </h5>
+        <div class="float-left">
+            <h6 class="card-subtitle mb-2 text-muted">
+                '.$room['street'].' '.$room['streetnumber'].' '.$room['postalcode'].' '.$room['city'].'
+            </h6>
+        </div>
+        <div class="float-right">
+            <h6 class="card-subtitle mb-2 text-muted"><i class="material-icons">how_to_reg</i>'.get_username($pdo, $room['owner']).'</h6>
+        </div>
+    </div>
+    <div class="card-body">
+        <p class="card-text">';
+            if(strlen($room['description']) > 560){
+                $card .= substr($room['description'], 0, 560);
+                $card .= '...';
+            } else {
+                $card .= $room['description'];
+            }
+    $card .= '
+        </p>
+    </div>
+    <div class="card-footer bg-transparent text-left">
+            <div class="float-left">
+                <p class="typography-body-2">
+                    <i class="material-icons">kitchen</i>&nbsp;&nbsp;'.$room['type'].'
+                    <i class="material-icons">aspect_ratio</i>&nbsp;&nbsp;'.$room['size'].'m<sup>2</sup>
+                    <i class="material-icons">local_atm</i>'.$room['price'].'
+                </p>
+            </div>
+
+            <div class="float-right">
+            <a  href="/DDWT18/room/?room_id=' . $room['id'] . '" role="button" class="btn btn-secondary">More info</a>
+            </div>
+    </div>
+</div>';
         array_push($cards, $card);
 
         $superArray = [
@@ -1043,15 +1114,16 @@ function get_rooms_cards($superArray){
                 foreach($superArray as $key => $items) { #room_id
                     if (empty($items['carousel'])) {
                         $rooms_card = '
-                        <div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
+                        <div id="carouselExampleSlidesOnly" class="carousel slide">
                           <div class="carousel-inner">
                             <div class="carousel-item active">
                                 <img class="d-block w-100" src="../images/room.jpg" alt="carousel slide" id="carousel_slide">
                             </div>
                         ';
+                        $rooms_card .= '</div>';
                     } elseif (count($items['carousel']) == 1) {
                         $rooms_card = '
-                                    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" class="carousel">
+                                    <div id="carouselExampleIndicators'.key($superArray).'" class="carousel slide" class="carousel">
                                       <div class="carousel-inner">
                                   ';
                         foreach ($items['carousel'] as $key => $carousel) { #carousel
@@ -1059,8 +1131,9 @@ function get_rooms_cards($superArray){
                         }
                         $rooms_card .= '</div>';
                     } else {
+                        #var_dump($superArray);
                         $rooms_card = '
-                                    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" class="carousel">
+                                    <div id="carouselExampleIndicators'.key($superArray).'" class="carousel slide" class="carousel">
                                       <div class="carousel-inner">
                                   ';
                         foreach ($items['carousel'] as $key => $carousel) { #carousel
@@ -1068,16 +1141,14 @@ function get_rooms_cards($superArray){
                         }
                         $rooms_card .= '
                                       </div>
-                                      <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                                      <a class="carousel-control-prev" href="#carouselExampleIndicators'.key($superArray).'" role="button" data-slide="prev">
                                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                         <span class="sr-only">Previous</span>
                                       </a>
-                                      <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                                      <a class="carousel-control-next" href="#carouselExampleIndicators'.key($superArray).'" role="button" data-slide="next">
                                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                         <span class="sr-only">Next</span>
                                       </a>';
-
-
                     }
                     $rooms_card .= '
                                     </div>
@@ -1133,7 +1204,7 @@ function display_opt_button($pdo, $user_id) {
     } else{
         return False;
     }
-};
+}
 
 function optinout_button($pdo, $room_id, $user_id) {
     $stmt= $pdo->prepare('SELECT room FROM optin where tenant =?');

@@ -87,7 +87,14 @@
                     <a href="<?= $root ?>/room/?room_id=<?= $room_id ?>" role="button" class="btn btn-warning">Opt in</a>
                 </div>
             </div>
-        <?php } ?>
+            <?php } ?>
+            <?php if ($display_optinout) { ?>
+                <div class="row">
+                    <div class="col-auto">
+                        <a href="<?= $root ?>/room/?room_id=<?= $room_id ?>" role="button" class="btn btn-warning">Opt out</a>
+                    </div>
+                </div>
+            <?php } ?>
         </div>
     </div>
 

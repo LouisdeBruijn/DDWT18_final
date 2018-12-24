@@ -1279,16 +1279,20 @@ function display_opt_button($pdo, $user_id) {
 }
 
 /**
- * show opt-in or opt-out button depending on current status
+ * show opt-in or opt-out button depending on current status of user. Shows opt out button if tenant has already opt in somewhere.
  * @param $pdo
  * @param $room_id
  * @param $user_id
  */
-function optinout_button($pdo, $room_id, $user_id) {
-    $stmt= $pdo->prepare('SELECT room FROM optin where tenant =?');
+function optinout_button($pdo, $user_id) {
+    $stmt= $pdo->prepare('SELECT room FROM optin where tenant =?'); #get room id from the optin table where tenant id is user id
     $stmt->execute([$user_id]);
     $valid = $stmt->fetchAll();
-        // DEZE FUNCTIE MOET NO VERDER AFGEMAAKT WORDEN
+    if ( $valid['tenant'] == ! ''){ #return true if there is a tenant which is in the optin table which has the same id as he current user. Then it should show a opt_out button.
+        return True;
+    } else{
+        return False;
+    }
 }
 
 

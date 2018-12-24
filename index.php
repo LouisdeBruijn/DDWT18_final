@@ -235,10 +235,10 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
             redirect('/DDWT18/login/');
         }
 
-        /* Edit serie to database */
+        /* Edit room to database */
         $feedback = update_room($db, $_POST, get_user_id());
 
-        /* Redirect to serie GET route */
+        /* Redirect to room GET route */
         redirect(sprintf('/DDWT18/room/?error_msg=%s', json_encode($feedback)));
 
     });
@@ -527,7 +527,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         $feedback = update_user($db, $_POST);
         $error_msg = get_error($feedback);
 
-        var_dump($feedback, $error_msg); #hiermee kunnen jullie zien welke message je op deze pagina krijgt
+        #var_dump($feedback, $error_msg); #hiermee kunnen jullie zien welke message je op deze pagina krijgt
 
         /* Get user info from db */
         $user_id = $_POST['user_id'];

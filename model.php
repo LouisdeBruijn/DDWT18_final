@@ -365,9 +365,9 @@ function get_rooms($pdo){
 
 /**
  * returns a table of all the rooms. Their names (description) and their owner names are showed.
- * Returns a string with the HTML code representing the table with all the series
- * @param $series_info_exp All the information for each series
- * @return string The series table
+ * Returns a string with the HTML code representing the table with all the rooms
+ * @param $soom_info_exp All the information for each room
+ * @return string The rooms table
  *
  */
 function get_rooms_table($pdo, $rooms){
@@ -395,9 +395,9 @@ function get_rooms_table($pdo, $rooms){
 }
 
 /**
- * Returns a string with the HTML code representing the information for that series
+ * Returns a string with the HTML code representing the information for that room
  * @param PDO $pdo The database connection
- * @return string The series table
+ * @return string The rooms table
  *
  */
 function get_room_info($pdo, $room_id){
@@ -414,6 +414,11 @@ function get_room_info($pdo, $room_id){
 }
 
 
+/**
+ * @param $pdo
+ * @param $owner_id
+ * @return string
+ */
 function get_owner_name($pdo, $owner_id){ #deze functie is ook hetzelfde als get_user_name en kan dus samengevoegd worden (enige verschil is de select query welke DB)?
     $stmt = $pdo->prepare('SELECT firstname,lastname FROM users WHERE id = ?');
     $stmt->execute([$owner_id]);
@@ -512,7 +517,7 @@ function postcode($pdo, $form_data){
 }
 
 /**
- * Add serie to the database
+ * Add room to the database
  * @param object $pdo db object
  * @param array $room_info post array
  * @return array with message feedback
@@ -583,9 +588,9 @@ function add_room($pdo, $room_info, $user_id){
 }
 
 /**
- * Updates a serie in the database using post array
+ * Updates a room in the database using post array
  * @param object $pdo db object
- * @param array $serie_info post array
+ * @param array $room_info post array
  * @return array
  */
 function update_room($pdo, $room_info, $user_id){
@@ -667,12 +672,12 @@ function update_room($pdo, $room_info, $user_id){
 /**
  * Removes a room with a specific room-ID
  * @param object $pdo db object
- * @param int $room_id id of the to be deleted series
+ * @param int $room_id id of the to be deleted rooms
  * @return array
  */
 function remove_room($pdo, $user_id, $room_id){
 
-    /* Get series info */
+    /* Get room info */
     #$room_info = get_room_info($pdo, $room_id); #deze functie klopt niet helemaal, daardoor is de functie hieronder redundant
 
     var_dump($user_id, $room_id);
@@ -778,10 +783,10 @@ function update_user($pdo, $user_info){
     $user = $stmt->fetch();
     $current_email = $user['email'];
 
-    echo "Hello world!";
-    print_r($user_info['user_id']);
-    print_r($current_email);
-    echo "<br>";
+    #echo "Hello world!";
+    #print_r($user_info['user_id']);
+    #print_r($current_email);
+    #echo "<br>";
 
     /* Check if email already exists */
     $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
@@ -822,6 +827,12 @@ function update_user($pdo, $user_info){
     }
 }
 
+/**
+ * @param $directory_name
+ * @param $user_id
+ * @param $folder
+ * @return string
+ */
 function create_directory($directory_name, $user_id, $folder){
     //The name of the directory that we need to create.
     $dir_name = "$directory_name/$user_id/$folder/";
@@ -834,12 +845,23 @@ function create_directory($directory_name, $user_id, $folder){
      return $dir_name;
 }
 
+/**
+ * @param $dir
+ * @return bool|null
+ */
 function is_dir_empty($dir) {
     if (!is_readable($dir)) return NULL;
     return (count(scandir($dir)) == 2);
 }
 
 
+/**
+ * @param $pdo
+ * @param $user_id
+ * @param $target_dir
+ * @param $room_id
+ * @return array
+ */
 function upload_file($pdo, $user_id, $target_dir, $room_id){
 
     // Moet je hier nog form validation doen?? Zodat ze niet een rare naam invoeren? of een rare file?
@@ -929,6 +951,10 @@ function upload_file($pdo, $user_id, $target_dir, $room_id){
 
 }
 
+/**
+ * @param $user_id
+ * @return string
+ */
 function check_avatar($user_id) {
     // Create a glob that returns an array
     $matching = glob( 'images/users/uploads/'.$user_id.'/avatar/avatar.*');
@@ -943,6 +969,10 @@ function check_avatar($user_id) {
     }
 }
 
+/**
+ * @param $variables
+ * @return array
+ */
 function check_url_var($variables){
     /* Check if the GET/POST variables are set on a route */
     if ($variables == NULL) {
@@ -954,6 +984,11 @@ function check_url_var($variables){
     }
 }
 
+/**
+ * @param $user_id
+ * @param $owner
+ * @return array
+ */
 function check_route($user_id, $owner){
     /* Check if user of the route is also owner of the to-be-edited-content */
     if ($user_id != $owner) {
@@ -964,6 +999,12 @@ function check_route($user_id, $owner){
     }
 }
 
+/**
+ * @param $pdo
+ * @param $user_id
+ * @param $room_id
+ * @return bool
+ */
 function display_buttons($pdo, $user_id, $room_id){ #hier doe ik dus alleen owner omdat ik alleen owner nodig heb #hier nog naar kijken!
 
     /* Get DB information */
@@ -977,6 +1018,10 @@ function display_buttons($pdo, $user_id, $room_id){ #hier doe ik dus alleen owne
     }
 }
 
+/**
+ * @param $images
+ * @return string
+ */
 function show_carousel($images) {
 
     // Create the carousel item
@@ -1014,6 +1059,11 @@ function show_carousel($images) {
 
 }
 
+/**
+ * @param $pdo
+ * @param $room_id
+ * @return array
+ */
 function get_carousel($pdo, $room_id) {
 
     // Set variables
@@ -1049,6 +1099,12 @@ function get_carousel($pdo, $room_id) {
     return $images;
 }
 
+/**
+ * @param $pdo
+ * @param $room
+ * @param $images
+ * @return array
+ */
 function get_image_src($pdo, $room, $images) {
 
         // Create Array with image src
@@ -1109,6 +1165,10 @@ function get_image_src($pdo, $room, $images) {
 }
 
 
+/**
+ * @param $superArray
+ * @return string
+ */
 function get_rooms_cards($superArray){
 
                 foreach($superArray as $key => $items) { #room_id
@@ -1162,6 +1222,13 @@ function get_rooms_cards($superArray){
 
 }
 
+/**
+ * @param $form_action
+ * @param $submit_btn
+ * @param $image_src
+ * @param $room_id
+ * @return string
+ */
 function image_card($form_action, $submit_btn, $image_src, $room_id){
 
     $image = '
@@ -1195,6 +1262,11 @@ function image_card($form_action, $submit_btn, $image_src, $room_id){
     return $image;
 }
 
+/**
+ * @param $pdo
+ * @param $user_id
+ * @return bool
+ */
 function display_opt_button($pdo, $user_id) {
     $stmt  = $pdo->prepare('SELECT role FROM users where id = ?');
     $stmt->execute([$user_id]);
@@ -1206,6 +1278,12 @@ function display_opt_button($pdo, $user_id) {
     }
 }
 
+/**
+ * show opt-in or opt-out button depending on current status
+ * @param $pdo
+ * @param $room_id
+ * @param $user_id
+ */
 function optinout_button($pdo, $room_id, $user_id) {
     $stmt= $pdo->prepare('SELECT room FROM optin where tenant =?');
     $stmt->execute([$user_id]);

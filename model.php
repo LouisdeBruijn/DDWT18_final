@@ -1295,6 +1295,29 @@ function optinout_button($pdo, $user_id) {
     }
 }
 
+function optin($pdo, $optin) {
+    $stmt = $pdo->prepare("INSERT INTO optin (room, tenant, message) VALUES (?, ?, ?)");
+    $stmt->execute([
+        $optin['room'],
+        $optin['tenant'],
+        $optin['message']
+    ]);
+
+    $inserted = $stmt->rowCount();
+    if ($inserted ==  1) {
+        return [
+            'type' => 'success',
+            'message' => 'Opt-in was successful.'
+        ];
+    }
+    else {
+        return [
+            'type' => 'danger',
+            'message' => 'Opt-in was unsuccessful.'
+        ];
+    }
+}
+
 /**
  *
  */

@@ -1295,4 +1295,25 @@ function optinout_button($pdo, $user_id) {
     }
 }
 
+/**
+ *
+ */
+function optout($pdo, $user_id) {
+    $stmt = $pdo->prepare("DELETE FROM optin WHERE id = ?");
+    $stmt->execute([$user_id]);
+    $deleted = $stmt->rowCount();
+    if ($deleted == 1) {
+        return [
+            'type' => 'succes',
+            'message' => 'You were succesfully opted-out'
+        ];
+    }
+    else {
+        return [
+            'type' => 'warning',
+            'message' => 'An error occured. Please try again.'
+        ];
+    }
+}
+
 

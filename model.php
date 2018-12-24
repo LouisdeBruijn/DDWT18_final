@@ -1271,7 +1271,7 @@ function display_opt_button($pdo, $user_id) {
     $stmt  = $pdo->prepare('SELECT role FROM users where id = ?');
     $stmt->execute([$user_id]);
     $role = $stmt->fetch();
-    if ( $role['role'] == 'tenant'){
+    if ( $role['role'] == '2'){ #het is '2' omdat dit in de db '2' de role voor tenant is.
         return True;
     } else{
         return False;

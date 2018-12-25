@@ -157,6 +157,21 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
 
     });
 
+    /* delete optin */
+    $router->post('/delete',function () use ($router, $db, $navigation_tpl, $root) {
+        if ( !check_login() ) {
+            redirect('/DDWT18/login/');
+        }
+        /* remove optin from database */
+        $feedback = optout($db, get_user_id());
+        #$error_msg = get_error($feedback);
+
+        /* Redirect to room GET route */
+        redirect(sprintf('/DDWT18/overview/?error_msg=%s', json_encode($feedback)));
+        $error_msg = get_error($feedback);
+    }
+    );
+
         /* Edit single room GET */
     $router->get('/edit', function() use ($router, $db, $navigation_tpl, $root) {
         /* Check if logged in */

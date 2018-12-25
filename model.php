@@ -1287,8 +1287,8 @@ function display_opt_button($pdo, $user_id) {
 function optinout_button($pdo, $user_id) {
     $stmt= $pdo->prepare('SELECT room FROM optin where tenant =?'); #get room id from the optin table where tenant id is user id
     $stmt->execute([$user_id]);
-    $valid = $stmt->fetchAll();
-    if ( $valid['tenant'] == ! ''){ #return true if there is a tenant which is in the optin table which has the same id as he current user. Then it should show a opt_out button.
+    $valid = $stmt->fetch();
+    if ( $valid['room'] == ! ''){ #return true if there is a tenant which is in the optin table which has the same id as he current user. Then it should show a opt_out button.
         return True;
     } else{
         return False;

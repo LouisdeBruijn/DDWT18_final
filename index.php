@@ -164,13 +164,13 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         }
         /* remove optin from database */
         $feedback = optout($db, get_user_id());
-        #$error_msg = get_error($feedback);
+        $error_msg = get_error($feedback);
+
+        #var_dump($feedback, $error_msg); #hiermee kunnen jullie zien welke message je op deze pagina krijgt
 
         /* Redirect to room GET route */
         redirect(sprintf('/DDWT18/overview/?error_msg=%s', json_encode($feedback)));
-        $error_msg = get_error($feedback);
-    }
-    );
+    });
 
         /* Edit single room GET */
     $router->get('/edit', function() use ($router, $db, $navigation_tpl, $root) {

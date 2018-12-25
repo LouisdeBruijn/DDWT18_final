@@ -1322,7 +1322,7 @@ function optin($pdo, $optin) {
  *
  */
 function optout($pdo, $user_id) {
-    $stmt = $pdo->prepare("DELETE FROM optin WHERE id = ?");
+    $stmt = $pdo->prepare("DELETE FROM optin WHERE tenant = ?");
     $stmt->execute([$user_id]);
     $deleted = $stmt->rowCount();
     if ($deleted == 1) {

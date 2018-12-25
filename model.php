@@ -1318,9 +1318,28 @@ function optin($pdo, $optin) {
     }
 }
 
+function optout($pdo, $room_id) {
+    $stmt = $pdo->prepare("DELETE FROM optin WHERE room = ?");
+    $stmt->execute([$room_id]);
+    $deleted = $stmt->rowCount();
+    if ($deleted == 1) {
+        return [
+            'type' => 'succes',
+            'message' => 'You were successfully opted-out for this room'
+        ];
+    }
+    else {
+        return [
+            'type' => 'warning',
+            'message' => 'An error occurred. Please try again.'
+        ];
+    }
+}
+
 /**
  *
  */
+/*
 function optout($pdo, $user_id) {
     $stmt = $pdo->prepare("DELETE FROM optin WHERE tenant = ?");
     $stmt->execute([$user_id]);
@@ -1338,5 +1357,5 @@ function optout($pdo, $user_id) {
         ];
     }
 }
-
+*/
 

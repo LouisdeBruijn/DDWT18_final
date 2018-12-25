@@ -92,6 +92,7 @@
                 <div class="row">
                     <div class="col-auto">
                         <form action="<?= $root ?>/room/delete" method="POST">
+                            <input type="hidden" value="<?= $room_id ?>" name="room_id">
                             <button type="submit" class="btn btn-danger">Opt out</button>
                         </form>
                         <!--<a href="<?= $root ?>/room/?room_id=<?= $room_id ?>" role="button" class="btn btn-warning">Opt out</a>-->

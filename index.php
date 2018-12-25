@@ -162,14 +162,19 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         if ( !check_login() ) {
             redirect('/DDWT18/login/');
         }
+
+
+        $room_id = $_POST['room_id'];
+
         /* remove optin from database */
-        $feedback = optout($db, get_user_id());
+        $feedback = optout($db, $room_id); #deze verwijderd alleen de opt in bij die specifieke kamer
+        #$feedback = optout($db, get_user_id()); Deze verwijderd alle opt ins van 1 tenant, zie uitgezette functie in model
         $error_msg = get_error($feedback);
 
-        #var_dump($feedback, $error_msg); #hiermee kunnen jullie zien welke message je op deze pagina krijgt
+        var_dump($room_id, $feedback, $error_msg); #hiermee kunnen jullie zien welke message je op deze pagina krijgt
 
         /* Redirect to room GET route */
-        redirect(sprintf('/DDWT18/overview/?error_msg=%s', json_encode($feedback)));
+        #redirect(sprintf('/DDWT18/overview/?error_msg=%s', json_encode($feedback)));
     });
 
         /* Edit single room GET */

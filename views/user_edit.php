@@ -46,7 +46,7 @@
                                 <div class="input-group mb-3">
                                     <input aria-describedby="" class="form-control-file" id="inputFile" name="fileToUpload" type="file" required>
                                     <div class="input-group-append">
-                                        <button class="btn btn-secondary" type="submit"><?= $submit_btn_avatar ?></button>
+                                        <button class="btn btn-info" type="submit"><?= $submit_btn_avatar ?></button>
                                     </div>
                                     <div class="valid-feedback">
                                         Looks good.
@@ -224,7 +224,7 @@
                                 </div>
                                 <input type="hidden" value="<?= $user_id ?>" name="user_id">
                                 <div class="col-sm-2">
-                                    <button class="btn btn-secondary" type="submit"><?= $submit_btn ?></button>
+                                    <button class="btn btn-info" type="submit"><?= $submit_btn ?></button>
                                 </div>
                             </form>
                         </div>

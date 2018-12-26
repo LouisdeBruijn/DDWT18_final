@@ -245,7 +245,7 @@
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Register</button>
+                        <button type="submit" class="btn btn-info">Register</button>
                     </form>
                 </div>
             </div>

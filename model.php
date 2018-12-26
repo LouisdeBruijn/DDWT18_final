@@ -88,7 +88,7 @@ function get_navigation($template, $active_id){
 
     }
     $navigation_exp .= '</ul>';
-    if (get_user_id()) {$navigation_exp .= '<a href="/DDWT18/logout/" class="btn btn-secondary">Logout</a>';};
+    if (get_user_id()) {$navigation_exp .= '<a href="/DDWT18/logout/" class="btn btn-info">Logout</a>';};
     $navigation_exp .= '</div></nav>';
     return $navigation_exp;
 }
@@ -182,7 +182,7 @@ function register_user($pdo, $form_data){
         'type' => 'success',
         'message' => sprintf('%s, your account was successfully created!', get_username($pdo, $_SESSION['user_id']))
     ];
-    redirect(sprintf('/DDWT18/myaccount/?error_msg=%s',
+    redirect(sprintf('/DDWT18/myaccount/?msg=%s',
         json_encode($feedback)));
 }
 
@@ -334,11 +334,12 @@ function logout_user(){
  * @return string
  */
 function get_error($feedback){
-    $error_exp = '
+    $feedback = json_decode($feedback, True);
+    $message = '
         <div class="alert alert-'.$feedback['type'].'" role="alert">
             '.$feedback['message'].'
         </div>';
-    return $error_exp;
+    return $message;
 }
 
 
@@ -385,7 +386,7 @@ function get_rooms_table($pdo, $rooms){
         <tr>
             <th scope="row">'.$value['name'].'</th>
             <th scope="row">'.get_owner_name($pdo, $value['owner']).'</th>
-            <td><a href="/DDWT18/room/?room_id='.$value['id'].'" role="button" class="btn btn-secondary">More info</a></td>
+            <td><a href="/DDWT18/room/?room_id='.$value['id'].'" role="button" class="btn btn-info">More info</a></td>
         </tr>';
     }
     $rooms_table .= '
@@ -401,6 +402,7 @@ function get_rooms_table($pdo, $rooms){
  *
  */
 function get_room_info($pdo, $room_id){
+
     $stmt = $pdo->prepare('SELECT * FROM rooms WHERE id = ?');
     $stmt->execute([$room_id]);
     $room_info = $stmt->fetch();
@@ -454,18 +456,20 @@ function postcode($pdo, $form_data){
     if ($room){
         return [
             'type' => 'danger',
-            'message' => 'This room was already added.'
+            'message' => 'A room was already added on this address.'
         ];
     }
 
     // Fetch count from postcode DB
     $count = count_postcode($pdo);
 
+    // Form variables
+    $postalcode = $form_data['postalcode'];
+    $streetnumber = $form_data['streetnumber'];
+
     if ( $count < 100 ){
 
-        // Form variables and date
-        $postalcode = $form_data['postalcode'];
-        $streetnumber = $form_data['streetnumber'];
+        // Date
         date_default_timezone_set("Europe/Amsterdam");
         $date = date("Y-m-d");
 
@@ -487,33 +491,63 @@ function postcode($pdo, $form_data){
         $data = json_decode($response, true);
         curl_close($curl);
 
-        // Fetch city and street from API data
-        $city = $data['_embedded']['addresses'][0]['city']['label'];
-        $street = $data['_embedded']['addresses'][0]['street'];
-
-        // Add Postcode API record to DB
-        $stmt = $pdo->prepare('INSERT INTO postcode (postalcode, streetnumber, city, street, date) VALUES (?, ?, ?, ?, ?)');
-        $stmt->execute([$postalcode, $streetnumber, $city, $street, $date]);
-
+        // When Postcode API gives an error
         if (array_key_exists('error', $data)) {
             return [
                 'type' => 'danger',
                 'message' => 'There was an error.'
             ];
-        } else {
-
-            // Associative Array
-            $arr = array('postalcode' => $postalcode, 'streetnumber' => $streetnumber, 'city' => $city, 'street' => $street);
-            return $arr;
         }
 
+        // When a correct postal code has been entered
+        if (array_key_exists('_embedded', $data) && array_key_exists('addresses', $data['_embedded']) && array_key_exists('0', $data['_embedded']['addresses'])) {
+            // Fetch city and street from API data
+            $city = $data['_embedded']['addresses'][0]['city']['label'];
+            $street = $data['_embedded']['addresses'][0]['street'];
+        } else { //When an incorrect postal code has been entered
+            $city = '';
+            $street = '';
+        }
+
+        // Add Postcode API record to DB
+        $stmt = $pdo->prepare('INSERT INTO postcode (postalcode, streetnumber, city, street, date) VALUES (?, ?, ?, ?, ?)');
+        $stmt->execute([$postalcode, $streetnumber, $city, $street, $date]);
 
     } else {
-        return [
-            'type' => 'danger',
-            'message' => 'You have reached the maximum number of API calls.'
-        ];
+        $city = '';
+        $street = '';
+
     }
+
+    // Associative Array
+    $arr = array('postalcode' => $postalcode, 'streetnumber' => $streetnumber, 'city' => $city, 'street' => $street);
+    return [
+        'array' => $arr,
+        'type' => 'success',
+    ];
+
+}
+
+function postcode_count_card($count){
+    $postcode_count = '
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">The number of calls to the Postcode API</h5>
+        <h1 class="text-right" >'.$count.'</h1>';
+    if ($count > 99) {
+
+        $postcode_count .= '
+    <div class="alert alert-danger" role="alert">
+        You have reached the maximum number of API calls.
+    </div>';
+    }
+
+$postcode_count .= '
+    </div>
+</div>
+    ';
+
+    return $postcode_count;
 }
 
 /**
@@ -619,9 +653,6 @@ function update_room($pdo, $room_info, $user_id){
     $stmt->execute([$room_info['postalcode'], $room_info['streetnumber'], $room_info['city'], $room_info['street']]);
     $room_db = $stmt->fetchAll();
 
-    var_dump($room_db);
-    var_dump('room_db', $room_db[0]['id'], 'room_info', $room_info['room_id']); #4 en 6
-
     /* Check if still editing the same room */
     if ($room_db[0]['id'] != $room_info['room_id']){
         return [
@@ -678,13 +709,10 @@ function update_room($pdo, $room_info, $user_id){
 function remove_room($pdo, $user_id, $room_id){
 
     /* Get room info */
-    #$room_info = get_room_info($pdo, $room_id); #deze functie klopt niet helemaal, daardoor is de functie hieronder redundant
-
-    var_dump($user_id, $room_id);
-    $room_info = display_buttons($pdo, $user_id, $room_id);
+    $room_info = get_room_info($pdo, $room_id);
 
     /* Check User Authorization */
-    if ($room_info[0]['owner'] != $user_id) {
+    if ($room_info['owner'] != $user_id) {
         return [
             'type' => 'danger',
             'message' => 'You are not authorized to perform this action.'
@@ -692,7 +720,7 @@ function remove_room($pdo, $user_id, $room_id){
     }
 
     /* Check if still removing the same room */
-    if ($room_info[0]['id'] != $room_id){
+    if ($room_info['id'] != $room_id){
         return [
             'type' => 'danger',
             'message' => 'This room was already removed.'
@@ -862,16 +890,9 @@ function is_dir_empty($dir) {
  * @param $room_id
  * @return array
  */
-function upload_file($pdo, $user_id, $target_dir, $room_id){
+function upload_file($pdo, $target_dir, $room_id){
 
     // Moet je hier nog form validation doen?? Zodat ze niet een rare naam invoeren? of een rare file?
-
-    // Rename filename for avatar only
-    if ($target_dir == 'images/users/uploads/'.$user_id.'/avatar/') {
-        $path_parts = pathinfo($_FILES["fileToUpload"]['name']);
-        $extension = strtolower($path_parts['extension']);
-        $_FILES["fileToUpload"]['name'] = 'avatar.' . $extension;
-    }
 
     // Create target file
     $target_file = $target_dir . basename($_FILES["fileToUpload"]['name']);
@@ -883,7 +904,7 @@ function upload_file($pdo, $user_id, $target_dir, $room_id){
         if($check !== false) {
             return [
                 'type' => 'danger',
-                'message' => 'File is an image - '.$check["mime"].'.' #blijkbaar is dit 'mime' niet goed
+                'message' => 'File is an image - '.$check["mime"].'.'
             ];
 
         } else {
@@ -910,29 +931,18 @@ function upload_file($pdo, $user_id, $target_dir, $room_id){
         ];
     }
 
-    // Remove any previous avatar files from directory (that might not have the same extension)
-    #fout: deze functie kan waarschijnlijk ook gewoon met file_exist() geschreven worden
-    if (!is_dir_empty($target_dir)) {
-        $matching = glob('images/users/uploads/' . $user_id . '/avatar/avatar.*');
-        $old_file = pathinfo($matching[0]);
-        $old_extension = $old_file['extension'];
-        $name = "{$target_dir}avatar.$old_extension";
-        if (file_exists($name)) {
-            unlink($name);
-        }
-    }
-
     // If a file exist with the same name and extension
     if (file_exists($target_file)) {
-        $stmt = $pdo->prepare('DELETE FROM images WHERE path = ?');
-        $stmt->execute([$target_file]);
-        unlink($target_file);
+        return [
+            'type' => 'danger',
+            'message' => sprintf("Sorry, a file '%s' has already been uploaded.", basename($_FILES["fileToUpload"]['name']))
+        
+        ];
     }
 
     // Create DB entry
     $stmt = $pdo->prepare('INSERT INTO images (name, path, room_id) VALUES (?, ?, ?)');
     $stmt->execute([basename($_FILES["fileToUpload"]['name']), $target_file, $room_id]);
-
 
     // Upload file to directory
     if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
@@ -947,6 +957,114 @@ function upload_file($pdo, $user_id, $target_dir, $room_id){
             'message' => 'Sorry, there was an error uploading your file.'
         ];
     }
+}
+
+function upload_avatar($user_id, $target_dir){
+
+    // Rename filename
+    $path_parts = pathinfo($_FILES["fileToUpload"]['name']);
+    $extension = strtolower($path_parts['extension']);
+    $_FILES["fileToUpload"]['name'] = 'avatar.' . $extension;
+
+    // Create target file
+    $target_file = $target_dir . basename($_FILES["fileToUpload"]['name']);
+    $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+
+    // Check if image file is a actual image or fake image
+    if(isset($_POST["submit"])) {
+        $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
+        if($check !== false) {
+            return [
+                'type' => 'danger',
+                'message' => 'File is an image - '.$check["mime"].'.'
+            ];
+
+        } else {
+            return [
+                'type' => 'danger',
+                'message' => 'File is not an image.'
+            ];
+        }
+    }
+
+    // Check file size
+    if ($_FILES["fileToUpload"]["size"] > 500000) {
+        return [
+            'type' => 'danger',
+            'message' => 'Sorry, your file is too large.'
+        ];
+    }
+    // Allow certain file formats
+    if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+        && $imageFileType != "gif" ) {
+        return [
+            'type' => 'danger',
+            'message' => 'Sorry, only JPG, JPEG, PNG & GIF files are allowed.'
+        ];
+    }
+
+    // Remove any previous avatar files from directory (that might not have the same extension)
+    if (!is_dir_empty($target_dir)) {
+        $matching = glob('images/users/uploads/' . $user_id . '/avatar/avatar.*');
+        $old_file = pathinfo($matching[0]);
+        $old_extension = $old_file['extension'];
+        $name = "{$target_dir}avatar.$old_extension";
+        if (file_exists($name)) {
+            unlink($name);
+        }
+    }
+
+    // Upload file to directory
+    if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+        return [
+            'type' => 'success',
+            'message' => 'The file '.basename( $_FILES["fileToUpload"]["name"]).' has been uploaded.'
+        ];
+
+    } else {
+        return [
+            'type' => 'danger',
+            'message' => 'Sorry, there was an error uploading your file.'
+        ];
+    }
+}
+
+
+function remove_file($pdo, $img){
+
+
+    //Create DB connection
+    $stmt = $pdo->prepare('SELECT * FROM images WHERE room_id = ?');
+    $stmt->execute([$img['room_id']]);
+    $dbRoom = $stmt->fetch();
+
+    // Check if it is the correct room
+    if ($img['room_id'] != $dbRoom['room_id']) {
+        return [
+            'type' => 'danger',
+            'message' => 'You are removing an image from a different room.'
+        ];
+    }
+
+    //Remove from DB
+    $stmt = $pdo->prepare('DELETE FROM images WHERE path = ?');
+    $stmt->execute([$img['img_path']]);
+    $deleted = $stmt->rowCount();
+    if ($deleted ==  1) {
+        return [
+            'type' => 'success',
+            'message' => sprintf("Image file '%s' was removed!", $dbRoom['name'])
+        ];
+    }
+    else {
+        return [
+            'type' => 'warning',
+            'message' => 'An error occurred. The room was not removed.'
+        ];
+    }
+
+    //Remove file from directory
+    unlink($img['img_path']);
 
 
 }
@@ -964,6 +1082,7 @@ function check_avatar($user_id) {
 
     // Check
     if (file_exists('images/users/uploads/'.$user_id.'/avatar/avatar.'.$extension.'')) {
+
         $avatar = "/DDWT18/images/users/uploads/$user_id/avatar/avatar.$extension";
         return $avatar;
     }
@@ -983,6 +1102,23 @@ function check_url_var($variables){
 
     }
 }
+
+function route_exists($pdo, $room_id){
+
+    $stmt = $pdo->prepare('SELECT id FROM rooms WHERE id = ?');
+    $stmt->execute([$room_id]);
+    $id = $stmt->fetch();
+
+    if(empty($id)){
+        $feedback = [
+            'type' => 'danger',
+            'message' => sprintf('Room %s does not exist!', $room_id )
+        ];
+        redirect(sprintf('/DDWT18/overview/?msg=%s',
+            json_encode($feedback)));
+    }
+}
+
 
 /**
  * @param $user_id
@@ -1010,8 +1146,8 @@ function display_buttons($pdo, $user_id, $room_id){ #hier doe ik dus alleen owne
     /* Get DB information */
     $stmt = $pdo->prepare('SELECT owner FROM rooms WHERE id = ?');
     $stmt->execute([$room_id]);
-    $room = $stmt->fetchAll();                          #Array to string conversion ????
-    if ( $room[0]['owner'] == $user_id){
+    $room = $stmt->fetch();
+    if ( $room['owner'] == $user_id){
         return True;
     } else {
         return False;
@@ -1025,7 +1161,6 @@ function display_buttons($pdo, $user_id, $room_id){ #hier doe ik dus alleen owne
 function show_carousel($images) {
 
     // Create the carousel item
-
     if (empty($images)) {
         $carousel = '<div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
   <div class="carousel-inner">
@@ -1035,6 +1170,16 @@ function show_carousel($images) {
   </div>
 </div>
 ';
+    } elseif (count($images) == 1) {
+        $carousel = '<div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
+    <div class="carousel-inner">';
+        foreach ($images as $key => $image) {
+            $carousel .= $image;
+        }
+
+        $carousel .= '
+    </div>
+</div>';
     } else {
         $carousel = '
 <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
@@ -1074,8 +1219,6 @@ function get_carousel($pdo, $room_id) {
     $stmt = $pdo->prepare('SELECT path FROM images WHERE room_id = ?');
     $stmt->execute([$room_id]);
     $roomPaths = $stmt->fetchAll();
-
-
 
     // Create the carousel item
     foreach ($roomPaths as $key => $imageSrc) {
@@ -1143,12 +1286,12 @@ function get_image_src($pdo, $room, $images) {
                 <p class="typography-body-2">
                     <i class="material-icons">kitchen</i>&nbsp;&nbsp;'.$room['type'].'
                     <i class="material-icons">aspect_ratio</i>&nbsp;&nbsp;'.$room['size'].'m<sup>2</sup>
-                    <i class="material-icons">local_atm</i>'.$room['price'].'
+                    <i class="material-icons">local_atm</i>&nbsp;&nbsp;'.$room['price'].'
                 </p>
             </div>
 
             <div class="float-right">
-            <a  href="/DDWT18/room/?room_id=' . $room['id'] . '" role="button" class="btn btn-secondary">More info</a>
+            <a  href="/DDWT18/room/?room_id=' . $room['id'] . '" role="button" class="btn btn-info">More info</a>
             </div>
     </div>
 </div>';
@@ -1191,7 +1334,6 @@ function get_rooms_cards($superArray){
                         }
                         $rooms_card .= '</div>';
                     } else {
-                        #var_dump($superArray);
                         $rooms_card = '
                                     <div id="carouselExampleIndicators'.key($superArray).'" class="carousel slide" class="carousel">
                                       <div class="carousel-inner">
@@ -1229,37 +1371,72 @@ function get_rooms_cards($superArray){
  * @param $room_id
  * @return string
  */
-function image_card($form_action, $submit_btn, $image_src, $room_id){
+function add_image_card($form_action, $submit_btn, $room_id){
 
     $image = '
     <div class="card">
-        <img class="card-img-top" id="image" src="'.$image_src.'" alt ="image" id="image_preview"/>
-        <div class="card text-center">
         <div class="card-body">
-                <h5 class="card-title">title</h5>
-                <form action ="'.$form_action.'" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-                   <div class="input-group mb-3">
-                        <input aria-describedby="" class="form-control-file" id="inputFile" name="fileToUpload" type="file" required>
-                        <div class="input-group-append">
-                        <button class="btn btn-secondary" type="submit">'.$submit_btn.'</button>
-                        </div>
-                        <div class="valid-feedback">
-                            Looks good.
-                        </div>
-                        <div class="invalid-feedback">
-                            Please enter a file.
-                        </div>
-                    </div>';
+            <h5 class="card-title">Upload an image</h5>
+            <form action ="'.$form_action.'" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+               <div class="input-group mb-3">
+                    <input aria-describedby="" class="form-control-file" id="inputFile" name="fileToUpload" type="file" required>
+                    <div class="input-group-append">
+                    <button class="btn btn-info" type="submit">'.$submit_btn.'</button>
+                    </div>
+                    <div class="valid-feedback">
+                        Looks good.
+                    </div>
+                    <div class="invalid-feedback">
+                        Please enter a file.
+                    </div>
+                </div>';
     if(isset($room_id)){
         $image .= '<input type="hidden" name="room_id" value="'.$room_id.'">';}
     $image .= '
-                </form>
-            </div>
+            </form>
         </div>
     </div>
     ';
 
     return $image;
+}
+
+function remove_img_card($pdo, $room_id, $form_action, $submit_btn){
+
+    $stmt  = $pdo->prepare('SELECT path, name FROM images where room_id = ?');
+    $stmt->execute([$room_id]);
+    $images = $stmt->fetchAll();
+
+    if (!empty($images)) {
+        $dropdown = '
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Remove an image</h5>
+        <form action ="'.$form_action.'" method="POST" class="needs-validation" novalidate>
+           <div class="input-group mb-3">
+                <select class="custom-select" id="images" name="img_path" required>
+                    <option disabled selected value>Choose...</option>';
+                    foreach ($images as $key => $img) {
+                        $dropdown .= '<option value = "'.$img['path'].'">'.$img['name'].'</option> ';
+    };
+        $dropdown .= '
+                </select>
+                    <div class="input-group-append">
+                    <input type="hidden" name="room_id" value="'.$room_id.'">
+                    <button class="btn btn-danger" type="submit">'.$submit_btn.'</button>
+                    </div>
+                    <div class="valid-feedback">
+                        Looks good.
+                    </div>
+                    <div class="invalid-feedback">
+                        Please choose an image.
+                    </div>
+            </div>
+        </form>
+    </div>
+</div>';
+        return $dropdown;
+    }
 }
 
 /**

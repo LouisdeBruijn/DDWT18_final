@@ -118,6 +118,9 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         $room_id = $_GET['room_id'];
         $room_info = get_room_info($db, $room_id);
 
+        /* Check if the route exists */
+        route_exists($db, $room_id);
+
         /* Get images */
         $images = show_carousel(get_carousel($db, $room_id));
 
@@ -134,7 +137,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
 
         /* Page */
         $page_title = $room_info['name'];
-        $page_subtitle = $room_info['description'];
+        $page_subtitle = nl2br($room_info['description']);
         $page_content = 'Room details';
         include use_template('room');
 
@@ -148,33 +151,11 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         }
 
         /* Remove room from database */
-        #fout: deze functie werkt nog niet.
-        $feedback = remove_room($db, get_user_id(), $_POST);
+        $feedback = remove_room($db, get_user_id(), $_POST['room_id']);
 
         /* Redirect to room GET route */
-        #redirect(sprintf('/DDWT18/overview/?error_msg=%s', json_encode($feedback)));
-        $error_msg = get_error($feedback);
+        redirect(sprintf('/DDWT18/overview/?msg=%s', json_encode($feedback)));
 
-    });
-
-    /* delete optin */
-    $router->post('/delete',function () use ($router, $db, $navigation_tpl, $root) {
-        if ( !check_login() ) {
-            redirect('/DDWT18/login/');
-        }
-
-
-        $room_id = $_POST['room_id'];
-
-        /* remove optin from database */
-        $feedback = optout($db, $room_id); #deze verwijderd alleen de opt in bij die specifieke kamer
-        #$feedback = optout($db, get_user_id()); Deze verwijderd alle opt ins van 1 tenant, zie uitgezette functie in model
-        $error_msg = get_error($feedback);
-
-        var_dump($room_id, $feedback, $error_msg); #hiermee kunnen jullie zien welke message je op deze pagina krijgt
-
-        /* Redirect to room GET route */
-        #redirect(sprintf('/DDWT18/overview/?error_msg=%s', json_encode($feedback)));
     });
 
         /* Edit single room GET */
@@ -189,7 +170,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
 
         /* Get msg from POST route */
         if ( isset($_GET['error_msg']) ) {
-            $error_msg = get_error($_GET['error_msg']);
+            $view_msg = get_error($_GET['error_msg']);
         }
 
         /* Get room_id from $_GET variables */
@@ -208,29 +189,38 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
             redirect('/DDWT18/overview/');
         }
 
-        /* Get counter for usage of Postcode API */
-        $count = count_postcode($db);
-
-        #redundant: deze code kan redundant worden door de functie get_room_cards !
-        /* Show example image or room images */
-        if (is_dir_empty('../DDWT18/images/users/uploads/'.$room_info['owner'].'/rooms/'.$room_id.'/')){
-            $image_src = '/DDWT18/images/avatar.jpg';
-        } else {
-            $files = scandir ('../DDWT18/images/users/uploads/'.$room_info['owner'].'/rooms/'.$room_id.'/');
-            $image_src = '/DDWT18/images/users/uploads/'.$room_info['owner'].'/rooms/'.$room_id.'/'.$files[2]; // because [0] = "." [1] = ".."
-        }
-
         /* Add images */
-        $img_form_action = '/DDWT18/room/image';
-        $add_pictures = image_card($img_form_action, 'Upload', $image_src, $room_id);
+        $add_pictures = add_image_card('/DDWT18/room/image', 'Upload', $room_id);
+
+        /* Remove images */
+        $remove_images = remove_img_card($db, $room_id, '/DDWT18/room/image/remove', 'Remove');
 
         /* Page */
         $page_title = 'Edit Room';
         $page_subtitle = 'Edit your room';
         $page_content = 'Fill in the details of your room.';
-        $submit_btn = "Edit room";
+        $submit_btn = 'Edit room';
         $form_action = '/DDWT18/room/edit';
         include use_template('new-step2');
+
+    });
+
+    /* Edit single room POST */
+    $router->post('/edit', function() use ($router, $db, $navigation_tpl, $root) {
+        /* Check if logged in */
+        if ( !check_login() ) {
+            redirect('/DDWT18/login/');
+        }
+
+        /* Edit room to database */
+        $feedback = update_room($db, $_POST, get_user_id());
+
+        if ($feedback['type'] == 'success'){
+            /* Redirect to room GET route */
+            redirect(sprintf('/DDWT18/room/?room_id='.$_POST['room_id'].'&msg=%s', json_encode($feedback)));
+        } else {
+            redirect(sprintf('/DDWT18/room/edit?room_id='.$_POST['room_id'].'&error_msg=%s', json_encode($feedback)));
+        }
 
     });
 
@@ -244,25 +234,53 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         $directory_name = "images/users/uploads";
         $target_dir = create_directory($directory_name, get_user_id(), 'rooms/'.$_POST['room_id']);
 
-        $feedback = upload_file($db, get_user_id(), $target_dir, $_POST['room_id']);
+        $feedback = upload_file($db, $target_dir, $_POST['room_id']);
 
-        #fout: hier moet nog een mooie redirect komen
+        if ($feedback['type'] == 'success'){
+            /* Redirect to room GET route */
+            redirect(sprintf('/DDWT18/room/?room_id='.$_POST['room_id'].'&msg=%s', json_encode($feedback)));
+        } else {
+            redirect(sprintf('/DDWT18/room/edit?room_id='.$_POST['room_id'].'&error_msg=%s', json_encode($feedback)));
+        }
     });
 
-    /* Edit single room POST */
-    $router->post('/edit', function() use ($router, $db, $navigation_tpl, $root) {
-        /* Check if logged in */
+    /* Remove images single room POST */
+    $router->post('/image/remove', function() use ($router, $db, $navigation_tpl, $root) {
+        if (!check_login()) {
+            redirect('/DDWT18/login/');
+        }
+
+        /* Remove image */
+       $feedback = remove_file($db, $_POST);
+
+        if ($feedback['type'] == 'success'){
+            /* Redirect to room GET route */
+            redirect(sprintf('/DDWT18/room/?room_id='.$_POST['room_id'].'&msg=%s', json_encode($feedback)));
+        } else {
+            redirect(sprintf('/DDWT18/room/edit?room_id='.$_POST['room_id'].'&error_msg=%s', json_encode($feedback)));
+        }
+
+    });
+
+        /* delete optin #tedoen? */
+    $router->post('/delete',function () use ($router, $db, $navigation_tpl, $root) {
         if ( !check_login() ) {
             redirect('/DDWT18/login/');
         }
 
-        /* Edit room to database */
-        $feedback = update_room($db, $_POST, get_user_id());
+        $room_id = $_POST['room_id'];
+
+        /* remove optin from database */
+        $feedback = optout($db, $room_id); #deze verwijderd alleen de opt in bij die specifieke kamer
+        #$feedback = optout($db, get_user_id()); Deze verwijderd alle opt ins van 1 tenant, zie uitgezette functie in model
+        $error_msg = get_error($feedback);
+
+        var_dump($room_id, $feedback, $error_msg); #hiermee kunnen jullie zien welke message je op deze pagina krijgt
 
         /* Redirect to room GET route */
-        redirect(sprintf('/DDWT18/room/?error_msg=%s', json_encode($feedback)));
-
+        #redirect(sprintf('/DDWT18/overview/?error_msg=%s', json_encode($feedback)));
     });
+
 
 });
 
@@ -320,8 +338,8 @@ $router->get('/register', function() use ($db, $navigation_tpl, $root) {
     $navigation = get_navigation($navigation_tpl, 4);
 
     /* Get error msg from POST route to GET route */
-    if ( isset($_GET['error_msg']) ) {
-        $error_msg = get_error($_GET['error_msg']);
+    if ( isset($_GET['msg']) ) {
+        $view_msg = get_error($_GET['msg']);
     }
 
     /* Page */
@@ -337,12 +355,12 @@ $router->post('/register', function() use ($db, $navigation_tpl, $root) {
     $error_msg = register_user($db, $_POST);
 
     /* Redirect to homepage */
-    redirect(sprintf('/DDWT18/register/?error_msg=%s', json_encode($error_msg)));
+    redirect(sprintf('/DDWT18/register/?msg=%s', json_encode($error_msg)));
 
 });
 
 /* Add room mount */
-$router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) { #waarom moet ik bij elke route weer opnieuw deze variabelen aanroepen
+$router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) {
 
     /* Add room GET */
     $router->get('/', function() use ($router, $db, $navigation_tpl, $root) {
@@ -354,18 +372,18 @@ $router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) { #
         /* Navigation */
         $navigation = get_navigation($navigation_tpl, 6);
 
-        /* Get msg from POST route */
-        if ( isset($_GET['error_msg']) ) {
-            $error_msg = get_error($_GET['error_msg']);
+        /* Get error msg from POST route to GET route */
+        if ( isset($_GET['msg']) ) {
+            $view_msg = get_error($_GET['msg']);
         }
 
         /* Get counter for usage of Postcode API */
-        $count = count_postcode($db);
+        $postcode_count = postcode_count_card(count_postcode($db));
 
         /* Page  */
         $page_title = 'Add Room';
         $page_subtitle = 'Add your room';
-        $page_content = 'Fill in the details of your room.';
+        $page_content = 'Enter the postalcode and street.';
         $submit_btn = "Continue";
         $form_action = '/DDWT18/add/';
         include use_template('new-step1');
@@ -381,30 +399,36 @@ $router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) { #
         /* Navigation */
         $navigation = get_navigation($navigation_tpl, 6);
 
-
         /* Call postcode API */
         $postcode_data = postcode($db, $_POST);
-        var_dump($postcode_data);
+
+        if ($postcode_data['type'] == 'success'){
+            json_encode($postcode_data);
+        } else {
+            /* Redirect to Add room GET */
+            redirect(sprintf('/DDWT18/add/?msg=%s',
+                json_encode($postcode_data)));
+        }
 
         /* Get counter for usage of Postcode API */
-        $count = count_postcode($db);
+        $postcode_count = postcode_count_card(count_postcode($db));
 
         /* Page info */
         $page_title = 'Add Room';
 
-        #fout: hier ga je de error messages nooit krijgen want dit is een post route, dus dit moet je anders doen, dus die error message van step-1 moet je in de post-variabele meegeven
-
         /* Postalcode API data */
         $postalcode = $_POST['postalcode'];
         $streetnumber = $_POST['streetnumber'];
-        $city = $postcode_data['city'];
-        $street = $postcode_data['street'];
+        $street = $postcode_data['array']['street'];
+        $city = $postcode_data['array']['city'];
+
 
         /* Page  */
         $page_subtitle = 'Add your room';
         $page_content = 'Fill in the details of your room.';
         $submit_btn = "Add room";
         $form_action = '/DDWT18/add/next';
+        $stepper = True;
         include use_template('new-step2');
 
     });
@@ -416,27 +440,15 @@ $router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) { #
             redirect('/DDWT18/login/');
         }
 
-        /* Navigation */
-        $navigation = get_navigation($navigation_tpl, 6);
-
-        /* Page */
-        $page_title = 'Add Room';
-        $page_subtitle = 'Add your room';
-        $page_content = 'Fill in the details of your room.';
-
-        /* Get counter for usage of Postcode API */
-        $count = count_postcode($db);
-
         /* Add serie to database */
         $feedback = add_room($db, $_POST, get_user_id());;
 
-        #fout: beste is om te valideren wat er WEL uit moet komen en al het andere is een danger message!
-        #fout: if $feedback = type 'danger' dan redirect naar deze pagina en else redirect naar de andere pagina.
-
-        #fout: hoe maak je nou dat de $feedback doormoet naar de overview pagina maar de #error message naar dezelfde add/room pagina. ????
-
-        /* Redirect to serie GET route */
-        redirect(sprintf('/DDWT18/overview/?error_msg=%s', json_encode($feedback)));
+        /* Redirect */
+        if ($feedback['type'] == 'success'){
+            redirect(sprintf('/DDWT18/myaccount/?msg=%s', json_encode($feedback)));
+        } else {
+            redirect(sprintf('/DDWT18/add/?msg=%s', json_encode($feedback)));
+        }
 
     });
 });
@@ -517,7 +529,6 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         $name = get_username($db, get_user_id());
 
         /* Change avatar */
-        $avatar = check_avatar(get_user_id());
         $form_action_avatar = '/DDWT18/myaccount/avatar';
         $submit_btn_avatar = 'Upload';
 
@@ -567,8 +578,8 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         $directory_name = "images/users/uploads";
         $target_dir = create_directory($directory_name, get_user_id(), 'avatar');
 
-        /* Upload file */
-        $feedback = upload_file($db, get_user_id(), $target_dir, $_POST['room_id']);
+        /* Upload avatar */
+        $feedback = upload_avatar(get_user_id(), $target_dir);
 
     });
 

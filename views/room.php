@@ -72,11 +72,25 @@
                         <a href="<?= $root ?>/room/edit?room_id=<?= $room_id ?>" role="button" class="btn btn-warning">Edit</a>
                     </div>
                     <div class="col-md-12">
-
-                        <form action="<?= $root ?>/room/remove/" method="POST">
-                            <input type="hidden" value="<?= $room_id ?>" name="room_id">
-                            <button type="submit" class="btn btn-danger">Remove</button>
-                        </form>
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModalCenter">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <p class="text-black-secondary typography-subheading">Discard room?</p>
+                                <form action="<?= $root ?>/room/remove/" method="POST">
+                                    <input type="hidden" value="<?= $room_id ?>" name="room_id">
+                                        <button class="btn btn-outline-info" data-dismiss="modal" type="button">Cancel</button>
+                                        <button type="submit" class="btn btn-outline-danger">Remove</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

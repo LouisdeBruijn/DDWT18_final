@@ -38,19 +38,19 @@
             <div class="col-md-4">
                     <h1><?= $page_title ?></h1>
                     <h5><?= $page_subtitle ?></h5>
-                    <p><?= $page_content ?></p>
 
 
                 <div class="card text-center mb-3">
                     <div class="card-body">
                         <img class="img-fluid" id="avatar" src="<?php if(isset($avatar)){echo $avatar;} else {echo "$root/images/avatar.jpg";} ?>" alt="profile image"/>
                         <h5 class="card-title"><?= $name ?></h5>
-                        <a href="/DDWT18/myaccount/edit" class="btn btn-secondary">Edit profile</a>
+                        <a href="/DDWT18/myaccount/edit" class="btn btn-info">Edit profile</a>
                     </div>
                 </div>
             </div>
             <!-- Middle content -->
             <div class="col-md-6">
+                <h5>View the rooms that you have listed below.</h5>
                 <?php if(isset($all_rooms)){foreach($all_rooms as $key => $room){echo $room;}}?>
             </div>
 

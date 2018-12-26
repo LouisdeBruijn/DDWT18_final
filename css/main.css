@@ -6,9 +6,12 @@
 /* Layout */
 
 .row {
-    margin-bottom: 2em;
+    margin-top: 1em;
 }
 
+.card {
+    margin-bottom: 1em;
+}
 
 /* Forms */
 #inputBio {

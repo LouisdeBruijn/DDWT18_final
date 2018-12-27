@@ -1035,7 +1035,6 @@ function upload_avatar($user_id, $target_dir){
 
 function remove_file($pdo, $img){
 
-
     //Create DB connection
     $stmt = $pdo->prepare('SELECT * FROM images WHERE room_id = ?');
     $stmt->execute([$img['room_id']]);
@@ -1048,6 +1047,9 @@ function remove_file($pdo, $img){
             'message' => 'You are removing an image from a different room.'
         ];
     }
+
+    //Remove file from directory
+    unlink($img['img_path']);
 
     //Remove from DB
     $stmt = $pdo->prepare('DELETE FROM images WHERE path = ?');
@@ -1065,10 +1067,6 @@ function remove_file($pdo, $img){
             'message' => 'An error occurred. The room was not removed.'
         ];
     }
-
-    //Remove file from directory
-    unlink($img['img_path']);
-
 
 }
 

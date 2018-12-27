@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype HTML>
 <html lang="en">
 <head>
     <!-- Required meta tags -->
@@ -21,36 +21,67 @@
     <title><?= $page_title ?></title>
 </head>
 <body>
-    <!-- Menu -->
-    <?= $navigation ?>
-    <!-- Content -->
-    <div class="container">
-        <!-- Full width -->
-        <div class="row">
-            <div class="col-md-12">
-                <!-- Error message -->
-                <?php if (isset($view_msg)){echo $view_msg;} ?>
-            </div>
+<!-- Menu -->
+<?= $navigation ?>
+<!-- Content -->
+<div class="container">
+    <!-- Full width -->
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Error message -->
+            <?php if (isset($view_msg)){echo $view_msg;} ?>
         </div>
+    </div>
 
         <div class="row">
             <!-- Left content -->
             <div class="col-md-4">
                     <h1><?= $page_title ?></h1>
-                    <h5><?= $page_subtitle ?></h5>
-
-
+                <h5><?= $page_subtitle ?></h5>
                 <div class="card text-center mb-3">
                     <div class="card-body">
                         <img class="img-fluid" id="avatar" src="<?php if(isset($avatar)){echo $avatar;} else {echo "$root/images/avatar.jpg";} ?>" alt="profile image"/>
                         <h5 class="card-title"><?= $name ?></h5>
+                        <div class="text-left">
+                            <label for="biography">Biography</label>
+                            <p class="card-text"><?php if(isset($user_info['biography'])){echo $user_info['biography'];}?></p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="role">Role</label>
+                                    <p class="card-text"><?php if(isset($user_info['role'])){if ($user_info['role'] == '1'){echo 'Owner';}elseif($user_info['role'] == '2'){echo 'Tenant';}}?></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="language">Language</label>
+                                    <p class="card-text"><?php if(isset($user_info['language'])){echo $user_info['language'];}?></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="occupation">Occupation</label>
+                                    <p class="card-text"><?php if(isset($user_info['occupation'])){echo $user_info['occupation'];}?></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="birthdate">Birth date</label>
+                                    <p class="card-text"><?php if(isset($user_info['birthdate'])){echo $user_info['birthdate'];}?></p>
+
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="email">Email address</label>
+                                    <p class="card-text"><?php if(isset($user_info['email'])){echo $user_info['email'];}?></p>
+
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="phone">Phone number</label>
+                                    <p class="card-text"><?php if(isset($user_info['phone'])){echo $user_info['phone'];}?></p>
+                                </div>
+                            </div>
+
+                        </div>
                         <a href="/DDWT18/myaccount/edit" class="btn btn-info">Edit profile</a>
                     </div>
                 </div>
             </div>
             <!-- Middle content -->
             <div class="col-md-6">
-                <h5>View the rooms that you have listed below.</h5>
+                <h5><?= $page_content ?></h5>
                 <?php if(isset($all_rooms)){foreach($all_rooms as $key => $room){echo $room;}}?>
             </div>
 

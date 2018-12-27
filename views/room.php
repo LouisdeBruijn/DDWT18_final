@@ -18,6 +18,7 @@
     <!-- Google Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
+    <title><?= $page_title ?></title>
 </head>
 <body>
 <!-- Menu -->

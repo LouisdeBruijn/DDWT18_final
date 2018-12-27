@@ -83,7 +83,7 @@
                 <div class="form-group">
                     <div class="">
                         <label for="inputDescription">Description</label>
-                        <textarea class="form-control"  aria-describedby="" id="inputDescription" placeholder="Describe the room." name="description" type="textarea" required><?php if (isset($room_info['description'])){echo $room_info['description'];} ?></textarea>
+                        <textarea class="form-control"  aria-describedby="" id="inputDescription" placeholder="Describe the room." name="description" type="textarea" rows="8" required><?php if (isset($room_info['description'])){echo $room_info['description'];} ?></textarea>
                         <div class="valid-feedback">
                             Looks good.
                         </div>

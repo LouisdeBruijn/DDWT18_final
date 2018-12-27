@@ -64,6 +64,81 @@ $router->get('/', function() use($db, $navigation_tpl, $root) {
 
 });
 
+
+/* Login GET */
+$router->get('/login', function() use ($db, $navigation_tpl, $root) {
+    /* Check if logged in */
+    if ( check_login() ) {
+        redirect('/DDWT18/myaccount/');
+    }
+
+    /* Navigation */
+    $navigation = get_navigation($navigation_tpl, 3);
+
+    /* Get error msg from POST route to GET route */
+    if ( isset($_GET['error_msg']) ) {
+        $view_msg = get_error($_GET['error_msg']);
+    }
+
+    /* Page */
+    $page_title = 'Login';
+    include use_template('login');
+
+
+});
+
+/* Login POST */
+$router->post('/login', function() use ($db, $navigation_tpl, $root) {
+    /* Login user */
+    $feedback = login_user($db, $_POST);
+
+    /* Redirect to homepage */
+    redirect(sprintf('/DDWT18/login/?error_msg=%s', json_encode($feedback)));
+
+});
+
+/* Logout GET */
+$router->get('/logout', function() use ($db) {
+
+    /* Logout user */
+    $feedback = logout_user();
+
+    /* Redirect to homepage */
+    redirect(sprintf('/DDWT18/?msg=%s',
+        json_encode($feedback)));
+
+});
+
+/* Register GET */
+$router->get('/register', function() use ($db, $navigation_tpl, $root) {
+    /* Check if user is logged in */
+    check_login();
+
+    /* Navigation */
+    $navigation = get_navigation($navigation_tpl, 4);
+
+    /* Get error msg from POST route to GET route */
+    if ( isset($_GET['msg']) ) {
+        $view_msg = get_error($_GET['msg']);
+    }
+
+    /* Page */
+    $page_title = 'Register';
+    include use_template('register');
+
+});
+
+/* Register POST */
+$router->post('/register', function() use ($db, $navigation_tpl, $root) {
+
+    /* Register user */
+    $error_msg = register_user($db, $_POST);
+
+    /* Redirect to homepage */
+    redirect(sprintf('/DDWT18/register/?msg=%s', json_encode($error_msg)));
+
+});
+
 /* Overview GET */
 $router->get('/overview', function() use ($db, $navigation_tpl, $root) {
     /* Check if user is logged in */
@@ -93,6 +168,7 @@ $router->get('/overview', function() use ($db, $navigation_tpl, $root) {
     /* Page */
     $page_title = 'Overview';
     $page_subtitle = 'Rooms in Groningen';
+    $page_content = 'View all available rooms here.';
     $nbr_rooms = count_rooms($db);
     include use_template('main');
 
@@ -116,7 +192,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
 
         /* Get room info from DB */
         $room_id = $_GET['room_id'];
-        $room_info = get_room_info($db, $room_id);
+        $room_info = get_db_info($db, $room_id, 'r');
 
         /* Check if the route exists */
         route_exists($db, $room_id);
@@ -182,7 +258,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         }
 
         /* Get current room details */
-        $room_info = get_room_info($db, $room_id);
+        $room_info = get_db_info($db, $room_id, 'r');
 
         /* Check user route authorization */
         if (check_route(get_user_id(), $room_info['owner'])) {
@@ -284,81 +360,6 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
 
 });
 
-
-/* Login GET */
-$router->get('/login', function() use ($db, $navigation_tpl, $root) {
-    /* Check if logged in */
-    if ( check_login() ) {
-        redirect('/DDWT18/myaccount/');
-    }
-
-    /* Navigation */
-    $navigation = get_navigation($navigation_tpl, 3);
-
-    /* Get error msg from POST route to GET route */
-    if ( isset($_GET['error_msg']) ) {
-        $view_msg = get_error($_GET['error_msg']);
-    }
-
-    /* Page */
-    $page_title = 'Login';
-    include use_template('login');
-
-
-});
-
-/* Login POST */
-$router->post('/login', function() use ($db, $navigation_tpl, $root) {
-    /* Login user */
-    $feedback = login_user($db, $_POST);
-
-    /* Redirect to homepage */
-    redirect(sprintf('/DDWT18/login/?error_msg=%s', json_encode($feedback)));
-
-});
-
-/* Logout GET */
-$router->get('/logout', function() use ($db) {
-
-    /* Logout user */
-    $feedback = logout_user();
-
-    /* Redirect to homepage */
-    redirect(sprintf('/DDWT18/?msg=%s',
-        json_encode($feedback)));
-
-});
-
-/* Register GET */
-$router->get('/register', function() use ($db, $navigation_tpl, $root) {
-    /* Check if user is logged in */
-    check_login();
-
-    /* Navigation */
-    $navigation = get_navigation($navigation_tpl, 4);
-
-    /* Get error msg from POST route to GET route */
-    if ( isset($_GET['msg']) ) {
-        $view_msg = get_error($_GET['msg']);
-    }
-
-    /* Page */
-    $page_title = 'Register';
-    include use_template('register');
-
-});
-
-/* Register POST */
-$router->post('/register', function() use ($db, $navigation_tpl, $root) {
-
-    /* Register user */
-    $error_msg = register_user($db, $_POST);
-
-    /* Redirect to homepage */
-    redirect(sprintf('/DDWT18/register/?msg=%s', json_encode($error_msg)));
-
-});
-
 /* Add room mount */
 $router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) {
 
@@ -369,6 +370,15 @@ $router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) {
             redirect('/DDWT18/login/');
         }
 
+        /* Check if user has the role 'owner' */
+        $user_info = get_db_info($db, get_user_id(), 'u');
+        if ($user_info['role'] != '1' ) {
+            $feedback = [
+                'type' => 'danger',
+                'message' => "You do not have the correct role 'owner' to add a room."
+            ];
+            redirect(sprintf('/DDWT18/overview/?msg=%s', json_encode($feedback)));
+        }
         /* Navigation */
         $navigation = get_navigation($navigation_tpl, 6);
 
@@ -400,7 +410,7 @@ $router->mount('/add', function() use ($router, $db, $navigation_tpl, $root) {
         $navigation = get_navigation($navigation_tpl, 6);
 
         /* Call postcode API */
-        $postcode_data = postcode($db, $_POST);
+        $postcode_data = postcode($db, $_POST, get_user_id());
 
         if ($postcode_data['type'] == 'success'){
             json_encode($postcode_data);
@@ -490,12 +500,12 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         $name = get_username($db, get_user_id());
 
         /* Get account info from db */
-        $user_info = get_account_info($db, get_user_id()); #fout: deze functie is PRECIES hetzelfde als get_serieinfo() en is dus redundant, maar nu voor nu voldoet het even. We kunnen later get_serieinfo() herschrijven zodat we die ook hier kunnen gebruiken.
+        $user_info = get_db_info($db, get_user_id(), 'u');
 
         /* Page info */
         $page_title = 'My Account';
-        $page_subtitle = 'Edit your account here';
-        $page_content = 'An overview of your account ';
+        $page_subtitle = 'An overview of your account';
+        $page_content = 'View the rooms that you have listed below';
         include use_template('account');
 
     });
@@ -520,8 +530,8 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         $navigation = get_navigation($navigation_tpl, 5);
 
         /* Get msg from POST route */
-        if ( isset($_GET['error_msg']) ) {
-            $error_msg = get_error($_GET['error_msg']);
+        if ( isset($_GET['msg']) ) {
+            $view_msg = get_error($_GET['msg']);
         }
 
         /* Avatar & Name card */
@@ -533,37 +543,35 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         $submit_btn_avatar = 'Upload';
 
         /* Get account info from db */
-        $user_info = get_account_info($db, get_user_id()); #deze functie is PRECIES hetzelfde als get_serieinfo() en is dus redundant, maar nu voor nu voldoet het even. We kunnen later get_serieinfo() herschrijven zodat we die ook hier kunnen gebruiken.
+        $user_info = get_db_info($db, get_user_id(), 'u');
         $user_id = get_user_id();
 
         /* Page info */
         $root = '/DDWT18/';
         $page_title = 'My Account';
-        $page_subtitle = 'Edit your account here';
-        $page_content = 'An overview of your account';
+        $page_subtitle = 'An overview of your account';
         $form_action = '/DDWT18/myaccount/edit';
         $submit_btn = 'Edit';
         include use_template('user_edit');
-
-        /* Redirect to homepage */
-        redirect(sprintf('/DDWT18/myaccount?error_msg=%s',
-            json_encode($error_msg)));
-
 
     });
 
     /* Edit user account POST */
     $router->post('/edit', function() use ($db, $navigation_tpl, $root) {
 
-        /* Update user in database */
-        $feedback = update_user($db, $_POST);
-        $error_msg = get_error($feedback);
-
-        #var_dump($feedback, $error_msg); #hiermee kunnen jullie zien welke message je op deze pagina krijgt
-
         /* Get user info from db */
         $user_id = $_POST['user_id'];
-        $user_info = get_account_info($db, $user_id);
+        $user_info = get_db_info($db, $user_id, 'u');
+
+        /* Update user in database */
+        $feedback = update_user($db, $_POST);
+
+        /* Redirect */
+        if ($feedback['type'] == 'success'){
+            redirect(sprintf('/DDWT18/myaccount/?msg=%s', json_encode($feedback)));
+        } else {
+            redirect(sprintf('/DDWT18/myaccount/edit/?msg=%s', json_encode($feedback)));
+        }
 
     });
 
@@ -581,11 +589,16 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         /* Upload avatar */
         $feedback = upload_avatar(get_user_id(), $target_dir);
 
+        /* Redirect */
+        if ($feedback['type'] == 'success'){
+            redirect(sprintf('/DDWT18/myaccount/?msg=%s', json_encode($feedback)));
+        } else {
+            redirect(sprintf('/DDWT18/myaccount/edit/?msg=%s', json_encode($feedback)));
+        }
+
     });
 
-
 });
-
 
 $router->set404(function() {
     // will result in an error message on page 404

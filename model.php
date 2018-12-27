@@ -255,23 +255,17 @@ function get_user_id(){
 }
 
 /**
- * @param $pdo
- * @param $owner_id
- * @return string
+ * Get the name of the user based on a specific user_id
+ * @param object $pdo database object, object $user_id user_id
+ * @return Array with first name and last name of user_id
  */
 function get_username($pdo, $user_id){
-    $stmt = $pdo->prepare('SELECT firstname,lastname FROM users WHERE id = ?');
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
     $stmt->execute([$user_id]);
     $user_info = $stmt->fetch();
-    $user_info_exp = Array();
 
-    foreach ($user_info as $key => $value){
-        $user_info_exp[$key] = htmlspecialchars($value);
-    }
     return $user_info['firstname'].' '.$user_info['lastname'];
 }
-
-
 
 /**
  * Check whether the user is logged in
@@ -293,26 +287,25 @@ function check_login(){
  * @param string $table_short
  * @return mixed
  */
-function get_db_info($pdo, $user_id, $table_short){
-
+function get_account_info($pdo, $user_id, $table_short = 'u'){ #aanpassen in mijn index.php en samenvoegen met get_rooms_info
     if($table_short == 'u'){
         $table = 'users';
     }
     elseif($table_short == 'r'){
         $table = 'rooms';
     }
-
     $stmt = $pdo->prepare('SELECT * FROM '. $table .' WHERE id = ?');
     $stmt->execute([$user_id]);
-    $db_info = $stmt->fetch();
-    $db_info_exp = Array();
+    $user_info = $stmt->fetch();
+    $user_info_exp = Array();
 
     /* Create array with htmlspecialchars */
-    foreach ($db_info as $key => $value){
-        $db_info_exp[$key] = htmlspecialchars($value);
+    foreach ($user_info as $key => $value){
+        $user_info_exp[$key] = htmlspecialchars($value);
     }
-    return $db_info_exp;
+    return $user_info_exp;
 }
+
 
 /**
  * Logs the user out of their session
@@ -392,7 +385,7 @@ function get_rooms_table($pdo, $rooms){
         $rooms_table .= '
         <tr>
             <th scope="row">'.$value['name'].'</th>
-            <th scope="row">'.get_username($pdo, $value['owner']).'</th>
+            <th scope="row">'.get_owner_name($pdo, $value['owner']).'</th>
             <td><a href="/DDWT18/room/?room_id='.$value['id'].'" role="button" class="btn btn-info">More info</a></td>
         </tr>';
     }
@@ -402,12 +395,49 @@ function get_rooms_table($pdo, $rooms){
     return $rooms_table;
 }
 
+/**
+ * Returns a string with the HTML code representing the information for that room
+ * @param PDO $pdo The database connection
+ * @return string The rooms table
+ *
+ */
+function get_room_info($pdo, $room_id){
+
+    $stmt = $pdo->prepare('SELECT * FROM rooms WHERE id = ?');
+    $stmt->execute([$room_id]);
+    $room_info = $stmt->fetch();
+    $room_info_exp = Array();
+
+    /* Create array with htmlspecialchars */
+    foreach ($room_info as $key => $value){
+        $room_info_exp[$key] = htmlspecialchars($value);
+    }
+    return $room_info_exp;
+}
+
+
+/**
+ * @param $pdo
+ * @param $owner_id
+ * @return string
+ */
+function get_owner_name($pdo, $owner_id){ #deze functie is ook hetzelfde als get_user_name en kan dus samengevoegd worden (enige verschil is de select query welke DB)?
+    $stmt = $pdo->prepare('SELECT firstname,lastname FROM users WHERE id = ?');
+    $stmt->execute([$owner_id]);
+    $owner_info = $stmt->fetch();
+    $owner_info_exp = Array();
+
+    foreach ($owner_info as $key => $value){
+        $owner_info_exp[$key] = htmlspecialchars($value);
+    }
+    return $owner_info['firstname'].' '.$owner_info['lastname'];
+}
 
 
 /**
  * Makes use of the Postcode API to fill in the city and street address
  */
-function postcode($pdo, $form_data, $user_id){
+function postcode($pdo, $form_data){
     // Validate form submission
     if (
         empty($form_data['postalcode']) or
@@ -416,15 +446,6 @@ function postcode($pdo, $form_data, $user_id){
         return [
             'type' => 'danger',
             'message' => 'You should enter a postal code and a streetnumber.'
-        ];
-    }
-
-    /* Check if user has the role 'owner' */
-    $user_info = get_db_info($pdo, $user_id, 'u');
-    if ($user_info['role'] != '1' ) {
-        return [
-            'type' => 'danger',
-            'message' => "You do not have the correct role 'owner' to perform this action."
         ];
     }
 
@@ -536,22 +557,8 @@ $postcode_count .= '
  * @return array with message feedback
  */
 function add_room($pdo, $room_info, $user_id){
-    /* Check if user_id is set */
-    if (!$user_id) {
-        return [
-            'type' => 'danger',
-            'message' => 'You have to be logged in to perfom this action.'
-        ];
-    }
-
-    /* Check if user has the role 'owner' */
-    $user_info = get_db_info($pdo, $user_id, 'u');
-    if ($user_info['role'] != '1' ) {
-        return [
-            'type' => 'danger',
-            'message' => "You do not have the correct role 'owner' to perform this action."
-        ];
-    }
+    /* Check if user_id is set
+    #moet dit eigenlijk ook nog?
 
     /* Check if all fields are set */
     $required_fields = ['name', 'description', 'postalcode', 'streetnumber', 'city', 'street', 'type', 'price', 'size'];
@@ -992,7 +999,7 @@ function upload_avatar($user_id, $target_dir){
         && $imageFileType != "gif" ) {
         return [
             'type' => 'danger',
-            'message' => 'Sorry, only JPG, JPEG, PNG and GIF files are allowed.'
+            'message' => 'Sorry, only JPG, JPEG, PNG & GIF files are allowed.'
         ];
     }
 
@@ -1011,7 +1018,7 @@ function upload_avatar($user_id, $target_dir){
     if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
         return [
             'type' => 'success',
-            'message' => 'The file '.basename( $_FILES["fileToUpload"]["name"]).' is your new avatar image.'
+            'message' => 'The file '.basename( $_FILES["fileToUpload"]["name"]).' has been uploaded.'
         ];
 
     } else {
@@ -1025,6 +1032,7 @@ function upload_avatar($user_id, $target_dir){
 
 function remove_file($pdo, $img){
 
+
     //Create DB connection
     $stmt = $pdo->prepare('SELECT * FROM images WHERE room_id = ?');
     $stmt->execute([$img['room_id']]);
@@ -1037,9 +1045,6 @@ function remove_file($pdo, $img){
             'message' => 'You are removing an image from a different room.'
         ];
     }
-
-    //Remove file from directory
-    unlink($img['img_path']);
 
     //Remove from DB
     $stmt = $pdo->prepare('DELETE FROM images WHERE path = ?');
@@ -1058,6 +1063,10 @@ function remove_file($pdo, $img){
         ];
     }
 
+    //Remove file from directory
+    unlink($img['img_path']);
+
+
 }
 
 /**
@@ -1068,15 +1077,14 @@ function check_avatar($user_id) {
     // Create a glob that returns an array
     $matching = glob( 'images/users/uploads/'.$user_id.'/avatar/avatar.*');
 
-    if (!empty($matching)) {
-        // Create the extension accessing the glob array
-        $extension = pathinfo($matching[0], PATHINFO_EXTENSION);
-        // Check
-        if (file_exists('images/users/uploads/'.$user_id.'/avatar/avatar.'.$extension.'')) {
+    // Create the extension accessing the glob array
+    $extension = pathinfo($matching[0],PATHINFO_EXTENSION);
 
-            $avatar = "/DDWT18/images/users/uploads/$user_id/avatar/avatar.$extension";
-            return $avatar;
-        }
+    // Check
+    if (file_exists('images/users/uploads/'.$user_id.'/avatar/avatar.'.$extension.'')) {
+
+        $avatar = "/DDWT18/images/users/uploads/$user_id/avatar/avatar.$extension";
+        return $avatar;
     }
 }
 
@@ -1553,4 +1561,79 @@ function optin_tenant_table($pdo, $name) {
     ';
     return $table_exp;
 
+}
+
+function get_user_info($pdo, $id) {
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->execute([$id]);
+    $user_info = $stmt->fetchAll();
+    $user_info_exp = Array();
+    foreach ($user_info as $key => $value) {
+        $user_info_exp[$key] = htmlspecialchars($value);
+    }
+    return $user_info_exp;
+}
+
+function optin_owner_table($pdo, $user_info) {
+    $table_exp = '
+    <table class="table table-hover" xmlns="http://www.w3.org/1999/html">
+    <thead
+    <tr>
+    <th scope="col">Opt ins from tenants</th>
+    <th scope="col"></th>
+    </tr>
+    </thead>
+    <tbody>';
+    foreach($user_info as $key => $value) {
+        $table_exp .= '
+    <tr>
+    <th scope="row">' . get_room_name($pdo, $value) . '</th>
+    <td>' . $user_info['firstname'] . '</td>
+    <td>'.$user_info['lastname'].'</td>
+    <td>'.$user_info['birthdate'].'</td>
+    <td>'.$user_info['biography'].'</td>
+    <td>'.$user_info['occupation'].'</td>
+    <td>'.$user_info['language'].'</td>
+    <td>'.$user_info['email'].'</td>
+    <td>'.$user_info['phone'].'</td>
+    </tr>
+    ';
+    }
+    $table_exp .= '
+    </tbody>
+    </table>
+    ';
+    return $table_exp;
+
+}
+
+
+/* geeft owner id's en geeft alle room id's terug die deze owner ownt. */
+function room_ids_owner($pdo, $owner_id) {
+    $stmt = $pdo->prepare("SELECT id FROM rooms WHERE owner = ?");
+    $stmt->execute([$owner_id]);
+    $room_id = $stmt->fetch();
+    $room_id_exp = Array();
+    foreach ($room_id as $key => $value) {
+        $room_id_exp[$key] = htmlspecialchars($value);
+    }
+    return $room_id_exp;
+}
+
+/* gets room id's from a specific owner as input and gives back tenant id's from the opted in tenants */
+function optin_tenant_id($pdo, $room_id) {
+    $stmt = $pdo->prepare("SELECT tenant FROM optin WHERE room = ?");
+    $stmt->execute([$room_id]);
+    $tenant_id = $stmt->fetchAll();
+    $tenant_id_exp = Array();
+    foreach ($tenant_id as $key => $value){
+        foreach ($value as $user_key => $user_input){
+            $tenant_id_exp[$key][$user_key] = htmlspecialchars($user_input);
+        }
+    }
+    return $tenant_id_exp;
+    #foreach ($tenant_id as $key => $value) {
+     #   $tenant_id_exp[$key] = htmlspecialchars($value);
+    #}
+    #return $tenant_id_exp;
 }

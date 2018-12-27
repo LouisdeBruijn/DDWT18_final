@@ -255,17 +255,23 @@ function get_user_id(){
 }
 
 /**
- * Get the name of the user based on a specific user_id
- * @param object $pdo database object, object $user_id user_id
- * @return Array with first name and last name of user_id
+ * @param $pdo
+ * @param $owner_id
+ * @return string
  */
 function get_username($pdo, $user_id){
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt = $pdo->prepare('SELECT firstname,lastname FROM users WHERE id = ?');
     $stmt->execute([$user_id]);
     $user_info = $stmt->fetch();
+    $user_info_exp = Array();
 
+    foreach ($user_info as $key => $value){
+        $user_info_exp[$key] = htmlspecialchars($value);
+    }
     return $user_info['firstname'].' '.$user_info['lastname'];
 }
+
+
 
 /**
  * Check whether the user is logged in
@@ -386,7 +392,7 @@ function get_rooms_table($pdo, $rooms){
         $rooms_table .= '
         <tr>
             <th scope="row">'.$value['name'].'</th>
-            <th scope="row">'.get_owner_name($pdo, $value['owner']).'</th>
+            <th scope="row">'.get_username($pdo, $value['owner']).'</th>
             <td><a href="/DDWT18/room/?room_id='.$value['id'].'" role="button" class="btn btn-info">More info</a></td>
         </tr>';
     }
@@ -396,22 +402,6 @@ function get_rooms_table($pdo, $rooms){
     return $rooms_table;
 }
 
-/**
- * @param $pdo
- * @param $owner_id
- * @return string
- */
-function get_owner_name($pdo, $owner_id){ #deze functie is ook hetzelfde als get_user_name en kan dus samengevoegd worden (enige verschil is de select query welke DB)?
-    $stmt = $pdo->prepare('SELECT firstname,lastname FROM users WHERE id = ?');
-    $stmt->execute([$owner_id]);
-    $owner_info = $stmt->fetch();
-    $owner_info_exp = Array();
-
-    foreach ($owner_info as $key => $value){
-        $owner_info_exp[$key] = htmlspecialchars($value);
-    }
-    return $owner_info['firstname'].' '.$owner_info['lastname'];
-}
 
 
 /**

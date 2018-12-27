@@ -1518,7 +1518,7 @@ function optout($pdo, $room_id) {
  */
 
 function optin_info_tenant($pdo, $tenant) {
-    $stmt = $pdo->prepare('SELECT * FROM optin WHERE tenant = ?');
+    $stmt = $pdo->prepare('SELECT room FROM optin WHERE tenant = ?');
     $stmt->execute([$tenant]);
     $tenant_info = $stmt->fetch();
     $tenant_info_exp = Array();

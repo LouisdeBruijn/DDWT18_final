@@ -272,7 +272,6 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
 
         /* remove optin from database */
         $feedback = optout($db, $room_id); #deze verwijderd alleen de opt in bij die specifieke kamer
-        #$feedback = optout($db, get_user_id()); Deze verwijderd alle opt ins van 1 tenant, zie uitgezette functie in model
         $error_msg = get_error($feedback);
 
         var_dump($room_id, $feedback, $error_msg); #hiermee kunnen jullie zien welke message je op deze pagina krijgt
@@ -482,6 +481,10 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
                 array_push($all_rooms, $rooms_card);
             }
         }
+
+        /* Get opt ins */
+        $tenant = optin_info_tenant($db, get_user_id());
+        $optin_table = optin_tenant_table($db,$tenant);
 
         /* Avatar image */
         $avatar = check_avatar(get_user_id());

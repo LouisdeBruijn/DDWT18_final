@@ -1513,26 +1513,52 @@ function optout($pdo, $room_id) {
     }
 }
 
-/**
+/** this function gives the info from a certain tenant from the optin table
  *
  */
-/*
-function optout($pdo, $user_id) {
-    $stmt = $pdo->prepare("DELETE FROM optin WHERE tenant = ?");
-    $stmt->execute([$user_id]);
-    $deleted = $stmt->rowCount();
-    if ($deleted == 1) {
-        return [
-            'type' => 'succes',
-            'message' => 'You were succesfully opted-out'
-        ];
-    }
-    else {
-        return [
-            'type' => 'warning',
-            'message' => 'An error occured. Please try again.'
-        ];
-    }
-}
-*/
 
+function optin_info_tenant($pdo, $tenant) {
+    $stmt = $pdo->prepare('SELECT * FROM optin WHERE tenant = ?');
+    $stmt->execute([$tenant]);
+    $tenant_info = $stmt->fetch();
+    $tenant_info_exp = Array();
+    /* createarray with htmlspecialcharacters */
+    foreach ($tenant_info as $key => $value) {
+        $tenant_info_exp[$key] = htmlspecialchars($value);
+    }
+    return $tenant_info_exp;
+}
+
+function get_room_name($pdo, $room_id) {
+    $stmt = $pdo->prepare("SELECT * FROM rooms WHERE id = ?");
+    $stmt->execute([$room_id]);
+    $room_info = $stmt->fetch();
+
+    return $room_info['name'];
+}
+
+function optin_tenant_table($pdo, $name) {
+    $table_exp = '
+    <table class="table table-hover" xmlns="http://www.w3.org/1999/html">
+    <thead
+    <tr>
+    <th scope="col">Opt ins</th>
+    <th scope="col"></th>
+    </tr>
+    </thead>
+    <tbody>';
+    foreach($name as $key => $value) {
+        $table_exp .= '
+    <tr>
+    <th scope="row">' . get_room_name($pdo, $value) . '</th>
+    <td><a href="/DDWT18/room/?room_id=' . $value['room'] . '" role="button" class="btn btn-primary">More Info</a></td>
+    </tr>
+    ';
+    }
+    $table_exp .= '
+    </tbody>
+    </table>
+    ';
+    return $table_exp;
+
+}

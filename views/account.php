@@ -84,6 +84,9 @@
                 <h5><?= $page_content ?></h5>
                 <?php if(isset($all_rooms)){foreach($all_rooms as $key => $room){echo $room;}}?>
             </div>
+            <div class="col-md-6">
+                <?= $optin_table ?>
+            </div>
 
             <!-- Right content -->
             <div class="col-md-2">

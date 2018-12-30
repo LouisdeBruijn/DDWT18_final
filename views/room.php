@@ -96,7 +96,7 @@
                 </div>
 
             <?php } ?>
-            <?php if ($display_optin) { ?>
+            <?php if ($display_optin and !$display_optinout){ ?>
             <div class="row">
                 <div class="col-auto">
                     <form action="<?= $root ?>/room/optin" method="POST">

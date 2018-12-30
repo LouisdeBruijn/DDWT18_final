@@ -1463,12 +1463,12 @@ function optinout_button($pdo, $user_id) {
     }
 }
 
-function optin($pdo, $optin) {
+function optin($pdo, $room_id, $user_id, $message) {
     $stmt = $pdo->prepare("INSERT INTO optin (room, tenant, message) VALUES (?, ?, ?)");
     $stmt->execute([
-        $optin['room'],
-        $optin['tenant'],
-        $optin['message']
+        $room_id,
+        $user_id,
+        $message
     ]);
 
     $inserted = $stmt->rowCount();

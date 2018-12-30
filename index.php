@@ -338,6 +338,20 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
 
     });
 
+    /* opt in POST */
+    $router->post('/optin',function () use ($router, $db, $navigation_tpl, $root) {
+        if ( !check_login() ) {
+            redirect('/DDWT18/login/');
+        }
+
+        $room_id = $_POST['room_id'];
+        $message = 'test message';
+
+        /* add optin to database */
+        $feedback = optin($db, $room_id, get_user_id(), $message);
+        var_dump($feedback);
+    });
+
         /* delete optin #tedoen? */
     $router->post('/delete',function () use ($router, $db, $navigation_tpl, $root) {
         if ( !check_login() ) {
@@ -492,8 +506,8 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         /* Get opt ins */
         $tenant = optin_info_tenant($db, get_user_id());
 
+        /* Show opt ins made by tenant */
         $optin_table = optin_tenant_table($db,$tenant);
-        #var_dump($room_name);
 
         /* Avatar image */
         $avatar = check_avatar(get_user_id());

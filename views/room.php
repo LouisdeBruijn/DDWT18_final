@@ -99,7 +99,12 @@
             <?php if ($display_optin) { ?>
             <div class="row">
                 <div class="col-auto">
-                    <a href="<?= $root ?>/room/?room_id=<?= $room_id ?>" role="button" class="btn btn-warning">Opt in</a>
+                    <form action="<?= $root ?>/room/optin" method="POST">
+                        <input type="hidden" value="<?= $room_id ?>" name="room_id">
+                        <input type="hidden" value="<?= $message ?>" name="message">
+                        <button type="submit" class="btn btn-primary">Opt in</button>
+                    </form>
+                    <!-- <a href="<?= $root ?>/room/?room_id=<?= $room_id ?>" role="button" class="btn btn-warning">Opt in</a> -->
                 </div>
             </div>
             <?php } ?>

@@ -85,6 +85,7 @@
                 <?php if(isset($all_rooms)){foreach($all_rooms as $key => $room){echo $room;}}?>
 
                 <?= $optin_table ?>
+                <?= $optin_owner_table ?>
             </div>
 
             <!-- Right content -->

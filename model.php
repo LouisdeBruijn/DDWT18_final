@@ -1569,7 +1569,7 @@ function optin_owner_table($pdo, $user_info) {
     foreach($user_info as $key => $value) {
         $table_exp .= '
     <tr>
-    <th scope="row">' . get_room_name($pdo, $value) . '</th>
+    <th scope="row">' . get_room_name($pdo, $value['room']) . '</th>
     <td>' . $user_info['firstname'] . '</td>
     <td>'.$user_info['lastname'].'</td>
     <td>'.$user_info['birthdate'].'</td>
@@ -1587,21 +1587,26 @@ function optin_owner_table($pdo, $user_info) {
     ';
     return $table_exp;
 }
+
+
 /* geeft owner id's en geeft alle room id's terug die deze owner ownt. */
 function room_ids_owner($pdo, $owner_id) {
     $stmt = $pdo->prepare("SELECT id FROM rooms WHERE owner = ?");
     $stmt->execute([$owner_id]);
-    $room_id = $stmt->fetch();
+    $room_id = $stmt->fetchAll();
     $room_id_exp = Array();
     foreach ($room_id as $key => $value) {
-        $room_id_exp[$key] = htmlspecialchars($value);
+        foreach ( $value as $user_key => $user_input) {
+            $room_id_exp[$key][$user_key] = htmlspecialchars($user_input);
+        }
     }
     return $room_id_exp;
 }
 /* gets room id's from a specific owner as input and gives back tenant id's from the opted in tenants */
 function optin_tenant_id($pdo, $room_id) {
     $stmt = $pdo->prepare("SELECT tenant FROM optin WHERE room = ?");
-    $stmt->execute([$room_id]);
+    $string_room_id = serialize($room_id);
+    $stmt->execute([$string_room_id]);
     $tenant_id = $stmt->fetchAll();
     $tenant_id_exp = Array();
     foreach ($tenant_id as $key => $value){

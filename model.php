@@ -1567,10 +1567,10 @@ function optin_owner_table($pdo, $user_info) {
     </tr>
     </thead>
     <tbody>';
-    foreach($user_info as $key => $value) {
+    {
         $table_exp .= '
     <tr>
-    <th scope="row">' . get_room_name($pdo, $value['room']) . '</th>
+    <th scope="row">Hier room name nog</th> <!-- Deze functie moet anders in deze tabel -->
     <td>' . $user_info['firstname'] . '</td>
     <td>'.$user_info['lastname'].'</td>
     <td>'.$user_info['birthdate'].'</td>
@@ -1606,8 +1606,8 @@ function room_ids_owner($pdo, $owner_id) {
 /* gets room id's from a specific owner as input and gives back tenant id's from the opted in tenants */
 function optin_tenant_id($pdo, $room_id) {
     $stmt = $pdo->prepare("SELECT tenant FROM optin WHERE room = ?");
-    $string_room_id = serialize($room_id);
-    $stmt->execute([$string_room_id]);
+    #var_dump($room_id);
+    $stmt->execute([$room_id]);
     $tenant_id = $stmt->fetchAll();
     $tenant_id_exp = Array();
     foreach ($tenant_id as $key => $value){

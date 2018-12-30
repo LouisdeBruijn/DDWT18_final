@@ -510,10 +510,22 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         /* Show opt ins made by tenant */
         $optin_table = optin_tenant_table($db,$tenant);
 
-        /* show optin made by tenant from this particular owner in the owner account overview */
+
+
+        /* Show opt ins to owner */
         $room_ids = room_ids_owner($db, get_user_id());
-        $tenant_info = optin_tenant_id($db, $room_ids);
-        #$optin_owner_table = optin_owner_table($db, $tenant_info);
+
+        foreach ($room_ids as $key => $value) {
+            foreach ($value as $keys => $values) {
+                $tenant_ids = optin_tenant_id($db, $values);
+                foreach ($tenant_ids as $key => $value) {
+                    foreach ($value as  $keys => $values) {
+                        $tenant_info = get_db_info($db, $values, 'u');
+                        $optin_owner_table = optin_owner_table($db, $tenant_info);
+                    }
+                }
+            }
+        }
 
 
         /* Avatar image */

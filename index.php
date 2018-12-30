@@ -347,13 +347,10 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         $room_id = $_POST['room_id'];
 
         /* remove optin from database */
-        $feedback = optout($db, $room_id); #deze verwijderd alleen de opt in bij die specifieke kamer
-        $error_msg = get_error($feedback);
+        $feedback = optout($db, $room_id);
 
-        var_dump($room_id, $feedback, $error_msg); #hiermee kunnen jullie zien welke message je op deze pagina krijgt
-
-        /* Redirect to room GET route */
-        #redirect(sprintf('/DDWT18/overview/?error_msg=%s', json_encode($feedback)));
+        /* Redirect to overview GET route */
+        redirect(sprintf('/DDWT18/overview/?msg=%s', json_encode($feedback)));
     });
 
 
@@ -494,7 +491,9 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
 
         /* Get opt ins */
         $tenant = optin_info_tenant($db, get_user_id());
+
         $optin_table = optin_tenant_table($db,$tenant);
+        #var_dump($room_name);
 
         /* Avatar image */
         $avatar = check_avatar(get_user_id());

@@ -1493,7 +1493,7 @@ function optout($pdo, $room_id) {
     if ($deleted == 1) {
         return [
             'type' => 'succes',
-            'message' => 'You were successfully opted-out for this room'
+            'message' => 'You were successfully opted-out.'
         ];
     }
     else {
@@ -1513,9 +1513,11 @@ function optin_info_tenant($pdo, $tenant) { #redundant: deze functie bijvoorbeel
     $stmt->execute([$tenant]);
     $tenant_info = $stmt->fetchAll(); #dit moest fetchAll zijn ipv fetch(), daardoor kreeg je die foreach array error. Nu is het namelijk een array met meerdere dingen en met fetch() haal je alleen de eerst-matchende waarde op.
     $tenant_info_exp = Array();
-    /* createarray with htmlspecialcharacters */
+    /* create array with htmlspecialchars */
     foreach ($tenant_info as $key => $value) {
-        $tenant_info_exp[$key] = htmlspecialchars($value);
+        foreach ($value as $user_key => $user_input){
+            $tenant_info_exp[$key][$user_key] = htmlspecialchars($user_input);
+        }
     }
     return $tenant_info_exp;
 }
@@ -1541,7 +1543,7 @@ function optin_tenant_table($pdo, $name) { #je zou hier ook ipv een tabel de car
     foreach($name as $key => $value) {
         $table_exp .= '
     <tr>
-    <th scope="row">' . get_room_name($pdo, $value) . '</th>
+    <th scope="row">' . get_room_name($pdo, $value['room']) . '</th>
     <td><a href="/DDWT18/room/?room_id=' . $value['room'] . '" role="button" class="btn btn-primary">More Info</a></td>
     </tr>
     ';

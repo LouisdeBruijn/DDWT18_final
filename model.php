@@ -1523,7 +1523,7 @@ function optin_info_tenant($pdo, $tenant) { #redundant: deze functie bijvoorbeel
 }
 
 function get_room_name($pdo, $room_id) { #deze functue zouden we eventueel kunnen samenvoegen met get_username en een if statement als het 'r' = dan return db_info['name'] en als het 'u' is dan return db_info['name] en 'surname'
-    $stmt = $pdo->prepare("SELECT * FROM rooms WHERE id = ?"); #als je alleen 1 waarde uit de db haalt (in dit geval 'name') dan kun je SELCECT name FROM gebruiken ipv SELECT *
+    $stmt = $pdo->prepare("SELECT name FROM rooms WHERE id = ?");
     $stmt->execute([$room_id]);
     $room_info = $stmt->fetch();
 
@@ -1532,10 +1532,10 @@ function get_room_name($pdo, $room_id) { #deze functue zouden we eventueel kunne
 
 function optin_tenant_table($pdo, $name) { #je zou hier ook ipv een tabel de cards met kamers waar ze optin op hebben gedaan kunnen laten zien
     $table_exp = '
-    <table class="table table-hover" xmlns="http://www.w3.org/1999/html">
+    <table class="table table-hover">
     <thead
     <tr>
-    <th scope="col">Opt ins</th>
+    <th scope="col">Opt ins you have initiated</th>
     <th scope="col"></th>
     </tr>
     </thead>
@@ -1544,7 +1544,7 @@ function optin_tenant_table($pdo, $name) { #je zou hier ook ipv een tabel de car
         $table_exp .= '
     <tr>
     <th scope="row">' . get_room_name($pdo, $value['room']) . '</th>
-    <td><a href="/DDWT18/room/?room_id=' . $value['room'] . '" role="button" class="btn btn-primary">More Info</a></td>
+    <td><a href="/DDWT18/room/?room_id=' . $value['room'] . '" role="button" class="btn btn-info">More Info</a></td>
     </tr>
     ';
     }

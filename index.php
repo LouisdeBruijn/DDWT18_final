@@ -350,7 +350,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         $feedback = optout($db, $room_id);
 
         /* Redirect to overview GET route */
-        redirect(sprintf('/DDWT18/overview/?msg=%s', json_encode($feedback)));
+        redirect(sprintf('/DDWT18/overview/?msg=%s', json_encode($feedback))); #krijg wel de message maar heeft geen achtergrond kleur?
     });
 
 

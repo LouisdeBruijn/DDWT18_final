@@ -345,11 +345,12 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         }
 
         $room_id = $_POST['room_id'];
-        $message = 'test message';
+        $message = $_POST['message'];
 
         /* add optin to database */
         $feedback = optin($db, $room_id, get_user_id(), $message);
-        var_dump($feedback);
+        #var_dump($feedback);
+        redirect(sprintf('/DDWT18/overview/?msg=%s', json_encode($feedback)));
     });
 
         /* delete optin #tedoen? */

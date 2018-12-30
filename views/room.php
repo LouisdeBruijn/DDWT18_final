@@ -96,7 +96,7 @@
                 </div>
 
             <?php } ?>
-            <?php if ($display_optin and !$display_optinout){ ?>
+            <?php if ($display_optin and !$display_optout){ ?>
             <div class="row">
                 <div class="col-auto">
                     <form action="<?= $root ?>/room/optin" method="POST">
@@ -107,7 +107,7 @@
                 </div>
             </div>
             <?php } ?>
-            <?php if ($display_optinout) { ?>
+            <?php if ($display_optout) { ?>
                 <div class="row">
                     <div class="col-auto">
                         <form action="<?= $root ?>/room/delete" method="POST">

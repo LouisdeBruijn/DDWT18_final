@@ -1559,20 +1559,62 @@ function optin_tenant_table($pdo, $name) { #je zou hier ook ipv een tabel de car
 
 function optin_cards($pdo, $user_info) {
     foreach($user_info as $key => $value) {
+        $card = '';
         $card .= '
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Opt in for room: Hier Room name</h5>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">Naam: '.$value['firstname'].'</li>
-                <li class="list-group-item">Achternaam: '.$value['lastname'].'</li>
-                <li class="list-group-item">Vestibulum at eros</li>
-            </ul>
-        </div>
-    </div>
-    ';}
-    return $card;
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Opt in for room: ' . get_room_name($pdo, $value['room']) . '</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Firstname: '.$value['firstname'].'</li>
+                        <li class="list-group-item">Lastname: '.$value['lastname'].'</li>
+                        <li class="list-group-item">Birthdate: '.$value['birthdate'].'</li>
+                        <li class="list-group-item">Biography: '.$value['biography'].'</li>
+                        <li class="list-group-item">Occupation: '.$value['occupation'].'</li>
+                        <li class="list-group-item">Language: '.$value['language'].'</li>
+                        <li class="list-group-item">Email: '.$value['email'].'</li>
+                        <li class="list-group-item">Phone: '.$value['phone'].'</li>
+                        <li class="list-group-item">Message: '.optin_room_message($pdo, $value['id']). '</li>
+                       
+    
+                    </ul>
+                </div>
+            </div>
+        ';}
+        return $card;
 }
+
+function optin_room_message ($pdo, $tenant_id) {
+    $stmt = $pdo->prepare("SELECT room, message FROM optin WHERE tenant = ?");
+    $stmt->execute([$tenant_id]);
+    $room_message = $stmt->fetchAll();
+    $room_message_exp = Array();
+    foreach ($room_message as $key => $value) {
+        foreach ($value as $user_key => $user_input) {
+            $room_message_exp[$key][$user_key] = htmlspecialchars($user_input);
+        }
+    }
+    var_dump($room_message_exp);
+    return $room_message_exp;
+    #return $room_message['room'].' '.$room_message['message'];
+}
+
+/*function optedin_info($pdo, $tenant_id, $owner_id) {
+    $stmt = $pdo->prepare("SELECT room, message FROM optin WHERE tenant = ?");
+    $stmt->execute([$tenant_id]);
+    $room_id = $stmt->fetchAll();
+    $owner_room_id_array = Array();
+    foreach ($room_id as $key => $value){
+        $owner_room_id = $value['room'];
+        array_push($owner_room_id_array,$owner_room_id);
+        $stmt = $pdo->prepare("SELECT id FROM rooms WHERE owner = ?, id = ?");
+        $stmt->execute([$owner_id]);
+        $optedin_roomids = $stmt->fetchAll();
+        var_dump($optedin_roomids);
+
+    }
+    var_dump($owner_room_id_array);
+
+}*/
 
 function optin_owner_table($pdo, $user_info) {
     $table_exp = '
@@ -1620,6 +1662,9 @@ function room_ids_owner($pdo, $owner_id) {
     }
     return $room_id_exp;
 }
+
+
+
 /* gets room id's from a specific owner as input and gives back tenant id's from the opted in tenants */
 function optin_tenant_id($pdo, $room_id) {
     $stmt = $pdo->prepare("SELECT tenant FROM optin WHERE room = ?");

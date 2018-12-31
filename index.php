@@ -510,7 +510,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         /* Show opt ins made by tenant */
         $optin_table = optin_tenant_table($db,$tenant);
 
-
+        #$test = optedin_info($db, '7', get_user_id());
 
         /* Show opt ins to owner */
         $room_ids = room_ids_owner($db, get_user_id());
@@ -522,7 +522,6 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
                 foreach ($tenant_ids as $key => $value) {
                     foreach ($value as  $keys => $values) {
                         $tenant_info = get_db_info($db, $values, 'u');
-                        #$optin_owner_table = optin_owner_table($db, $tenant_info);
                         array_push($all_opt_ins, $tenant_info);
                     }
                 }

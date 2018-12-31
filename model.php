@@ -1557,6 +1557,23 @@ function optin_tenant_table($pdo, $name) { #je zou hier ook ipv een tabel de car
 
 }
 
+function optin_cards($pdo, $user_info) {
+    foreach($user_info as $key => $value) {
+        $card .= '
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Opt in for room: Hier Room name</h5>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Naam: '.$value['firstname'].'</li>
+                <li class="list-group-item">Achternaam: '.$value['lastname'].'</li>
+                <li class="list-group-item">Vestibulum at eros</li>
+            </ul>
+        </div>
+    </div>
+    ';}
+    return $card;
+}
+
 function optin_owner_table($pdo, $user_info) {
     $table_exp = '
     <table class="table table-hover">

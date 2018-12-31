@@ -528,7 +528,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
                 }
             }
         }
-        $optin_owner_table = optin_owner_table($db, $all_opt_ins);
+        $optin_owner_table = optin_cards($db, $all_opt_ins);
 
 
         /* Avatar image */

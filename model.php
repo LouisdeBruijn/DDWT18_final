@@ -1557,35 +1557,7 @@ function optin_tenant_table($pdo, $name) { #je zou hier ook ipv een tabel de car
 
 }
 
-
-
-function optin_cards($pdo, $user_info, $opt_info) {
-    $card = '';
-    foreach($user_info as $key => $value) {
-        $card .= '
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Opt in for room: '.get_room_name($pdo, $opt_info['room']).'</h5>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">Firstname: '.$value['firstname'].'</li>
-                        <li class="list-group-item">Lastname: '.$value['lastname'].'</li>
-                        <li class="list-group-item">Birthdate: '.$value['birthdate'].'</li>
-                        <li class="list-group-item">Biography: '.$value['biography'].'</li>
-                        <li class="list-group-item">Occupation: '.$value['occupation'].'</li>
-                        <li class="list-group-item">Language: '.$value['language'].'</li>
-                        <li class="list-group-item">Email: '.$value['email'].'</li>
-                        <li class="list-group-item">Phone: '.$value['phone'].'</li>
-                        <li class="list-group-item">Message: '.$opt_info['message'].'</li>
-                       
-    
-                    </ul>
-                </div>
-            </div>
-        ';}
-        return $card;
-}
-
-function test($pdo, $optinfo) {
+function optin_owner_cards($pdo, $optinfo) {
     $card = '';
     foreach($optinfo as $key => $value) {
         $card .= '
@@ -1611,85 +1583,18 @@ function test($pdo, $optinfo) {
     return $card;
 }
 
-/*function optin_room_message ($pdo, $tenant_id) {
-    $stmt = $pdo->prepare("SELECT room, message FROM optin WHERE tenant = ?");
-    $stmt->execute([$tenant_id]);
-    $room_message = $stmt->fetchAll();
-    $room_message_exp = Array();
-    foreach ($room_message as $key => $value) {
-        foreach ($value as $user_key => $user_input) {
-            $room_message_exp[$key][$user_key] = htmlspecialchars($user_input);
-        }
-    }
-    var_dump($room_message_exp);
-    return $room_message_exp;
-    #return $room_message['room'].' '.$room_message['message'];
-}*/
-
-function get_opt_info($pdo, $room_id){
-    $stmt = $pdo->prepare('SELECT * FROM optin WHERE room = ?');
-    $stmt->execute([$room_id]);
-    $opt_info = $stmt->fetch();
+function get_opt_info($pdo, $room) {
+    $stmt = $pdo->prepare("SELECT * FROM optin WHERE room = ?");
+    $stmt->execute([$room]);
+    $opt_info = $stmt->fetchAll();
     $opt_info_exp = Array();
-
-    /* Create array with htmlspecialchars */
-    foreach ($opt_info as $key => $value){
-        $opt_info_exp[$key] = htmlspecialchars($value);
+    foreach ($opt_info as $key => $value) {
+        foreach ( $value as $user_key => $user_input) {
+            $opt_info_exp[$key][$user_key] = htmlspecialchars($user_input);
+        }
     }
     return $opt_info_exp;
 }
-
-/*function optedin_info($pdo, $tenant_id, $owner_id) {
-    $stmt = $pdo->prepare("SELECT room, message FROM optin WHERE tenant = ?");
-    $stmt->execute([$tenant_id]);
-    $room_id = $stmt->fetchAll();
-    $owner_room_id_array = Array();
-    foreach ($room_id as $key => $value){
-        $owner_room_id = $value['room'];
-        array_push($owner_room_id_array,$owner_room_id);
-        $stmt = $pdo->prepare("SELECT id FROM rooms WHERE owner = ?, id = ?");
-        $stmt->execute([$owner_id]);
-        $optedin_roomids = $stmt->fetchAll();
-        var_dump($optedin_roomids);
-
-    }
-    var_dump($owner_room_id_array);
-
-}*/
-
-#de onderstaande functie kan nu weg toch?
-/*function optin_owner_table($pdo, $user_info) {
-    $table_exp = '
-    <table class="table table-hover">
-    <thead
-    <tr>
-    <th scope="col">Opt ins from tenants</th>
-    <th scope="col"></th>
-    </tr>
-    </thead>
-    <tbody>';
-    foreach($user_info as $key => $value) {
-        $table_exp .= '
-    <tr>
-    <th scope="row">Hier room name nog</th>
-    <td>' . $value['firstname'] . '</td>
-    <td>'.$value['lastname'].'</td>
-    <td>'.$value['birthdate'].'</td>
-    <td>'.$value['biography'].'</td>
-    <td>'.$value['occupation'].'</td>
-    <td>'.$value['language'].'</td>
-    <td>'.$value['email'].'</td>
-    <td>'.$value['phone'].'</td>
-    </tr>
-    ';
-    }
-    $table_exp .= '
-    </tbody>
-    </table>
-    ';
-    return $table_exp;
-}*/
-
 
 /* geeft owner id's en geeft alle room id's terug die deze owner ownt. */
 function room_ids_owner($pdo, $owner_id) {

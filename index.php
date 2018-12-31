@@ -507,53 +507,22 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         /* Get opt ins */
         $tenant = optin_info_tenant($db, get_user_id());
 
-        /* Show opt ins made by tenant */
+        /* Show opt ins made by tenant to tenant*/
         $optin_table = optin_tenant_table($db, $tenant);
 
-        #$test = optedin_info($db, '7', get_user_id());
-
-        /* Show opt ins to owner */
+        /* Show opt ins made by tenant to owner */
         $room_ids = room_ids_owner($db, get_user_id());
-
         $all_opt_info = array();
         foreach ($room_ids as $key => $value) {
-            foreach ($value as $key => $values) {
-                $opt_info = get_opt_info($db, $values);
-                array_push($all_opt_info,$opt_info);
-            }
-        }
-        $optin_owner_table = test($db, $all_opt_info);
-
-
-        /*Eerdere versie voor opt in cards*/
-        /*
-        $all_opt_ins = array();
-        #$all_opt_info = array();
-        foreach ($room_ids as $key => $value) {
             foreach ($value as $keys => $values) {
-                $opt_info = get_opt_info($db, '3');
+                $opt_info = get_opt_info($db, $values);
+                foreach ($opt_info as $key => $value) {
+                    array_push($all_opt_info, $value);
 
-                $tenant_ids = optin_tenant_id($db, $values);
-                foreach ($tenant_ids as $key => $value) {
-                    foreach ($value as $keys => $values) {
-                        #$opt_info = get_opt_info($db, $values);
-                        $tenant_info = get_db_info($db, $values, 'u');
-                        #array_push($all_opt_info, $opt_info);
-                        array_push($all_opt_ins, $tenant_info);
-                    }
                 }
             }
         }
-        $optin_owner_table = test($db, $opt_info);
-        */
-
-        #foreach($all_opt_info as $key => $value) {
-        #    $optin_owner_table = optin_cards($db, $all_opt_ins, $value);
-        #}
-        # Hij laat nu wel een room name en message bij opt in cards zien maar nog niet juiste bij iedere card
-
-
-
+        $optin_owner_table = optin_owner_cards($db, $all_opt_info);
 
         /* Avatar image */
         $avatar = check_avatar(get_user_id());

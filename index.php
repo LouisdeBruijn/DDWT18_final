@@ -515,17 +515,20 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         /* Show opt ins to owner */
         $room_ids = room_ids_owner($db, get_user_id());
 
+        $all_opt_ins = array();
         foreach ($room_ids as $key => $value) {
             foreach ($value as $keys => $values) {
                 $tenant_ids = optin_tenant_id($db, $values);
                 foreach ($tenant_ids as $key => $value) {
                     foreach ($value as  $keys => $values) {
                         $tenant_info = get_db_info($db, $values, 'u');
-                        $optin_owner_table = optin_owner_table($db, $tenant_info);
+                        #$optin_owner_table = optin_owner_table($db, $tenant_info);
+                        array_push($all_opt_ins, $tenant_info);
                     }
                 }
             }
         }
+        $optin_owner_table = optin_owner_table($db, $all_opt_ins);
 
 
         /* Avatar image */

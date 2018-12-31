@@ -1559,7 +1559,7 @@ function optin_tenant_table($pdo, $name) { #je zou hier ook ipv een tabel de car
 
 function optin_owner_table($pdo, $user_info) {
     $table_exp = '
-    <table class="table table-hover" xmlns="http://www.w3.org/1999/html">
+    <table class="table table-hover">
     <thead
     <tr>
     <th scope="col">Opt ins from tenants</th>
@@ -1567,18 +1567,18 @@ function optin_owner_table($pdo, $user_info) {
     </tr>
     </thead>
     <tbody>';
-    {
+    foreach($user_info as $key => $value) {
         $table_exp .= '
     <tr>
-    <th scope="row">Hier room name nog</th> <!-- Deze functie moet anders in deze tabel -->
-    <td>' . $user_info['firstname'] . '</td>
-    <td>'.$user_info['lastname'].'</td>
-    <td>'.$user_info['birthdate'].'</td>
-    <td>'.$user_info['biography'].'</td>
-    <td>'.$user_info['occupation'].'</td>
-    <td>'.$user_info['language'].'</td>
-    <td>'.$user_info['email'].'</td>
-    <td>'.$user_info['phone'].'</td>
+    <th scope="row">Hier room name nog</th>
+    <td>' . $value['firstname'] . '</td>
+    <td>'.$value['lastname'].'</td>
+    <td>'.$value['birthdate'].'</td>
+    <td>'.$value['biography'].'</td>
+    <td>'.$value['occupation'].'</td>
+    <td>'.$value['language'].'</td>
+    <td>'.$value['email'].'</td>
+    <td>'.$value['phone'].'</td>
     </tr>
     ';
     }

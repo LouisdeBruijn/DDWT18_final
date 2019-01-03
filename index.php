@@ -208,7 +208,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         /* Display buttons */
         $display_buttons = display_buttons($db, get_user_id(), $room_id);
         $display_optin = display_opt_button($db, get_user_id(), $room_id);
-        $display_optout = display_optout($db, get_user_id(), $room_id);
+        #$display_optout = display_optout($db, get_user_id(), $room_id);
 
 
         /* Page */

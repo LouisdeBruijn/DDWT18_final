@@ -1430,20 +1430,34 @@ function remove_img_card($pdo, $room_id, $form_action, $submit_btn){
     }
 }
 
-/**
- * @param $pdo
- * @param $user_id
- * @return bool
- */
-function display_opt_button($pdo, $user_id) {
-    $stmt  = $pdo->prepare('SELECT role FROM users where id = ?');
-    $stmt->execute([$user_id]);
-    $role = $stmt->fetch();
-    if ( $role['role'] == '2'){ #het is '2' omdat dit in de db '2' de role voor tenant is.
+
+function display_opt_button($pdo, $user_id, $room_id){
+    $stmt = $pdo->prepare('SELECT tenant FROM optin WHERE room = ?');
+    $stmt->execute([$room_id]);
+    $tenant = $stmt->fetchAll();
+    $tenants = array();
+    if (empty($tenant)) {
         return True;
-    } else{
-        return False;
     }
+    else {
+        foreach ($tenant as $key => $value){
+            foreach ($value as $keys => $values) {
+                array_push($tenants, $values);
+                #if ($values == $user_id){
+                #    return False;
+                #} else {
+                 #   return True;
+                #}
+            }
+        }
+        if (in_array($user_id, $tenants)) {
+            return False;
+        } else {
+            return True;
+        }
+    }
+
+
 }
 
 /**
@@ -1457,7 +1471,7 @@ function display_optout($pdo, $user_id, $room_id) {
     $stmt = $pdo->prepare('SELECT room FROM optin WHERE tenant = ?');
     $stmt->execute([$user_id]);
     $room  = $stmt->fetch();
-    if ( $room['room'] == $room_id){
+    if ( $room['room'] !== ""){
         return True;
     } else{
         return False;

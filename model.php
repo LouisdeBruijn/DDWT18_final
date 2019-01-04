@@ -1443,11 +1443,6 @@ function display_opt_button($pdo, $user_id, $room_id){
         foreach ($tenant as $key => $value){
             foreach ($value as $keys => $values) {
                 array_push($tenants, $values);
-                #if ($values == $user_id){
-                #    return False;
-                #} else {
-                 #   return True;
-                #}
             }
         }
         if (in_array($user_id, $tenants)) {
@@ -1460,25 +1455,22 @@ function display_opt_button($pdo, $user_id, $room_id){
 
 }
 
-/**
- * Checks if user already has an optin for $room_id
- * @param $pdo
- * @param $user_id
- * @param $room_id
- * @return bool
- */
-function display_optout($pdo, $user_id, $room_id) {
-    $stmt = $pdo->prepare('SELECT room FROM optin WHERE tenant = ?');
-    $stmt->execute([$user_id]);
-    $room  = $stmt->fetch();
-    if ( $room['room'] !== ""){
-        return True;
-    } else{
-        return False;
-    }
-}
+
 
 function optin($pdo, $room_id, $user_id, $message) {
+    /* Check if all fields are set */
+    if (
+        empty($room_id) or
+        empty($user_id) or
+        empty($message)
+    ){
+        return [
+            'type' => 'danger',
+            'message' => 'There was an error. Not all fields were filled in.'
+        ];
+    }
+
+    /* Add optin to db */
     $stmt = $pdo->prepare("INSERT INTO optin (room, tenant, message) VALUES (?, ?, ?)");
     $stmt->execute([
         $room_id,
@@ -1546,12 +1538,11 @@ function get_room_name($pdo, $room_id) { #deze functue zouden we eventueel kunne
 }
 
 function optin_tenant_table($pdo, $name) { #je zou hier ook ipv een tabel de cards met kamers waar ze optin op hebben gedaan kunnen laten zien
-    $table_exp = '
+    $table_exp = '<div class="card">
     <table class="table table-hover">
     <thead
     <tr>
     <th scope="col">Opt ins you have initiated</th>
-    <th scope="col"></th>
     </tr>
     </thead>
     <tbody>';
@@ -1560,7 +1551,7 @@ function optin_tenant_table($pdo, $name) { #je zou hier ook ipv een tabel de car
     <tr>
     <th scope="row">' . get_room_name($pdo, $value['room']) . '</th>
     <td><a href="/DDWT18/room/?room_id=' . $value['room'] . '" role="button" class="btn btn-info">More Info</a></td>
-    </tr>
+    </tr></div>
     ';
     }
     $table_exp .= '

@@ -505,6 +505,11 @@ function postcode($pdo, $form_data, $user_id){
 
 }
 
+/**
+ * Counts number of calls to postcode API
+ * @param $count
+ * @return string
+ */
 function postcode_count_card($count){
     $postcode_count = '
 <div class="card">
@@ -775,6 +780,7 @@ function count_rooms($pdo){
 }
 
 /**
+ * update the user info in database
  * @param $pdo
  * @param $user_info
  * @return array
@@ -802,11 +808,6 @@ function update_user($pdo, $user_info){
     $stmt->execute([$user_info['user_id']]);
     $user = $stmt->fetch();
     $current_email = $user['email'];
-
-    #echo "Hello world!";
-    #print_r($user_info['user_id']);
-    #print_r($current_email);
-    #echo "<br>";
 
     /* Check if email already exists */
     $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
@@ -876,6 +877,7 @@ function is_dir_empty($dir) {
 
 
 /**
+ * function to upload a picture
  * @param $pdo
  * @param $user_id
  * @param $target_dir
@@ -884,7 +886,6 @@ function is_dir_empty($dir) {
  */
 function upload_file($pdo, $target_dir, $room_id){
 
-    // Moet je hier nog form validation doen?? Zodat ze niet een rare naam invoeren? of een rare file?
 
     // Create target file
     $target_file = $target_dir . basename($_FILES["fileToUpload"]['name']);
@@ -951,6 +952,12 @@ function upload_file($pdo, $target_dir, $room_id){
     }
 }
 
+/**
+ * upload avatar picture
+ * @param $user_id
+ * @param $target_dir
+ * @return array
+ */
 function upload_avatar($user_id, $target_dir){
 
     // Rename filename
@@ -1022,6 +1029,12 @@ function upload_avatar($user_id, $target_dir){
 }
 
 
+/**
+ * removes room images from database
+ * @param $pdo
+ * @param $img
+ * @return array
+ */
 function remove_file($pdo, $img){
 
     //Create DB connection
@@ -1080,6 +1093,7 @@ function check_avatar($user_id) {
 }
 
 /**
+ * Check if the GET/POST variables are set on a route
  * @param $variables
  * @return array
  */
@@ -1094,6 +1108,12 @@ function check_url_var($variables){
     }
 }
 
+
+/**
+ * check if route exists
+ * @param $pdo
+ * @param $room_id
+ */
 function route_exists($pdo, $room_id){
 
     $stmt = $pdo->prepare('SELECT id FROM rooms WHERE id = ?');
@@ -1112,6 +1132,7 @@ function route_exists($pdo, $room_id){
 
 
 /**
+ * Check if user of the route is also owner of the to-be-edited-content
  * @param $user_id
  * @param $owner
  * @return array
@@ -1127,12 +1148,13 @@ function check_route($user_id, $owner){
 }
 
 /**
+ * display buttons if user is owner of room
  * @param $pdo
  * @param $user_id
  * @param $room_id
  * @return bool
  */
-function display_buttons($pdo, $user_id, $room_id){ #hier doe ik dus alleen owner omdat ik alleen owner nodig heb #hier nog naar kijken!
+function display_buttons($pdo, $user_id, $room_id){
 
     /* Get DB information */
     $stmt = $pdo->prepare('SELECT owner FROM rooms WHERE id = ?');
@@ -1146,6 +1168,7 @@ function display_buttons($pdo, $user_id, $room_id){ #hier doe ik dus alleen owne
 }
 
 /**
+ * create and show carousel
  * @param $images
  * @return string
  */
@@ -1196,6 +1219,7 @@ function show_carousel($images) {
 }
 
 /**
+ * create carousel item
  * @param $pdo
  * @param $room_id
  * @return array
@@ -1234,6 +1258,7 @@ function get_carousel($pdo, $room_id) {
 }
 
 /**
+ *
  * @param $pdo
  * @param $room
  * @param $images
@@ -1300,6 +1325,7 @@ function get_image_src($pdo, $room, $images) {
 
 
 /**
+ * get cards for rooms
  * @param $superArray
  * @return string
  */
@@ -1346,7 +1372,7 @@ function get_rooms_cards($superArray){
                     $rooms_card .= '
                                     </div>
                                    ';
-                    foreach($items['card'] as $key => $card) { #card
+                    foreach($items['card'] as $key => $card) {
                         $rooms_card .= $card;
                     }
                 }
@@ -1356,6 +1382,7 @@ function get_rooms_cards($superArray){
 }
 
 /**
+ * add image to card
  * @param $form_action
  * @param $submit_btn
  * @param $image_src
@@ -1392,6 +1419,14 @@ function add_image_card($form_action, $submit_btn, $room_id){
     return $image;
 }
 
+/**
+ * remove image from card
+ * @param $pdo
+ * @param $room_id
+ * @param $form_action
+ * @param $submit_btn
+ * @return string
+ */
 function remove_img_card($pdo, $room_id, $form_action, $submit_btn){
 
     $stmt  = $pdo->prepare('SELECT path, name FROM images where room_id = ?');
@@ -1431,6 +1466,13 @@ function remove_img_card($pdo, $room_id, $form_action, $submit_btn){
 }
 
 
+/**
+ * returns true or false depending if tenant is opted in at this room
+ * @param $pdo
+ * @param $user_id
+ * @param $room_id
+ * @return bool
+ */
 function display_opt_button($pdo, $user_id, $room_id){
     $stmt = $pdo->prepare('SELECT tenant FROM optin WHERE room = ?');
     $stmt->execute([$room_id]);
@@ -1456,7 +1498,14 @@ function display_opt_button($pdo, $user_id, $room_id){
 }
 
 
-
+/**
+ * adds optin by tenant to database
+ * @param $pdo
+ * @param $room_id
+ * @param $user_id
+ * @param $message
+ * @return array
+ */
 function optin($pdo, $room_id, $user_id, $message) {
     /* Check if all fields are set */
     if (
@@ -1504,6 +1553,12 @@ function optin($pdo, $room_id, $user_id, $message) {
     }
 }
 
+/**
+ * deletes opt in by tenant from database
+ * @param $pdo
+ * @param $room_id
+ * @return array
+ */
 function optout($pdo, $room_id) {
     $stmt = $pdo->prepare("DELETE FROM optin WHERE room = ?");
     $stmt->execute([$room_id]);
@@ -1522,14 +1577,17 @@ function optout($pdo, $room_id) {
     }
 }
 
-/** this function gives the info from a certain tenant from the optin table
- *
- */
 
-function optin_info_tenant($pdo, $tenant) { #redundant: deze functie bijvoorbeeld zouden we net als get_room_info kunnen samenvoegen bij get_db_info ! --> ik heb hiervan al een begin gemaakt
+/**
+ * this function gives the info from a certain tenant from the optin table
+ * @param $pdo
+ * @param $tenant
+ * @return array
+ */
+function optin_info_tenant($pdo, $tenant) {
     $stmt = $pdo->prepare('SELECT room FROM optin WHERE tenant = ?');
     $stmt->execute([$tenant]);
-    $tenant_info = $stmt->fetchAll(); #dit moest fetchAll zijn ipv fetch(), daardoor kreeg je die foreach array error. Nu is het namelijk een array met meerdere dingen en met fetch() haal je alleen de eerst-matchende waarde op.
+    $tenant_info = $stmt->fetchAll();
     $tenant_info_exp = Array();
     /* create array with htmlspecialchars */
     foreach ($tenant_info as $key => $value) {
@@ -1540,15 +1598,27 @@ function optin_info_tenant($pdo, $tenant) { #redundant: deze functie bijvoorbeel
     return $tenant_info_exp;
 }
 
-function get_room_name($pdo, $room_id) { #deze functue zouden we eventueel kunnen samenvoegen met get_username en een if statement als het 'r' = dan return db_info['name'] en als het 'u' is dan return db_info['name] en 'surname'
+/**
+ * gives back name of room
+ * @param $pdo
+ * @param $room_id
+ * @return mixed
+ */
+function get_room_name($pdo, $room_id) {
     $stmt = $pdo->prepare("SELECT name FROM rooms WHERE id = ?");
     $stmt->execute([$room_id]);
     $room_info = $stmt->fetch();
 
-    return $room_info['name'];
+    return htmlspecialchars($room_info['name']);
 }
 
-function optin_tenant_table($pdo, $name) { #je zou hier ook ipv een tabel de cards met kamers waar ze optin op hebben gedaan kunnen laten zien
+/**
+ * shows overview of opt ins by logged in user (which is a tenant) in my account
+ * @param $pdo
+ * @param $name
+ * @return string
+ */
+function optin_tenant_table($pdo, $name) {
     $table_exp = '<div class="card">
     <table class="table table-hover">
     <thead
@@ -1573,6 +1643,12 @@ function optin_tenant_table($pdo, $name) { #je zou hier ook ipv een tabel de car
 
 }
 
+/**
+ * shows opt ins by tenants in my account to logged in owner
+ * @param $pdo
+ * @param $optinfo
+ * @return string
+ */
 function optin_owner_cards($pdo, $optinfo) {
     $card = '';
     foreach($optinfo as $key => $value) {
@@ -1599,6 +1675,12 @@ function optin_owner_cards($pdo, $optinfo) {
     return $card;
 }
 
+/**
+ * get info from optin table from database for a specific room
+ * @param $pdo
+ * @param $room
+ * @return array
+ */
 function get_opt_info($pdo, $room) {
     $stmt = $pdo->prepare("SELECT * FROM optin WHERE room = ?");
     $stmt->execute([$room]);
@@ -1612,7 +1694,12 @@ function get_opt_info($pdo, $room) {
     return $opt_info_exp;
 }
 
-/* geeft owner id's en geeft alle room id's terug die deze owner ownt. */
+/**
+ * Returns all room id's of rooms owned by owner
+ * @param $pdo
+ * @param $owner_id
+ * @return array
+ */
 function room_ids_owner($pdo, $owner_id) {
     $stmt = $pdo->prepare("SELECT id FROM rooms WHERE owner = ?");
     $stmt->execute([$owner_id]);
@@ -1626,7 +1713,13 @@ function room_ids_owner($pdo, $owner_id) {
     return $room_id_exp;
 }
 
-/* gets room id's from a specific owner as input and gives back tenant id's from the opted in tenants */
+
+/**
+ * gives room id's from a specific owner as input and gives back tenant id's from the opted in tenants
+ * @param $pdo
+ * @param $room_id
+ * @return array
+ */
 function optin_tenant_id($pdo, $room_id) {
     $stmt = $pdo->prepare("SELECT tenant FROM optin WHERE room = ?");
     $stmt->execute([$room_id]);

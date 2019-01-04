@@ -629,6 +629,20 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
 
     });
 
+    /* Delete user account POST */
+    $router->post('/remove', function() use ($db, $navigation_tpl, $root) {
+        $user_id = $_POST['user_id'];
+        $feedback = delete_account($db, $user_id);
+
+        /* Redirect */
+        if ($feedback['type'] == 'success'){
+            redirect(sprintf('/DDWT18/?msg=%s', json_encode($feedback)));
+        } else {
+            redirect(sprintf('/DDWT18/myaccount/delete/?msg=%s', json_encode($feedback)));
+        }
+
+    });
+
 });
 
 $router->set404(function() {

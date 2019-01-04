@@ -76,6 +76,7 @@
 
                         </div>
                         <a href="/DDWT18/myaccount/edit" class="btn btn-info">Edit profile</a>
+                        <a href="/DDWT18/myaccount/remove" class="btn btn-danger">Delete account</a>
                     </div>
                 </div>
             </div>

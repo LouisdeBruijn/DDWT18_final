@@ -1732,3 +1732,24 @@ function optin_tenant_id($pdo, $room_id) {
     }
     return $tenant_id_exp;
 }
+
+/**
+ *
+ */
+function delete_account($pdo, $user_id) {
+    $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+    $stmt->execute([$user_id]);
+    $deleted = $stmt->rowCount();
+    if ($deleted ==  1) {
+        return [
+            'type' => 'success',
+            'message' => "Account removed!"
+        ];
+    }
+    else {
+        return [
+            'type' => 'warning',
+            'message' => 'An error occurred. Your account was not removed.'
+        ];
+    }
+}

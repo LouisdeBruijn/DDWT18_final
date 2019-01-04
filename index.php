@@ -631,7 +631,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
 
     /* Delete user account POST */
     $router->post('/remove', function() use ($db, $navigation_tpl, $root) {
-        $user_id = $_POST['user_id'];
+        $user_id = get_user_id();
         $feedback = delete_account($db, $user_id);
 
         /* Redirect */

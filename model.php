@@ -1470,6 +1470,17 @@ function optin($pdo, $room_id, $user_id, $message) {
         ];
     }
 
+    /* Check if tenant already opted in for room_id */
+    $stmt = $pdo->prepare('SELECT * FROM optin WHERE tenant = ? AND room = ?');
+    $stmt->execute([$user_id, $room_id]);
+    $optin = $stmt->rowCount();
+    if ($optin) {
+        return [
+            'type' => 'danger',
+            'message' => 'You are already opted-in for this room.'
+        ];
+    }
+
     /* Add optin to db */
     $stmt = $pdo->prepare("INSERT INTO optin (room, tenant, message) VALUES (?, ?, ?)");
     $stmt->execute([

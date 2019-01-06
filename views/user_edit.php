@@ -57,6 +57,25 @@
                         </div>
                     </form>
                 </div>
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <p class="text-black-secondary typography-subheading">Discard your account?</p>
+                                <form action="<?= $root ?>/myaccount/remove/" method="POST">
+                                    <input type="hidden" value="<?= $user_id ?>" name="user_id">
+                                    <button class="btn btn-outline-info" data-dismiss="modal" type="button">Cancel</button>
+                                    <button type="submit" class="btn btn-outline-danger">Remove</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModalCenter">
+                    Delete account
+                </button>
+
             </div>
         </div>
         <!-- Middle content -->

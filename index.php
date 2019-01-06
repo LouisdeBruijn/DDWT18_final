@@ -208,7 +208,7 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         /* Display buttons */
         $display_buttons = display_buttons($db, get_user_id(), $room_id);
         $display_optin = display_opt_button($db, get_user_id(), $room_id);
-        #$display_optout = display_optout($db, get_user_id(), $room_id);
+
 
 
         /* Page */
@@ -349,11 +349,11 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
 
         /* add optin to database */
         $feedback = optin($db, $room_id, get_user_id(), $message);
-        #var_dump($feedback);
+
         redirect(sprintf('/DDWT18/overview/?msg=%s', json_encode($feedback)));
     });
 
-        /* delete optin #tedoen? */
+        /* delete optin */
     $router->post('/delete',function () use ($router, $db, $navigation_tpl, $root) {
         if ( !check_login() ) {
             redirect('/DDWT18/login/');
@@ -362,10 +362,10 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         $room_id = $_POST['room_id'];
 
         /* remove optin from database */
-        $feedback = optout($db, $room_id);
+        $feedback = optout($db, $room_id, get_user_id());
 
         /* Redirect to overview GET route */
-        redirect(sprintf('/DDWT18/overview/?msg=%s', json_encode($feedback))); #krijg wel de message maar heeft geen achtergrond kleur?
+        redirect(sprintf('/DDWT18/overview/?msg=%s', json_encode($feedback)));
     });
 
 
@@ -631,14 +631,19 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
 
     /* Delete user account POST */
     $router->post('/remove', function() use ($db, $navigation_tpl, $root) {
-        $user_id = get_user_id();
-        $feedback = delete_account($db, $user_id);
+        /* Check if logged in */
+        if ( !check_login() ) {
+            redirect('/DDWT18/login/');
+        }
+
+        /* Delete user account */
+        $feedback = delete_account($db, get_user_id());
 
         /* Redirect */
         if ($feedback['type'] == 'success'){
             redirect(sprintf('/DDWT18/?msg=%s', json_encode($feedback)));
         } else {
-            redirect(sprintf('/DDWT18/myaccount/delete/?msg=%s', json_encode($feedback)));
+            redirect(sprintf('/DDWT18/myaccount/edit/?msg=%s', json_encode($feedback)));
         }
 
     });

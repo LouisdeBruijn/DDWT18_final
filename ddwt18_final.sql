@@ -218,8 +218,8 @@ ALTER TABLE `images`
 -- Constraints for table `optin`
 --
 ALTER TABLE `optin`
-  ADD CONSTRAINT `optin_ibfk_1` FOREIGN KEY (`room`) REFERENCES `rooms` (`id`),
-  ADD CONSTRAINT `optin_ibfk_2` FOREIGN KEY (`tenant`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `optin_ibfk_1` FOREIGN KEY (`room`) REFERENCES `rooms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `optin_ibfk_2` FOREIGN KEY (`tenant`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `rooms`

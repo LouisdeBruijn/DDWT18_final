@@ -96,18 +96,18 @@
                 </div>
 
             <?php } ?>
-            <?php if ($display_optin){ ?>
+            <?php if ($display_optin and !$display_buttons){ ?>
             <div class="row">
                 <div class="col-auto">
                     <form action="<?= $root ?>/room/optin" method="POST">
                         <input type="hidden" value="<?= $room_id ?>" name="room_id">
-                        <textarea class="form-control" aria-describedby="" id="message" placeholder="Write a message the the owner of the room" name="message" type="textarea" required></textarea><br>
-                        <button type="submit" class="btn btn-primary">Opt in</button>
+                        <textarea class="form-control" aria-describedby="" id="message" placeholder="Write a message for the owner of the room" name="message" type="textarea" required></textarea><br>
+                        <button type="submit" class="btn btn-info">Opt in</button>
                     </form>
                 </div>
             </div>
             <?php } ?>
-            <?php if (!$display_optin) { ?>
+            <?php if (!$display_optin){ ?>
                 <div class="row">
                     <div class="col-auto">
                         <form action="<?= $root ?>/room/delete" method="POST">
@@ -117,6 +117,7 @@
                     </div>
                 </div>
             <?php } ?>
+
         </div>
     </div>
 

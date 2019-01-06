@@ -1017,7 +1017,7 @@ function upload_avatar($user_id, $target_dir){
     if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
         return [
             'type' => 'success',
-            'message' => 'The file '.basename( $_FILES["fileToUpload"]["name"]).' is your new avatar image.'
+            'message' => 'Your avatar image has been changed.'
         ];
 
     } else {
@@ -1474,26 +1474,31 @@ function remove_img_card($pdo, $room_id, $form_action, $submit_btn){
  * @return bool
  */
 function display_opt_button($pdo, $user_id, $room_id){
-    $stmt = $pdo->prepare('SELECT tenant FROM optin WHERE room = ?');
+
+    $stmt = $pdo->prepare('SELECT tenant, room FROM optin WHERE room = ?');
     $stmt->execute([$room_id]);
-    $tenant = $stmt->fetchAll();
-    $tenants = array();
-    if (empty($tenant)) {
+    $optin = $stmt->fetchAll();
+
+    /* if there are no opt-ins, show opt-in buttons */
+    if (empty($optin)) {
         return True;
     }
-    else {
-        foreach ($tenant as $key => $value){
-            foreach ($value as $keys => $values) {
-                array_push($tenants, $values);
-            }
-        }
-        if (in_array($user_id, $tenants)) {
+
+    #Als we weten hoe een try/except werkt in php kunnen deze twee functies hieronder samengeveogd worden.
+
+    /* if user has posted an opt-in, don't show opt-in buttons  */
+    foreach ($optin as $key => $value) {
+        if ($user_id == $value['tenant']) {
             return False;
-        } else {
-            return True;
         }
     }
 
+    /* if user has not posted an opt-in, show opt-in buttons */
+    foreach ($optin as $key => $value) {
+        if ($user_id != $value['tenant']) {
+            return True;
+        }
+    }
 
 }
 
@@ -1559,13 +1564,37 @@ function optin($pdo, $room_id, $user_id, $message) {
  * @param $room_id
  * @return array
  */
-function optout($pdo, $room_id) {
-    $stmt = $pdo->prepare("DELETE FROM optin WHERE room = ?");
+function optout($pdo, $room_id, $user_id) {
+
+    /*
+    /*Check if user is tenant
+    $stmt = $pdo->prepare('SELECT * FROM optin WHERE room = ?');
     $stmt->execute([$room_id]);
+    $optin = $stmt->fetchAll();
+
+    #Ik begrijp niet helemaal hoe ik hier door een lijst heen kan werken met foreach loops en dat ie niet elke keer eruit knalt
+    #als er meerdere optins zijn dan is de eerste niet gelijk aan user_id en dan ben je de zak en knalt ie je eruit
+    #maar je wilt per item in de lijst van $optin kijken of deze gelijk is aan $user_id, en als er 1tje zo is dan dat ie doorgaat met de functie
+    # maar nu knalt ie je eruit als het niet zo is. ik ben eigenlijk opzoek naar een try except (python) functie
+
+    foreach ($optin as $key => $value) {
+        var_dump($value);
+        if ($user_id != $value['tenant'] ){
+            return [
+                'type' => 'danger',
+                'message' => 'You are not the tenant for this room and thus cannot delete it.'
+            ];
+        }
+    }
+    */
+
+    /* Remove the room */
+    $stmt = $pdo->prepare("DELETE FROM optin WHERE room = ? AND tenant = ?");
+    $stmt->execute([$room_id, $user_id]);
     $deleted = $stmt->rowCount();
     if ($deleted == 1) {
         return [
-            'type' => 'succes',
+            'type' => 'success',
             'message' => 'You were successfully opted-out.'
         ];
     }
@@ -1737,13 +1766,27 @@ function optin_tenant_id($pdo, $room_id) {
  *
  */
 function delete_account($pdo, $user_id) {
+
+    /* Check User Authorization */
+    $form_user_id = $_POST['user_id'];
+    if ($form_user_id != $user_id) {
+        return [
+            'type' => 'danger',
+            'message' => 'You are not authorized to perform this action.'
+        ];
+    }
+
+    /* Destroy the session */
+    session_destroy();
+
+    /* Remove user from database */
     $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
     $stmt->execute([$user_id]);
     $deleted = $stmt->rowCount();
     if ($deleted ==  1) {
         return [
             'type' => 'success',
-            'message' => "Account removed!"
+            'message' => "Your account was removed!"
         ];
     }
     else {

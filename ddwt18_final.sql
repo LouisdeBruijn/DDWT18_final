@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Dec 27, 2018 at 12:24 PM
+-- Generation Time: Jan 07, 2019 at 01:03 PM
 -- Server version: 5.7.23
--- PHP Version: 7.2.8
+-- PHP Version: 7.2.10
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -107,7 +107,8 @@ CREATE TABLE `rooms` (
 
 INSERT INTO `rooms` (`id`, `owner`, `name`, `description`, `street`, `streetnumber`, `postalcode`, `city`, `type`, `price`, `size`) VALUES
 (19, 11, 'Student\'s room overlooking water bay area', 'A beautiful and light-written room right between the Noorderplantsoen and the canals. Easy access to supermarkets and a nice and quiet neighbourhood. ', 'Havenstraat', 1, '9712Ta', 'Groningen', 'Student\'s house', '410.00', 10),
-(20, 11, 'Beautiful and spacious apartment for international housing', 'This beautiful apartment is well-lit with natural lighting and close-by the nearest supermarkets at the Kwinkenplein. The neighbourhood is attracting lots of international students.', 'Kwinkenplein', 2, '9712GZ', 'Groningen', 'Apartment', '440.00', 20);
+(20, 11, 'Beautiful and spacious apartment for international housing', 'This beautiful apartment is well-lit with natural lighting and close-by the nearest supermarkets at the Kwinkenplein. The neighbourhood is attracting lots of international students.', 'Kwinkenplein', 2, '9712GZ', 'Groningen', 'Apartment', '440.00', 20),
+(21, 16, 'Studio with a view', 'A cosy studio on the 6th floor with a great view', 'Goudenregenstraat', 327, '8922CP', 'Leeuwarden', 'Studio', '350.00', 21);
 
 -- --------------------------------------------------------
 
@@ -136,7 +137,11 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `password`, `firstname`, `lastname`, `role`, `birthdate`, `biography`, `occupation`, `language`, `email`, `phone`) VALUES
 (11, 'louis_de_bruijn', '$2y$10$.WayG.fNq8R5u.pC9Vlb1ePnstFxqbPaNWispSNQhM59BLZsYl12G', 'Louis', 'de Bruijn', 1, '1994-03-14', 'My name is Louis, I am a 24-year old student of Information Science at the University of Groningen. ', 'Information Science', 'NL', 'l.e.d.de.bruijn@student.rug.nl', '+31615443390'),
-(12, 'china_international', '$2y$10$0rNI0nrXztUkwQnsLtzn5eeGGRV8qMq4CqixMOAssyVYCJ15FhoJa', 'Hong', 'Tong', 2, '1998-01-11', 'I spleak English not so good. I come from Beijing and want to study in Groningen but I no find house. ', 'Biochemistry', 'ZH', 'hongtong@china.com', '+31612345678');
+(12, 'china_international', '$2y$10$0rNI0nrXztUkwQnsLtzn5eeGGRV8qMq4CqixMOAssyVYCJ15FhoJa', 'Hong', 'Tong', 2, '1998-01-11', 'I spleak English not so good. I come from Beijing and want to study in Groningen but I no find house. ', 'Biochemistry', 'ZH', 'hongtong@china.com', '+31612345678'),
+(13, 'anna', '$2y$10$VOHPcsSdu//qDHJxOYxnM.14yvgAgb9YFBlupACMMwd.knWTMPWL.', 'Anna', 'Jung', 2, '1992-11-07', 'I\'m a student looking for an accommodation', 'Art History', 'DE', 'annajung@gmail.com', '0645493649'),
+(14, 'dan', '$2y$10$ICEy9OU7oZIEJvSzuhRTueoz4/LVtbXRUH/jm3XF3LXclv71uBacm', 'Daniel', 'Howard', 2, '1989-07-15', 'Hi, I\'m Daniel. I\'m studying Engineering and I\'m looking for an accommodation.', 'Engineering', 'EN', 'dan_howard@gmail.com', '0627031088'),
+(15, 'elli', '$2y$10$TXZCa9AYNa.snAfFgqdgT.HM99kB87EuIwd5Qt0X9PmfVQCGfnqa2', 'Elli', 'Virtanen', 2, '1994-12-27', 'Hey I\'m from Finland, I will be studying in the Netherlands for a year.', 'Sociology', 'FI', 'ellivirtanen@hotmail.com', '0622306813'),
+(16, 'fenna', '$2y$10$PYhw2BjmFWnao6m11tVOZ.rjft7PmNPPJ6SO/k9ijent7ZShoO64O', 'Fenna', 'Dijkstra', 1, '1990-02-08', 'Hi I\'m Fenna I study psychology.', 'Psychology', 'NL', 'fenna_dijkstra@hotmailc.om', '0681698934');
 
 --
 -- Indexes for dumped tables
@@ -196,13 +201,13 @@ ALTER TABLE `postcode`
 -- AUTO_INCREMENT for table `rooms`
 --
 ALTER TABLE `rooms`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Constraints for dumped tables

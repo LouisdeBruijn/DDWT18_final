@@ -58,8 +58,8 @@ $router->get('/', function() use($db, $navigation_tpl, $root) {
 
     /* Page */
     $page_title = 'Home';
-    $page_subtitle = 'Wat gaan we hiermee doen';
-    $page_content = 'Tot nu toe niet heel veel';
+    $page_subtitle = '';
+    $page_content = '';
     include use_template('main');
 
 });
@@ -76,8 +76,8 @@ $router->get('/login', function() use ($db, $navigation_tpl, $root) {
     $navigation = get_navigation($navigation_tpl, 3);
 
     /* Get error msg from POST route to GET route */
-    if ( isset($_GET['error_msg']) ) {
-        $view_msg = get_error($_GET['error_msg']);
+    if ( isset($_GET['msg']) ) {
+        $view_msg = get_error($_GET['msg']);
     }
 
     /* Page */
@@ -93,7 +93,7 @@ $router->post('/login', function() use ($db, $navigation_tpl, $root) {
     $feedback = login_user($db, $_POST);
 
     /* Redirect to homepage */
-    redirect(sprintf('/DDWT18/login/?error_msg=%s', json_encode($feedback)));
+    redirect(sprintf('/DDWT18/login/?msg=%s', json_encode($feedback)));
 
 });
 
@@ -104,7 +104,7 @@ $router->get('/logout', function() use ($db) {
     $feedback = logout_user();
 
     /* Redirect to homepage */
-    redirect(sprintf('/DDWT18/?msg=%s',
+    redirect(sprintf('/DDWT18/login/?msg=%s',
         json_encode($feedback)));
 
 });
@@ -208,8 +208,6 @@ $router->mount('/room', function() use ($router, $db, $navigation_tpl, $root) {
         /* Display buttons */
         $display_buttons = display_buttons($db, get_user_id(), $room_id);
         $display_optin = display_opt_button($db, get_user_id(), $room_id);
-
-
 
         /* Page */
         $page_title = $room_info['name'];
@@ -492,37 +490,49 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
             $view_msg = get_error($_GET['msg']);
         }
 
-        /* Get rooms from DB */
-        $all_rooms = array();
-        $rooms = get_rooms($db);
+        /* Get account info from db */
+        $user_info = get_db_info($db, get_user_id(), 'u');
 
-        /* Only show rooms that user owns */
-        foreach ($rooms as $key => $room) {
-            if (get_user_id() == $room['owner']) {
-                $rooms_card = get_rooms_cards(get_image_src($db, $room, get_carousel($db, $room['id'])));
-                array_push($all_rooms, $rooms_card);
-            }
-        }
+        if ( $user_info['role'] == 1) {
+            /* Owner */
 
-        /* Get opt ins */
-        $tenant = optin_info_tenant($db, get_user_id());
+            // Get rooms from DB
+            $all_rooms = array();
+            $rooms = get_rooms($db);
 
-        /* Show opt ins made by tenant to tenant*/
-        $optin_table = optin_tenant_table($db, $tenant);
-
-        /* Show opt ins made by tenant to owner */
-        $room_ids = room_ids_owner($db, get_user_id());
-        $all_opt_info = array();
-        foreach ($room_ids as $key => $value) {
-            foreach ($value as $keys => $values) {
-                $opt_info = get_opt_info($db, $values);
-                foreach ($opt_info as $key => $value) {
-                    array_push($all_opt_info, $value);
-
+            // Only show rooms that user owns
+            foreach ($rooms as $key => $room) {
+                if (get_user_id() == $room['owner']) {
+                    $rooms_card = get_rooms_cards(get_image_src($db, $room, get_carousel($db, $room['id'])));
+                    array_push($all_rooms, $rooms_card);
                 }
             }
+
+            // Only show opt ins made by tenant to owner
+            $room_ids = room_ids_owner($db, get_user_id());
+            $all_opt_info = array();
+            foreach ($room_ids as $key => $value) {
+                foreach ($value as $keys => $values) {
+                    $opt_info = get_opt_info($db, $values);
+                    foreach ($opt_info as $key => $value) {
+                        array_push($all_opt_info, $value);
+
+                    }
+                }
+            }
+
+            // Optin owner table
+            $optin_owner_table = optin_owner_cards($db, $all_opt_info);
+
+        } else {
+            /* Tenant */
+            // Get opt ins
+            $tenant = optin_info_tenant($db, get_user_id());
+
+            // Show opt ins made by tenant to tenant
+            $optin_table = optin_tenant_table($db, $tenant);
+
         }
-        $optin_owner_table = optin_owner_cards($db, $all_opt_info);
 
         /* Avatar image */
         $avatar = check_avatar(get_user_id());
@@ -530,13 +540,10 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
         /* User first name and last name */
         $name = get_username($db, get_user_id());
 
-        /* Get account info from db */
-        $user_info = get_db_info($db, get_user_id(), 'u');
-
         /* Page info */
         $page_title = 'My Account';
         $page_subtitle = 'An overview of your account';
-        $page_content = 'View the rooms that you have listed below';
+        $page_content = '';
         include use_template('account');
 
     });
@@ -641,7 +648,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
 
         /* Redirect */
         if ($feedback['type'] == 'success'){
-            redirect(sprintf('/DDWT18/?msg=%s', json_encode($feedback)));
+            redirect(sprintf('/DDWT18/register/?msg=%s', json_encode($feedback)));
         } else {
             redirect(sprintf('/DDWT18/myaccount/edit/?msg=%s', json_encode($feedback)));
         }

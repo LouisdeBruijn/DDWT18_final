@@ -1614,10 +1614,14 @@ function optout($pdo, $room_id, $user_id) {
  * @return array
  */
 function optin_info_tenant($pdo, $tenant) {
+
+
+
     $stmt = $pdo->prepare('SELECT room FROM optin WHERE tenant = ?');
     $stmt->execute([$tenant]);
     $tenant_info = $stmt->fetchAll();
     $tenant_info_exp = Array();
+
     /* create array with htmlspecialchars */
     foreach ($tenant_info as $key => $value) {
         foreach ($value as $user_key => $user_input){
@@ -1648,25 +1652,25 @@ function get_room_name($pdo, $room_id) {
  * @return string
  */
 function optin_tenant_table($pdo, $name) {
-    $table_exp = '<div class="card">
-    <table class="table table-hover">
-    <thead
-    <tr>
-    <th scope="col">Opt ins you have initiated</th>
-    </tr>
-    </thead>
-    <tbody>';
-    foreach($name as $key => $value) {
-        $table_exp .= '
-    <tr>
-    <th scope="row">' . get_room_name($pdo, $value['room']) . '</th>
-    <td><a href="/DDWT18/room/?room_id=' . $value['room'] . '" role="button" class="btn btn-info">More Info</a></td>
-    </tr></div>
-    ';
-    }
-    $table_exp .= '
-    </tbody>
-    </table>
+
+    $table_exp = '
+    <div class="card">
+        <table class="table table-hover" id="opt-in">
+            <tbody>';
+            foreach($name as $key => $value) {
+                $table_exp .= '
+            <tr>
+                <th scope="row">' . get_room_name($pdo, $value['room']) . '</th>
+                <td>
+                    <a href="/DDWT18/room/?room_id=' . $value['room'] . '" role="button" class="btn btn-info">More Info</a>
+                </td>
+            </tr>
+            ';
+            }
+            $table_exp .= '
+            </tbody>
+        </table>
+    </div>
     ';
     return $table_exp;
 
@@ -1679,25 +1683,45 @@ function optin_tenant_table($pdo, $name) {
  * @return string
  */
 function optin_owner_cards($pdo, $optinfo) {
+
     $card = '';
+
     foreach($optinfo as $key => $value) {
-        $card .= '
+        $card = '
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Opt in for room: '.get_room_name($pdo, $value['room']).'</h5>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">Firstname: '.get_db_info($pdo,$value['tenant'],'u')['firstname'].'</li>
-                        <li class="list-group-item">Lastname: '.get_db_info($pdo,$value['tenant'],'u')['lastname'].'</li>
-                        <li class="list-group-item">Birthdate: '.get_db_info($pdo,$value['tenant'],'u')['birthdate'].'</li>
-                        <li class="list-group-item">Biography: '.get_db_info($pdo,$value['tenant'],'u')['biography'].'</li>
-                        <li class="list-group-item">Occupation: '.get_db_info($pdo,$value['tenant'],'u')['occupation'].'</li>
-                        <li class="list-group-item">Language: '.get_db_info($pdo,$value['tenant'],'u')['language'].'</li>
-                        <li class="list-group-item">Email: '.get_db_info($pdo,$value['tenant'],'u')['email'].'</li>
-                        <li class="list-group-item">Phone: '.get_db_info($pdo,$value['tenant'],'u')['phone'].'</li>
-                        <li class="list-group-item">Message: '.$value['message'].'</li>
-                       
-    
-                    </ul>
+                    <label for="card_title">Opt in for room</label>
+                    <h5 class="card-title">'.get_room_name($pdo, $value['room']).'</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="full_name">Name</label>
+                                <p class="card-text">'.get_db_info($pdo,$value['tenant'],'u')['firstname'].' '.get_db_info($pdo,$value['tenant'],'u')['lastname'].'</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="occupation">Birth date</label>
+                                <p class="card-text">'.get_db_info($pdo,$value['tenant'],'u')['birthdate'].'</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="birthdate">Occupation</label>
+                                <p class="card-text">'.get_db_info($pdo,$value['tenant'],'u')['occupation'].'</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="birthdate">Language</label>
+                                <p class="card-text">'.get_db_info($pdo,$value['tenant'],'u')['language'].'</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="birthdate">Email address</label>
+                                <p class="card-text">'.get_db_info($pdo,$value['tenant'],'u')['email'].'</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="birthdate">Phone number</label>
+                                <p class="card-text">'.get_db_info($pdo,$value['tenant'],'u')['phone'].'</p>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="birthdate">Message</label>
+                                <p class="card-text">'.$value['message'].'</p>
+                            </div>
+                        </div>
                 </div>
             </div>
         ';}
@@ -1763,7 +1787,8 @@ function optin_tenant_id($pdo, $room_id) {
 }
 
 /**
- *
+ * deletes the user account
+ * @return array
  */
 function delete_account($pdo, $user_id) {
 

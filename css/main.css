@@ -67,5 +67,9 @@
     max-height: 20em;
 }
 
+/* Opt-in table */
+#opt-in {
+    margin-bottom: 0px;
+}
 
 

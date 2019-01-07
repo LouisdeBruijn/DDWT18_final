@@ -73,23 +73,33 @@
                                     <p class="card-text"><?php if(isset($user_info['phone'])){echo $user_info['phone'];}?></p>
                                 </div>
                             </div>
-
                         </div>
-                        <a href="/DDWT18/myaccount/edit" class="btn btn-info">Edit profile</a>
                     </div>
+                        <a href="/DDWT18/myaccount/edit" class="btn btn-info">Edit profile</a>
                 </div>
+
+                <?php if(!empty($optin_owner_table)){
+                    echo '<h5>View the opt-ins for your rooms</h5>';
+                    echo $optin_owner_table;} 
+                ?>
+
             </div>
             <!-- Middle content -->
             <div class="col-md-6">
-                <h5><?= $page_content ?></h5>
-                <?php if(isset($all_rooms)){foreach($all_rooms as $key => $room){echo $room;}}?>
+                <?php if(!empty($all_rooms)){
+                    echo '<h5>View the rooms that you have listed below</h5>';
+                    foreach($all_rooms as $key => $room){echo $room;}}
+                ?>
+                <?php if(!empty($tenant) ){
+                    echo '<h5>Opt ins you have initiated</h5>';
+                    echo $optin_table;}
+                ?>
 
-                <?= $optin_table ?>
-                <?= $optin_owner_table ?>
             </div>
 
             <!-- Right content -->
             <div class="col-md-2">
+
             </div>
 
         </div>

@@ -58,7 +58,7 @@ $router->get('/', function() use($db, $navigation_tpl, $root) {
 
     /* Page */
     $page_title = 'Home';
-    $page_subtitle = '';
+    $page_subtitle = 'Welcome to our website where you can find a suitable place to live in Groningen.';
     $page_content = '';
     include use_template('main');
 
@@ -516,7 +516,6 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
                     $opt_info = get_opt_info($db, $values);
                     foreach ($opt_info as $key => $value) {
                         array_push($all_opt_info, $value);
-
                     }
                 }
             }

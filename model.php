@@ -1484,8 +1484,6 @@ function display_opt_button($pdo, $user_id, $room_id){
         return True;
     }
 
-    #Als we weten hoe een try/except werkt in php kunnen deze twee functies hieronder samengeveogd worden.
-
     /* if user has posted an opt-in, don't show opt-in buttons  */
     foreach ($optin as $key => $value) {
         if ($user_id == $value['tenant']) {
@@ -1566,28 +1564,6 @@ function optin($pdo, $room_id, $user_id, $message) {
  */
 function optout($pdo, $room_id, $user_id) {
 
-    /*
-    /*Check if user is tenant
-    $stmt = $pdo->prepare('SELECT * FROM optin WHERE room = ?');
-    $stmt->execute([$room_id]);
-    $optin = $stmt->fetchAll();
-
-    #Ik begrijp niet helemaal hoe ik hier door een lijst heen kan werken met foreach loops en dat ie niet elke keer eruit knalt
-    #als er meerdere optins zijn dan is de eerste niet gelijk aan user_id en dan ben je de zak en knalt ie je eruit
-    #maar je wilt per item in de lijst van $optin kijken of deze gelijk is aan $user_id, en als er 1tje zo is dan dat ie doorgaat met de functie
-    # maar nu knalt ie je eruit als het niet zo is. ik ben eigenlijk opzoek naar een try except (python) functie
-
-    foreach ($optin as $key => $value) {
-        var_dump($value);
-        if ($user_id != $value['tenant'] ){
-            return [
-                'type' => 'danger',
-                'message' => 'You are not the tenant for this room and thus cannot delete it.'
-            ];
-        }
-    }
-    */
-
     /* Remove the room */
     $stmt = $pdo->prepare("DELETE FROM optin WHERE room = ? AND tenant = ?");
     $stmt->execute([$room_id, $user_id]);
@@ -1614,8 +1590,6 @@ function optout($pdo, $room_id, $user_id) {
  * @return array
  */
 function optin_info_tenant($pdo, $tenant) {
-
-
 
     $stmt = $pdo->prepare('SELECT room FROM optin WHERE tenant = ?');
     $stmt->execute([$tenant]);

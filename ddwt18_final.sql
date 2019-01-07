@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Jan 07, 2019 at 01:03 PM
+-- Generation Time: Jan 07, 2019 at 02:02 PM
 -- Server version: 5.7.23
--- PHP Version: 7.2.10
+-- PHP Version: 7.2.8
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -40,10 +40,11 @@ CREATE TABLE `images` (
 --
 
 INSERT INTO `images` (`id`, `name`, `path`, `room_id`) VALUES
-(42, 'room4.JPG', 'images/users/uploads/11/rooms/19/room4.JPG', 19),
-(43, 'room1.jpg', 'images/users/uploads/11/rooms/20/room1.jpg', 20),
-(44, 'room2.jpg', 'images/users/uploads/11/rooms/20/room2.jpg', 20),
-(45, 'room3.jpeg', 'images/users/uploads/11/rooms/20/room3.jpeg', 20);
+(53, '2ndroom1.jpg', 'images/users/uploads/16/rooms/21/2ndroom1.jpg', 21),
+(54, '2ndroom2.jpg', 'images/users/uploads/16/rooms/21/2ndroom2.jpg', 21),
+(55, 'room1.jpg', 'images/users/uploads/11/rooms/19/room1.jpg', 19),
+(56, 'room2.jpg', 'images/users/uploads/11/rooms/19/room2.jpg', 19),
+(57, 'room4.JPG', 'images/users/uploads/11/rooms/20/room4.JPG', 20);
 
 -- --------------------------------------------------------
 
@@ -56,6 +57,17 @@ CREATE TABLE `optin` (
   `room` int(11) NOT NULL,
   `message` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `optin`
+--
+
+INSERT INTO `optin` (`tenant`, `room`, `message`) VALUES
+(13, 21, 'Hi, my name is Anna and I would very much like to rent this beautiful studio with a view!\r\n\r\nGreetings, \r\n\r\nAnna'),
+(14, 21, 'I would very much like to live in this beautiful studio!\r\n\r\nGreetings, Dan'),
+(14, 20, 'Wow! such a nice kitchen. I really like cooking. \r\n\r\nGreetings, Dan'),
+(15, 20, 'Hi, I would like to opt-in.'),
+(15, 21, 'Hi! \r\n\r\nWhat a beautiful place, I would love to spend my Bachelor degree here.\r\n\r\nGreetings,\r\n\r\nElli');
 
 -- --------------------------------------------------------
 
@@ -71,15 +83,6 @@ CREATE TABLE `postcode` (
   `street` varchar(255) DEFAULT NULL,
   `date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `postcode`
---
-
-INSERT INTO `postcode` (`id`, `postalcode`, `streetnumber`, `city`, `street`, `date`) VALUES
-(163, '9712Ta', '1', 'Groningen', 'Havenstraat', '2018-12-27'),
-(164, '9712GZ', '2', 'Groningen', 'Kwinkenplein', '2018-12-27'),
-(165, '9734Va', '2', '', '', '2018-12-27');
 
 -- --------------------------------------------------------
 
@@ -137,9 +140,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `password`, `firstname`, `lastname`, `role`, `birthdate`, `biography`, `occupation`, `language`, `email`, `phone`) VALUES
 (11, 'louis_de_bruijn', '$2y$10$.WayG.fNq8R5u.pC9Vlb1ePnstFxqbPaNWispSNQhM59BLZsYl12G', 'Louis', 'de Bruijn', 1, '1994-03-14', 'My name is Louis, I am a 24-year old student of Information Science at the University of Groningen. ', 'Information Science', 'NL', 'l.e.d.de.bruijn@student.rug.nl', '+31615443390'),
-(12, 'china_international', '$2y$10$0rNI0nrXztUkwQnsLtzn5eeGGRV8qMq4CqixMOAssyVYCJ15FhoJa', 'Hong', 'Tong', 2, '1998-01-11', 'I spleak English not so good. I come from Beijing and want to study in Groningen but I no find house. ', 'Biochemistry', 'ZH', 'hongtong@china.com', '+31612345678'),
 (13, 'anna', '$2y$10$VOHPcsSdu//qDHJxOYxnM.14yvgAgb9YFBlupACMMwd.knWTMPWL.', 'Anna', 'Jung', 2, '1992-11-07', 'I\'m a student looking for an accommodation', 'Art History', 'DE', 'annajung@gmail.com', '0645493649'),
-(14, 'dan', '$2y$10$ICEy9OU7oZIEJvSzuhRTueoz4/LVtbXRUH/jm3XF3LXclv71uBacm', 'Daniel', 'Howard', 2, '1989-07-15', 'Hi, I\'m Daniel. I\'m studying Engineering and I\'m looking for an accommodation.', 'Engineering', 'EN', 'dan_howard@gmail.com', '0627031088'),
+(14, 'dan', '$2y$10$ICEy9OU7oZIEJvSzuhRTueoz4/LVtbXRUH/jm3XF3LXclv71uBacm', 'Daniel', 'Howard', 2, '1989-07-15', 'Hi, I\'m Daniel. I\'m studying Engineering and I\'m looking for an accommodation.', 'Wizard', 'EN', 'dan_howard@gmail.com', '0627031088'),
 (15, 'elli', '$2y$10$TXZCa9AYNa.snAfFgqdgT.HM99kB87EuIwd5Qt0X9PmfVQCGfnqa2', 'Elli', 'Virtanen', 2, '1994-12-27', 'Hey I\'m from Finland, I will be studying in the Netherlands for a year.', 'Sociology', 'FI', 'ellivirtanen@hotmail.com', '0622306813'),
 (16, 'fenna', '$2y$10$PYhw2BjmFWnao6m11tVOZ.rjft7PmNPPJ6SO/k9ijent7ZShoO64O', 'Fenna', 'Dijkstra', 1, '1990-02-08', 'Hi I\'m Fenna I study psychology.', 'Psychology', 'NL', 'fenna_dijkstra@hotmailc.om', '0681698934');
 
@@ -189,25 +191,25 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `images`
 --
 ALTER TABLE `images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT for table `postcode`
 --
 ALTER TABLE `postcode`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=166;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=169;
 
 --
 -- AUTO_INCREMENT for table `rooms`
 --
 ALTER TABLE `rooms`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- Constraints for dumped tables

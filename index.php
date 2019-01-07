@@ -161,7 +161,7 @@ $router->get('/overview', function() use ($db, $navigation_tpl, $root) {
 
     /* Only show rooms that user owns */
     foreach ($rooms as $key => $room) {
-            $rooms_card = get_rooms_cards(get_image_src($db, $room, get_carousel($db, $room['id'])));
+            $rooms_card = get_rooms_cards(create_room_info_card($db, $room, get_carousel($db, $room['id'])));
             array_push($all_rooms, $rooms_card);
         }
 
@@ -503,7 +503,7 @@ $router->mount('/myaccount', function() use ($router, $db, $navigation_tpl, $roo
             // Only show rooms that user owns
             foreach ($rooms as $key => $room) {
                 if (get_user_id() == $room['owner']) {
-                    $rooms_card = get_rooms_cards(get_image_src($db, $room, get_carousel($db, $room['id'])));
+                    $rooms_card = get_rooms_cards(create_room_info_card($db, $room, get_carousel($db, $room['id'])));
                     array_push($all_rooms, $rooms_card);
                 }
             }

@@ -128,7 +128,6 @@ function check_required_fields($required_fields, $form_data) {
  * @param object $form_data filled in user-data
  */
 function register_user($pdo, $form_data){
-
     /* Form validation */
     $required_fields = ['username', 'password', 'firstname', 'lastname', 'role', 'birthdate', 'biography', 'occupation', 'language', 'email', 'phone'];
     $missing_fields = check_required_fields($required_fields, $form_data);
@@ -191,8 +190,7 @@ function register_user($pdo, $form_data){
  * @param object $pdo database
  * @param object $form_data filled in user-data
  */
-function login_user($pdo, $form_data)
-{
+function login_user($pdo, $form_data){
     /* Check if all fields are set */
     if (
         empty($form_data['username']) or
@@ -257,7 +255,7 @@ function get_user_id(){
 /**
  * Get the name of the user based on a specific user_id
  * @param object $pdo database object, object $user_id user_id
- * @return Array with first name and last name of user_id
+ * @return array with first name and last name of user_id
  */
 function get_username($pdo, $user_id){
     $stmt = $pdo->prepare('SELECT firstname,lastname FROM users WHERE id = ?');
@@ -283,13 +281,12 @@ function check_login(){
 /**
  * Generates an array with account information
  * @param object $pdo db object
- * @param int $user_id id of the user
- * @param string $table_short
+ * @param int $user_id unique id of the user
+ * @param string $table_short representing the db table
  * @return mixed
  */
 
 function get_db_info($pdo, $db_id, $table_short){
-
     if($table_short == 'u'){
         $table = 'users';
     }
@@ -314,7 +311,7 @@ function get_db_info($pdo, $db_id, $table_short){
 
 /**
  * Logs the user out of their session
- * @return array
+ * @return array with message feedback
  */
 function logout_user(){
     session_start();
@@ -350,8 +347,8 @@ function get_error($feedback){
 
 /**
  * returns an array with all the rooms in de database
- * @param $pdo
- * @return array
+ * @param object $pdo db object
+ * @return array with all rooms
  */
 
 function get_rooms($pdo){
@@ -372,9 +369,9 @@ function get_rooms($pdo){
 /**
  * returns a table of all the rooms. Their names (description) and their owner names are showed.
  * Returns a string with the HTML code representing the table with all the rooms
+ * @param object $pdo db object
  * @param $soom_info_exp All the information for each room
  * @return string The rooms table
- *
  */
 function get_rooms_table($pdo, $rooms){
     $rooms_table = '
@@ -404,6 +401,10 @@ function get_rooms_table($pdo, $rooms){
 
 /**
  * Makes use of the Postcode API to fill in the city and street address
+ * @param object $pdo db object
+ * @param array $form_data filled in user-data
+ * @param int $user_id unique id of the user
+ * @return array with the postalcode, street, streetnumber and city or message feedback
  */
 function postcode($pdo, $form_data, $user_id){
     // Validate form submission
@@ -507,8 +508,8 @@ function postcode($pdo, $form_data, $user_id){
 
 /**
  * Counts number of calls to postcode API
- * @param $count
- * @return string
+ * @param $count the rowcount of the postcode database table
+ * @return string the card with the number of calls to the Postcode API
  */
 function postcode_count_card($count){
     $postcode_count = '
@@ -535,7 +536,8 @@ $postcode_count .= '
 /**
  * Add room to the database
  * @param object $pdo db object
- * @param array $room_info post array
+ * @param array $room_info filled in user-data
+ * @param int $user_id unique id of the user
  * @return array with message feedback
  */
 function add_room($pdo, $room_info, $user_id){
@@ -620,11 +622,11 @@ function add_room($pdo, $room_info, $user_id){
 /**
  * Updates a room in the database using post array
  * @param object $pdo db object
- * @param array $room_info post array
- * @return array
+ * @param array $room_info filled in user-data
+ * @param int $user_id unique id of the user
+ * @return array with message feedback
  */
 function update_room($pdo, $room_info, $user_id){
-
     /* Check if all fields are set */
     $required_fields = ['name', 'description', 'postalcode', 'streetnumber', 'city', 'street', 'type', 'price', 'size'];
     $missing_fields = check_required_fields($required_fields, $room_info);
@@ -699,11 +701,11 @@ function update_room($pdo, $room_info, $user_id){
 /**
  * Removes a room with a specific room-ID
  * @param object $pdo db object
- * @param int $room_id id of the to be deleted rooms
- * @return array
+ * @param int $user_id unique id of the user
+ * @param int $room_id unique id of the room
+ * @return array with message feedback
  */
 function remove_room($pdo, $user_id, $room_id){
-
     /* Get room info */
     $room_info = get_db_info($pdo, $room_id, 'r');
 
@@ -746,7 +748,7 @@ function remove_room($pdo, $user_id, $room_id){
 /**
  * Count the number of Postcode API calls per day
  * @param object $pdo database object
- * @return mixed
+ * @return int the count of the postcode API calls per day
  */
 function count_postcode($pdo){
     /* Count the number of Postcode API calls per day*/
@@ -761,7 +763,7 @@ function count_postcode($pdo){
 /**
  * Count the number of rooms listed on rooms Overview
  * @param object $pdo database object
- * @return mixed
+ * @return mixed the card with the number of rooms available
  */
 function count_rooms($pdo){
     /* Get rooms */
@@ -780,10 +782,10 @@ function count_rooms($pdo){
 }
 
 /**
- * update the user info in database
- * @param $pdo
- * @param $user_info
- * @return array
+ * Update the user info in database
+ * @param object $pdo database object
+ * @param array $user_info filled in user-data
+ * @return array with message feedback
  */
 function update_user($pdo, $user_info){
     /* Check if all fields are set */
@@ -849,10 +851,11 @@ function update_user($pdo, $user_info){
 }
 
 /**
- * @param $directory_name
- * @param $user_id
- * @param $folder
- * @return string
+ * Creates a directory based on the user_id and a folder
+ * @param string $directory_name the name of the directory to be created
+ * @param int $user_id unique id of the user
+ * @param string $folder the folder name to be created
+ * @return string $dir_name the directory name
  */
 function create_directory($directory_name, $user_id, $folder){
     //The name of the directory that we need to create.
@@ -867,26 +870,26 @@ function create_directory($directory_name, $user_id, $folder){
 }
 
 /**
- * @param $dir
+ * Check whether this directory is empty
+ * @param $dir the directory to be checked
  * @return bool|null
  */
 function is_dir_empty($dir) {
+
     if (!is_readable($dir)) return NULL;
     return (count(scandir($dir)) == 2);
 }
 
 
 /**
- * function to upload a picture
- * @param $pdo
- * @param $user_id
- * @param $target_dir
- * @param $room_id
- * @return array
+ * Upload a file to the server and its filename to the database
+ * @param object $pdo database object
+ * @param int $user_id unique id of the user
+ * @param string $target_dir the directory that the file is to be uploaded to
+ * @param int $room_id unique id of the room
+ * @return array with message feedback
  */
 function upload_file($pdo, $target_dir, $room_id){
-
-
     // Create target file
     $target_file = $target_dir . basename($_FILES["fileToUpload"]['name']);
     $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
@@ -953,13 +956,12 @@ function upload_file($pdo, $target_dir, $room_id){
 }
 
 /**
- * upload avatar picture
- * @param $user_id
- * @param $target_dir
- * @return array
+ * Upload avatar image to the server
+ * @param int $user_id unique id of the user
+ * @param string $target_dir the directory that the file is to be uploaded to
+ * @return array with message feedback
  */
 function upload_avatar($user_id, $target_dir){
-
     // Rename filename
     $path_parts = pathinfo($_FILES["fileToUpload"]['name']);
     $extension = strtolower($path_parts['extension']);
@@ -1030,13 +1032,12 @@ function upload_avatar($user_id, $target_dir){
 
 
 /**
- * removes room images from database
- * @param $pdo
- * @param $img
- * @return array
+ * Removes files from the database and from the server
+ * @param object $pdo database object
+ * @param string $img the image filename including its path
+ * @return array with message feedback
  */
 function remove_file($pdo, $img){
-
     //Create DB connection
     $stmt = $pdo->prepare('SELECT * FROM images WHERE room_id = ?');
     $stmt->execute([$img['room_id']]);
@@ -1073,8 +1074,9 @@ function remove_file($pdo, $img){
 }
 
 /**
- * @param $user_id
- * @return string
+ * Check whether an avatar image exists, and if not use a default imagepath
+ * @param int $user_id unique id of the user
+ * @return string the avatar imagepath
  */
 function check_avatar($user_id) {
     // Create a glob that returns an array
@@ -1094,8 +1096,8 @@ function check_avatar($user_id) {
 
 /**
  * Check if the GET/POST variables are set on a route
- * @param $variables
- * @return array
+ * @param array $variables the GET or POST variables that are to be checked
+ * @return array with message feedback
  */
 function check_url_var($variables){
     /* Check if the GET/POST variables are set on a route */
@@ -1108,14 +1110,13 @@ function check_url_var($variables){
     }
 }
 
-
 /**
- * check if route exists
- * @param $pdo
- * @param $room_id
+ * Check if the route exists, and if it doesn't redirect
+ * @param object $pdo database object
+ * @param int $room_id unique id of the room
+ * @return array with message feedback
  */
 function route_exists($pdo, $room_id){
-
     $stmt = $pdo->prepare('SELECT id FROM rooms WHERE id = ?');
     $stmt->execute([$room_id]);
     $id = $stmt->fetch();
@@ -1133,12 +1134,11 @@ function route_exists($pdo, $room_id){
 
 /**
  * Check if user of the route is also owner of the to-be-edited-content
- * @param $user_id
- * @param $owner
- * @return array
+ * @param int $user_id unique id of the user
+ * @param int $owner the unique id of the user that owns the room
+ * @return array with message feedback
  */
 function check_route($user_id, $owner){
-    /* Check if user of the route is also owner of the to-be-edited-content */
     if ($user_id != $owner) {
         return [
             'type' => 'danger',
@@ -1148,14 +1148,13 @@ function check_route($user_id, $owner){
 }
 
 /**
- * display buttons if user is owner of room
- * @param $pdo
- * @param $user_id
- * @param $room_id
+ * Display buttons if user is owner of room
+ * @param object $pdo database object
+ * @param int $user_id unique id of the user
+ * @param int $room_id unique id of the room
  * @return bool
  */
 function display_buttons($pdo, $user_id, $room_id){
-
     /* Get DB information */
     $stmt = $pdo->prepare('SELECT owner FROM rooms WHERE id = ?');
     $stmt->execute([$room_id]);
@@ -1168,12 +1167,49 @@ function display_buttons($pdo, $user_id, $room_id){
 }
 
 /**
- * create and show carousel
- * @param $images
- * @return string
+ * Create carousel item based on the images
+ * @param object $pdo database object
+ * @param int $room_id unique id of the room
+ * @return array with the strings for creating the carousel images
+ */
+function get_carousel($pdo, $room_id) {
+    // Set variables
+    $first = True;
+    $images = array();
+
+    // Get DB image paths
+    $stmt = $pdo->prepare('SELECT path FROM images WHERE room_id = ?');
+    $stmt->execute([$room_id]);
+    $roomPaths = $stmt->fetchAll();
+
+    // Create the carousel item
+    foreach ($roomPaths as $key => $imageSrc) {
+        if ($first) {
+            $image = '
+                    <div class="carousel-item active">
+                        <img class="d-block w-100" src="../'.$imageSrc['path'] .'" alt="carousel slide" id="carousel_slide">
+                    </div>
+                    ';
+            $first = False;
+            array_push($images, $image);
+        } else {
+            $image = '
+                    <div class="carousel-item">
+                        <img class="d-block w-100" src="../' . $imageSrc['path'] . '" alt="carousel slide" id="carousel_slide">
+                    </div>
+                    ';
+            array_push($images, $image);
+        }
+    }
+    return $images;
+}
+
+/**
+ * Create the carousel for showing it on the page
+ * @param array $images the strings for creating the carousel images
+ * @return string the carousel to show on the page
  */
 function show_carousel($images) {
-
     // Create the carousel item
     if (empty($images)) {
         $carousel = '<div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
@@ -1218,60 +1254,20 @@ function show_carousel($images) {
 
 }
 
-/**
- * create carousel item
- * @param $pdo
- * @param $room_id
- * @return array
- */
-function get_carousel($pdo, $room_id) {
-
-    // Set variables
-    $first = True;
-    $images = array();
-
-    // Get DB image paths
-    $stmt = $pdo->prepare('SELECT path FROM images WHERE room_id = ?');
-    $stmt->execute([$room_id]);
-    $roomPaths = $stmt->fetchAll();
-
-    // Create the carousel item
-    foreach ($roomPaths as $key => $imageSrc) {
-        if ($first) {
-            $image = '
-                    <div class="carousel-item active">
-                        <img class="d-block w-100" src="../'.$imageSrc['path'] .'" alt="carousel slide" id="carousel_slide">
-                    </div>
-                    ';
-            $first = False;
-            array_push($images, $image);
-        } else {
-            $image = '
-                    <div class="carousel-item">
-                        <img class="d-block w-100" src="../' . $imageSrc['path'] . '" alt="carousel slide" id="carousel_slide">
-                    </div>
-                    ';
-            array_push($images, $image);
-        }
-    }
-    return $images;
-}
 
 /**
- *
- * @param $pdo
- * @param $room
- * @param $images
- * @return array
+ * Creates the card with the room information from the database and the image carousel
+ * @param object $pdo database object
+ * @param array $room the rooms from the database
+ * @param array $images the strings for creating the carousel images
+ * @return array with the room information card and the image carousel
  */
-function get_image_src($pdo, $room, $images) {
+function create_room_info_card($pdo, $room, $images) {
+    // Create Array with image src
+    $cards = array();
 
-        // Create Array with image src
-        $cards = array();
-        $first = True;
-
-        // Create card
-        $card = '
+    // Create card
+    $card = '
 <div class="card border-ligth mb-3" id="room_card">
     <div class="card-header">
         <h5 class="card-title">
@@ -1325,72 +1321,69 @@ function get_image_src($pdo, $room, $images) {
 
 
 /**
- * get cards for rooms
- * @param $superArray
- * @return string
+ * Combines the cards with the room information and the carousel images into one card to show on page
+ * @param array $superArray with the carousel images and the room information in the card
+ * @return array with the room cards
  */
 function get_rooms_cards($superArray){
-
-                foreach($superArray as $key => $items) { #room_id
-                    if (empty($items['carousel'])) {
-                        $rooms_card = '
-                        <div id="carouselExampleSlidesOnly" class="carousel slide">
+    foreach($superArray as $key => $items) { #room_id
+        if (empty($items['carousel'])) {
+            $rooms_card = '
+            <div id="carouselExampleSlidesOnly" class="carousel slide">
+              <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img class="d-block w-100" src="../images/room.jpg" alt="carousel slide" id="carousel_slide">
+                </div>
+            ';
+            $rooms_card .= '</div>';
+        } elseif (count($items['carousel']) == 1) {
+            $rooms_card = '
+                        <div id="carouselExampleIndicators'.key($superArray).'" class="carousel slide" class="carousel">
                           <div class="carousel-inner">
-                            <div class="carousel-item active">
-                                <img class="d-block w-100" src="../images/room.jpg" alt="carousel slide" id="carousel_slide">
-                            </div>
-                        ';
-                        $rooms_card .= '</div>';
-                    } elseif (count($items['carousel']) == 1) {
-                        $rooms_card = '
-                                    <div id="carouselExampleIndicators'.key($superArray).'" class="carousel slide" class="carousel">
-                                      <div class="carousel-inner">
-                                  ';
-                        foreach ($items['carousel'] as $key => $carousel) { #carousel
-                            $rooms_card .= $carousel;
-                        }
-                        $rooms_card .= '</div>';
-                    } else {
-                        $rooms_card = '
-                                    <div id="carouselExampleIndicators'.key($superArray).'" class="carousel slide" class="carousel">
-                                      <div class="carousel-inner">
-                                  ';
-                        foreach ($items['carousel'] as $key => $carousel) { #carousel
-                            $rooms_card .= $carousel;
-                        }
-                        $rooms_card .= '
-                                      </div>
-                                      <a class="carousel-control-prev" href="#carouselExampleIndicators'.key($superArray).'" role="button" data-slide="prev">
-                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                        <span class="sr-only">Previous</span>
-                                      </a>
-                                      <a class="carousel-control-next" href="#carouselExampleIndicators'.key($superArray).'" role="button" data-slide="next">
-                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                        <span class="sr-only">Next</span>
-                                      </a>';
-                    }
-                    $rooms_card .= '
-                                    </div>
-                                   ';
-                    foreach($items['card'] as $key => $card) {
-                        $rooms_card .= $card;
-                    }
-                }
+                      ';
+            foreach ($items['carousel'] as $key => $carousel) { #carousel
+                $rooms_card .= $carousel;
+            }
+            $rooms_card .= '</div>';
+        } else {
+            $rooms_card = '
+                        <div id="carouselExampleIndicators'.key($superArray).'" class="carousel slide" class="carousel">
+                          <div class="carousel-inner">
+                      ';
+            foreach ($items['carousel'] as $key => $carousel) { #carousel
+                $rooms_card .= $carousel;
+            }
+            $rooms_card .= '
+                          </div>
+                          <a class="carousel-control-prev" href="#carouselExampleIndicators'.key($superArray).'" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Previous</span>
+                          </a>
+                          <a class="carousel-control-next" href="#carouselExampleIndicators'.key($superArray).'" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Next</span>
+                          </a>';
+        }
+        $rooms_card .= '
+                        </div>
+                       ';
+        foreach($items['card'] as $key => $card) {
+            $rooms_card .= $card;
+        }
+    }
 
     return $rooms_card;
 
 }
 
 /**
- * add image to card
- * @param $form_action
- * @param $submit_btn
- * @param $image_src
- * @param $room_id
- * @return string
+ * Upload image card
+ * @param string $form_action the route/action that the form submits to
+ * @param string $submit_btn the text on the submit button
+ * @param int $room_id unique id of the room
+ * @return string with the add image card
  */
 function add_image_card($form_action, $submit_btn, $room_id){
-
     $image = '
     <div class="card">
         <div class="card-body">
@@ -1420,15 +1413,14 @@ function add_image_card($form_action, $submit_btn, $room_id){
 }
 
 /**
- * remove image from card
- * @param $pdo
- * @param $room_id
- * @param $form_action
- * @param $submit_btn
- * @return string
+ * Remove image card with select dropdown for all images in database
+ * @param object $pdo database object
+ * @param int $room_id unique id of the room
+ * @param string $form_action the route/action that the form submits to
+ * @param string $submit_btn the text on the submit button
+ * @return string with the remove image card
  */
 function remove_img_card($pdo, $room_id, $form_action, $submit_btn){
-
     $stmt  = $pdo->prepare('SELECT path, name FROM images where room_id = ?');
     $stmt->execute([$room_id]);
     $images = $stmt->fetchAll();
@@ -1467,14 +1459,13 @@ function remove_img_card($pdo, $room_id, $form_action, $submit_btn){
 
 
 /**
- * returns true or false depending if tenant is opted in at this room
- * @param $pdo
- * @param $user_id
- * @param $room_id
+ * Returns true or false depending if tenant is opted in at this room
+ * @param object $pdo database object
+ * @param int $user_id unique id of the user
+ * @param int $room_id unique id of the room
  * @return bool
  */
 function display_opt_button($pdo, $user_id, $room_id){
-
     $stmt = $pdo->prepare('SELECT tenant, room FROM optin WHERE room = ?');
     $stmt->execute([$room_id]);
     $optin = $stmt->fetchAll();
@@ -1502,12 +1493,12 @@ function display_opt_button($pdo, $user_id, $room_id){
 
 
 /**
- * adds optin by tenant to database
- * @param $pdo
- * @param $room_id
- * @param $user_id
- * @param $message
- * @return array
+ * Adds optin by tenant to database
+ * @param object $pdo database object
+ * @param int $user_id unique id of the user
+ * @param int $room_id unique id of the room
+ * @param string $message the message form the opt-in form
+ * @return array with message feedback
  */
 function optin($pdo, $room_id, $user_id, $message) {
     /* Check if all fields are set */
@@ -1557,13 +1548,13 @@ function optin($pdo, $room_id, $user_id, $message) {
 }
 
 /**
- * deletes opt in by tenant from database
- * @param $pdo
- * @param $room_id
- * @return array
+ * Deletes opt in by tenant from database
+ * @param object $pdo database object
+ * @param int $room_id unique id of the room
+ * @param int $user_id unique id of the user
+ * @return array with message feedback
  */
 function optout($pdo, $room_id, $user_id) {
-
     /* Remove the room */
     $stmt = $pdo->prepare("DELETE FROM optin WHERE room = ? AND tenant = ?");
     $stmt->execute([$room_id, $user_id]);
@@ -1584,15 +1575,14 @@ function optout($pdo, $room_id, $user_id) {
 
 
 /**
- * this function gives the info from a certain tenant from the optin table
- * @param $pdo
- * @param $tenant
- * @return array
+ * this function gives the rooms info from a certain tenant from the optin table
+ * @param object $pdo database object
+ * @param int $user_id unique id of the user that is the tenant
+ * @return array with all rooms that this tenant has opted-in
  */
-function optin_info_tenant($pdo, $tenant) {
-
+function optin_info_tenant($pdo, $user_id) {
     $stmt = $pdo->prepare('SELECT room FROM optin WHERE tenant = ?');
-    $stmt->execute([$tenant]);
+    $stmt->execute([$user_id]);
     $tenant_info = $stmt->fetchAll();
     $tenant_info_exp = Array();
 
@@ -1606,9 +1596,9 @@ function optin_info_tenant($pdo, $tenant) {
 }
 
 /**
- * gives back name of room
- * @param $pdo
- * @param $room_id
+ * Returns the room name
+ * @param object $pdo database object
+ * @param int $room_id unique id of the room
  * @return mixed
  */
 function get_room_name($pdo, $room_id) {
@@ -1620,18 +1610,17 @@ function get_room_name($pdo, $room_id) {
 }
 
 /**
- * shows overview of opt ins by logged in user (which is a tenant) in my account
- * @param $pdo
- * @param $name
+ * Shows overview of opt-ins by logged in user (which is a tenant) in my account
+ * @param object $pdo database object
+ * @param array $tenant all rooms that this tenant has opted-in
  * @return string
  */
-function optin_tenant_table($pdo, $name) {
-
+function optin_tenant_table($pdo, $tenant) {
     $table_exp = '
     <div class="card">
         <table class="table table-hover" id="opt-in">
             <tbody>';
-            foreach($name as $key => $value) {
+            foreach($tenant as $key => $value) {
                 $table_exp .= '
             <tr>
                 <th scope="row">' . get_room_name($pdo, $value['room']) . '</th>
@@ -1651,13 +1640,12 @@ function optin_tenant_table($pdo, $name) {
 }
 
 /**
- * shows opt ins by tenants in my account to logged in owner
- * @param $pdo
- * @param $optinfo
- * @return string
+ * Shows opt-ins by tenants in my account to logged in owner
+ * @param object $pdo database object
+ * @param array $optinfo the room ids of the owner
+ * @return string the card showing opt-ins by tenants
  */
 function optin_owner_cards($pdo, $optinfo) {
-
     $card = '';
 
     foreach($optinfo as $key => $value) {
@@ -1703,9 +1691,9 @@ function optin_owner_cards($pdo, $optinfo) {
 }
 
 /**
- * get info from optin table from database for a specific room
- * @param $pdo
- * @param $room
+ * Get info from optin table from database for a specific room
+ * @param object $pdo database object
+ * @param array $room the room_ids of the owner
  * @return array
  */
 function get_opt_info($pdo, $room) {
@@ -1723,9 +1711,9 @@ function get_opt_info($pdo, $room) {
 
 /**
  * Returns all room id's of rooms owned by owner
- * @param $pdo
- * @param $owner_id
- * @return array
+ * @param object $pdo database object
+ * @param int $owner_id unique id of the owner of the room
+ * @return array with all room id's
  */
 function room_ids_owner($pdo, $owner_id) {
     $stmt = $pdo->prepare("SELECT id FROM rooms WHERE owner = ?");
@@ -1742,10 +1730,10 @@ function room_ids_owner($pdo, $owner_id) {
 
 
 /**
- * gives room id's from a specific owner as input and gives back tenant id's from the opted in tenants
- * @param $pdo
- * @param $room_id
- * @return array
+ * Gives room id's from a specific owner as input and gives back tenant id's from the opted in tenants
+ * @param object $pdo database object
+ * @param int $room_id unique id of the room
+ * @return array with tenant id's
  */
 function optin_tenant_id($pdo, $room_id) {
     $stmt = $pdo->prepare("SELECT tenant FROM optin WHERE room = ?");
@@ -1761,11 +1749,12 @@ function optin_tenant_id($pdo, $room_id) {
 }
 
 /**
- * deletes the user account
- * @return array
+ * Deletes the user account
+ * @param object $pdo database object
+ * @param int $user_id unique id of the user
+ * @return array with feedback messages
  */
 function delete_account($pdo, $user_id) {
-
     /* Check User Authorization */
     $form_user_id = $_POST['user_id'];
     if ($form_user_id != $user_id) {
@@ -1794,4 +1783,5 @@ function delete_account($pdo, $user_id) {
             'message' => 'An error occurred. Your account was not removed.'
         ];
     }
+
 }
